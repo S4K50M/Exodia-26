@@ -69,6 +69,8 @@ function App() {
     const trigger = scrollTriggerRef.current
     if (!trigger) return
 
+    const isMobile = window.matchMedia('(max-width: 720px)').matches
+
     const ctx = gsap.context(() => {
       // bg: zoom in, move slow, offset to right
       if (bgRef.current) {
@@ -94,7 +96,7 @@ function App() {
       if (leftMountRef.current) {
         gsap.fromTo(
           leftMountRef.current,
-          { yPercent: 28, scale: 1 },
+          { yPercent: isMobile ? 0 : 28, scale: isMobile ? 1.5 : 1 },
           {
             yPercent: 0,
             scale: 2.5,
@@ -111,7 +113,7 @@ function App() {
       if (rightMountRef.current) {
         gsap.fromTo(
           rightMountRef.current,
-          { yPercent: 28, scale: 1 },
+          { yPercent: isMobile ? 0 : 28, scale: isMobile ? 1.5 :1 },
           {
             yPercent: 0,
             scale: 2.1,

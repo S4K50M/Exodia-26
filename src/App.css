@@ -204,11 +204,8 @@
     padding-inline: 0.6rem;
   }
 
-  .layer-exodia img {
-    width: min(70vw, 320px);
-  }
-
-  .layer-hut img {
-    width: min(50vw, 260px);
+  .layer-bg img {
+    /* On mobile, ensure the first (background) image fills the whole screen */
+    object-fit: cover;
   }
 }
