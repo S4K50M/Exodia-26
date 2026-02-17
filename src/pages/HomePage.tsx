@@ -1,14 +1,17 @@
-import { Routes, Route } from 'react-router-dom'
+import { useEffect, useRef } from 'react'
+import Lenis from 'lenis'
+import gsap from 'gsap'
+import { ScrollTrigger } from 'gsap/ScrollTrigger'
 
-import { Navbar } from './components/Navbar'
-import { HomePage } from './pages/HomePage'
-import { EventsPage } from './pages/EventsPage'
-import { TeamPage } from './pages/TeamPage'
-import { MerchandisePage } from './pages/MerchandisePage'
+import bg from '../assets/home/bg.png'
+import exodia from '../assets/home/exodia.png'
+import hut from '../assets/home/hut.png'
+import leftMountain from '../assets/home/left_mountain.png'
+import rightMountain from '../assets/home/right_mountain.png'
 
-import './App.css'
+gsap.registerPlugin(ScrollTrigger)
 
-function App() {
+export function HomePage() {
   const containerRef = useRef<HTMLDivElement | null>(null)
   const scrollTriggerRef = useRef<HTMLDivElement | null>(null)
   const bgRef = useRef<HTMLDivElement | null>(null)
@@ -42,10 +45,7 @@ function App() {
     const trigger = scrollTriggerRef.current
     if (!trigger) return
 
-    const isMobile = window.matchMedia('(max-width: 720px)').matches
-
     const ctx = gsap.context(() => {
-      // bg: zoom in, move slow, offset to right
       if (bgRef.current) {
         gsap.fromTo(
           bgRef.current,
@@ -65,11 +65,10 @@ function App() {
         )
       }
 
-      // mountains: bigger by default, zoom in more and more on scroll
       if (leftMountRef.current) {
         gsap.fromTo(
           leftMountRef.current,
-          { yPercent: isMobile ? 0 : 28, scale: isMobile ? 1.5 : 1 },
+          { yPercent: 28, scale: 1 },
           {
             yPercent: 0,
             scale: 2.5,
@@ -86,7 +85,7 @@ function App() {
       if (rightMountRef.current) {
         gsap.fromTo(
           rightMountRef.current,
-          { yPercent: isMobile ? 0 : 28, scale: isMobile ? 1.5 :1 },
+          { yPercent: 28, scale: 1 },
           {
             yPercent: 0,
             scale: 2.1,
@@ -101,7 +100,6 @@ function App() {
         )
       }
 
-      // exodia: moves further up and out of screen as camera moves down
       if (exodiaRef.current) {
         gsap.fromTo(
           exodiaRef.current,
@@ -120,7 +118,6 @@ function App() {
         )
       }
 
-      // hut: moves down and out of screen as camera moves down
       if (hutRef.current) {
         gsap.fromTo(
           hutRef.current,
@@ -144,16 +141,30 @@ function App() {
   }, [])
 
   return (
-    <>
-      <Navbar />
-      <Routes>
-        <Route path="/" element={<HomePage />} />
-        <Route path="/events" element={<EventsPage />} />
-        <Route path="/team" element={<TeamPage />} />
-        <Route path="/merchandise" element={<MerchandisePage />} />
-      </Routes>
-    </>
+    <div className="app" ref={containerRef}>
+      <main className="parallax-page">
+        <div className="scroll-trigger" ref={scrollTriggerRef}>
+          <div className="parallax-stage">
+            <div className="layer layer-bg" ref={bgRef}>
+              <img src={bg} alt="" />
+            </div>
+            <div className="layer layer-exodia">
+              <img ref={exodiaRef} src={exodia} alt="Exodia" />
+            </div>
+            <div className="layer layer-mountains">
+              <div className="mountain-left" ref={leftMountRef}>
+                <img src={leftMountain} alt="" />
+              </div>
+              <div className="mountain-right" ref={rightMountRef}>
+                <img src={rightMountain} alt="" />
+              </div>
+            </div>
+            <div className="layer layer-hut">
+              <img ref={hutRef} src={hut} alt="" />
+            </div>
+          </div>
+        </div>
+      </main>
+    </div>
   )
 }
-
-export default App
