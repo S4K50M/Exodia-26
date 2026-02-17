@@ -1,42 +1,214 @@
-#root {
-  max-width: 1280px;
-  margin: 0 auto;
-  padding: 2rem;
-  text-align: center;
+.app {
+  min-height: 100vh;
+  color: #f5f5f7;
 }
 
-.logo {
-  height: 6em;
-  padding: 1.5em;
-  will-change: filter;
-  transition: filter 300ms;
-}
-.logo:hover {
-  filter: drop-shadow(0 0 2em #646cffaa);
-}
-.logo.react:hover {
-  filter: drop-shadow(0 0 2em #61dafbaa);
+.parallax-page {
+  min-height: 100vh;
 }
 
-@keyframes logo-spin {
-  from {
-    transform: rotate(0deg);
+/* Tall scroll area - all parallax tied to this single scroll */
+.scroll-trigger {
+  height: 280vh;
+  position: relative;
+}
+
+/* Sticky stage - stays in viewport while user scrolls through scroll-trigger */
+.parallax-stage {
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  width: 100%;
+  overflow: hidden;
+}
+
+/* Base layer styling */
+.layer {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.layer img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  will-change: transform;
+}
+
+/* 1. bg - tall scene, camera pans down through it (no crop) */
+.layer-bg {
+  z-index: 1;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 280vh;
+  bottom: auto;
+  transform-origin: 65% center;
+}
+
+.layer-bg img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  object-position: center top;
+}
+
+/* 2. exodia - centered, above bg */
+.layer-exodia {
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.layer-exodia img {
+  width: min(50vw, 420px);
+  height: auto;
+  object-fit: contain;
+  transform-origin: center center;
+}
+
+/* 3. mountains - left and right */
+.layer-mountains {
+  z-index: 3;
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+}
+
+.mountain-left,
+.mountain-right {
+  position: absolute;
+  bottom: 0;
+  width: 50%;
+  height: 85%;
+  display: flex;
+  align-items: flex-end;
+  transform-origin: bottom center;
+}
+
+.mountain-left {
+  left: 0;
+  justify-content: flex-start;
+}
+
+.mountain-right {
+  right: 0;
+  justify-content: flex-end;
+}
+
+.mountain-left img,
+.mountain-right img {
+  height: 100%;
+  width: auto;
+  max-width: 100%;
+  object-fit: contain;
+  object-position: bottom;
+}
+
+/* 4. hut - center bottom, starts mostly off-screen */
+.layer-hut {
+  z-index: 4;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  padding-bottom: 0;
+}
+
+.layer-hut img {
+  width: min(35vw, 320px);
+  height: auto;
+  object-fit: contain;
+  object-position: bottom center;
+  transform-origin: center bottom;
+}
+
+/* Navbar */
+.navbar {
+  position: fixed;
+  inset-inline: 0;
+  top: 1.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  max-width: 1120px;
+  margin-inline: auto;
+  padding: 0.75rem 1.5rem;
+  border-radius: 999px;
+  background: rgba(15, 15, 30, 0.6);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  box-shadow:
+    0 18px 40px rgba(0, 0, 0, 0.65),
+    0 0 0 1px rgba(255, 255, 255, 0.02);
+  backdrop-filter: blur(20px) saturate(160%);
+  -webkit-backdrop-filter: blur(20px) saturate(160%);
+  z-index: 20;
+}
+
+.navbar-brand {
+  font-size: 1.1rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.navbar-links {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.navbar-links button {
+  border-radius: 999px;
+  border: 1px solid transparent;
+  padding: 0.4rem 0.9rem;
+  font-size: 0.85rem;
+  font-weight: 500;
+  background: rgba(255, 255, 255, 0.06);
+  color: inherit;
+  cursor: pointer;
+  transition:
+    background 150ms ease,
+    border-color 150ms ease,
+    transform 150ms ease;
+}
+
+.navbar-links button:hover {
+  background: rgba(255, 255, 255, 0.14);
+  border-color: rgba(255, 255, 255, 0.25);
+  transform: translateY(-1px);
+}
+
+.navbar-links button:active {
+  transform: translateY(0);
+}
+
+@media (max-width: 720px) {
+  .navbar {
+    padding-inline: 1rem;
+    border-radius: 20px;
   }
-  to {
-    transform: rotate(360deg);
+
+  .navbar-links {
+    gap: 0.25rem;
   }
-}
 
-@media (prefers-reduced-motion: no-preference) {
-  a:nth-of-type(2) .logo {
-    animation: logo-spin infinite 20s linear;
+  .navbar-links button {
+    padding-inline: 0.6rem;
   }
-}
 
-.card {
-  padding: 2em;
-}
+  .layer-exodia img {
+    width: min(70vw, 320px);
+  }
 
-.read-the-docs {
-  color: #888;
+  .layer-hut img {
+    width: min(50vw, 260px);
+  }
 }
