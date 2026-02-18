@@ -9,6 +9,7 @@ import hut from '../assets/home/hut.png'
 import leftMountain from '../assets/home/left_mountain.png'
 import rightMountain from '../assets/home/right_mountain.png'
 
+
 gsap.registerPlugin(ScrollTrigger)
 
 export function HomePage() {
@@ -142,6 +143,7 @@ export function HomePage() {
 
   return (
     <div className="app" ref={containerRef}>
+      
       <main className="parallax-page">
         <div className="scroll-trigger" ref={scrollTriggerRef}>
           <div className="parallax-stage">
