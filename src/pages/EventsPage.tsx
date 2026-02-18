@@ -19,6 +19,11 @@ const EVENT_DATA = [
   { id: 3, title: 'Workshop', date: 'May 10', desc: 'Hands-on learning session' },
   { id: 4, title: 'Meetup', date: 'June 5', desc: 'Community gathering' },
   { id: 5, title: 'Demo Day', date: 'July 20', desc: 'Showcase your projects' },
+  { id: 6, title: 'Code Sprint', date: 'Aug 12', desc: 'Fast-paced coding competition' },
+  { id: 7, title: 'Design Jam', date: 'Sep 8', desc: 'UI/UX design challenge' },
+  { id: 8, title: 'Open Source Day', date: 'Oct 3', desc: 'Contribute to open source' },
+  { id: 9, title: 'Career Fair', date: 'Nov 18', desc: 'Meet recruiters and alumni' },
+  { id: 10, title: 'Year Wrap', date: 'Dec 20', desc: 'Annual recap and awards' },
 ]
 
 export function EventsPage() {
@@ -87,14 +92,15 @@ export function EventsPage() {
         )
       }
 
-      // cards: emerge from bottom when dragons are gone
+      // cards: emerge from bottom with scale when section appears
       if (cardsWrapRef.current) {
         gsap.fromTo(
           cardsWrapRef.current,
-          { yPercent: 100, opacity: 0 },
+          { yPercent: 100, opacity: 0, scale: 0.96 },
           {
             yPercent: 0,
             opacity: 1,
+            scale: 1,
             ease: 'none',
             scrollTrigger: {
               trigger,

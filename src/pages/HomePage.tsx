@@ -19,125 +19,127 @@ export function HomePage() {
   const hutRef = useRef<HTMLImageElement | null>(null)
   const leftMountRef = useRef<HTMLImageElement | null>(null)
   const rightMountRef = useRef<HTMLImageElement | null>(null)
+  const lenisRef = useRef<Lenis | null>(null)
+  const scrollCtxRef = useRef<gsap.Context | null>(null)
 
+  // ── Lenis smooth scroll ──────────────────────────────────────────────────────
   useEffect(() => {
-    const lenis = new Lenis({
-      smoothWheel: true,
-      lerp: 0.1,
-    })
-
+    const lenis = new Lenis({ smoothWheel: true, lerp: 0.1 })
+    lenisRef.current = lenis
     lenis.on('scroll', () => ScrollTrigger.update())
 
     let frameId: number
-    const raf = (time: number) => {
-      lenis.raf(time)
-      frameId = requestAnimationFrame(raf)
-    }
+    const raf = (time: number) => { lenis.raf(time); frameId = requestAnimationFrame(raf) }
     frameId = requestAnimationFrame(raf)
 
-    return () => {
-      lenis.destroy()
-      cancelAnimationFrame(frameId)
-    }
+    return () => { lenis.destroy(); cancelAnimationFrame(frameId) }
   }, [])
 
+  // ── Intro + scroll parallax ──────────────────────────────────────────────────
   useEffect(() => {
     const trigger = scrollTriggerRef.current
-    if (!trigger) return
+    if (!trigger || !leftMountRef.current || !rightMountRef.current || !exodiaRef.current) return
 
-    const ctx = gsap.context(() => {
-      if (bgRef.current) {
-        gsap.fromTo(
-          bgRef.current,
-          { y: 0, scale: 1, x: 0 },
-          {
-            y: '-35vh',
-            scale: 1.25,
-            x: '-4%',
-            ease: 'none',
-            scrollTrigger: {
-              trigger,
-              start: 'top top',
-              end: 'bottom bottom',
-              scrub: 3,
-            },
-          }
-        )
-      }
+    const lenis = lenisRef.current
 
-      if (leftMountRef.current) {
-        gsap.fromTo(
-          leftMountRef.current,
-          { yPercent: 28, scale: 1 },
-          {
-            yPercent: 0,
-            scale: 2.5,
-            ease: 'none',
-            scrollTrigger: {
-              trigger,
-              start: 'top top',
-              end: 'bottom bottom',
-              scrub: 1.5,
-            },
-          }
-        )
-      }
-      if (rightMountRef.current) {
-        gsap.fromTo(
-          rightMountRef.current,
-          { yPercent: 28, scale: 1 },
-          {
-            yPercent: 0,
-            scale: 2.1,
-            ease: 'none',
-            scrollTrigger: {
-              trigger,
-              start: 'top top',
-              end: 'bottom bottom',
-              scrub: 1.5,
-            },
-          }
-        )
-      }
+    // Lock scroll for the duration of the intro
+    lenis?.stop()
 
-      if (exodiaRef.current) {
-        gsap.fromTo(
-          exodiaRef.current,
-          { yPercent: 0, scale: 1.2 },
-          {
-            yPercent: -180,
-            scale: 0.9,
-            ease: 'none',
-            scrollTrigger: {
-              trigger,
-              start: 'top top',
-              end: 'bottom bottom',
-              scrub: 1,
-            },
-          }
-        )
-      }
+    // ── INTRO START STATES ────────────────────────────────────────────────────
+    // Each mountain wrapper is 50% wide × 85% tall, anchored at its bottom corner.
+    // Scale from that corner so it expands inward and upward to fill the screen.
+    gsap.set(leftMountRef.current, {
+      scale: 3.2,
+      xPercent: 0,
+      yPercent: 0,
+      transformOrigin: 'bottom left',
+    })
+    gsap.set(rightMountRef.current, {
+      scale: 3.2,
+      xPercent: 0,
+      yPercent: 0,
+      transformOrigin: 'bottom right',
+    })
+    // Exodia hidden behind the mountain curtain
+    gsap.set(exodiaRef.current, { opacity: 0, scale: 0.85, yPercent: 10 })
 
-      if (hutRef.current) {
-        gsap.fromTo(
-          hutRef.current,
-          { yPercent: 0, scale: 1 },
-          {
-            yPercent: 120,
-            scale: 0.9,
-            ease: 'none',
-            scrollTrigger: {
-              trigger,
-              start: 'top top',
-              end: 'bottom bottom',
-              scrub: 1,
-            },
-          }
-        )
-      }
-    }, containerRef)
+    // Intro timeline
+    const tl = gsap.timeline({
+      delay: 0.2,
+      onComplete: () => {
+        lenis?.start()
 
-    return () => ctx.revert()
+        // Wire up scroll-driven parallax only AFTER the intro finishes so
+        // the fromTo start values match the post-intro element positions
+        const ctx = gsap.context(() => {
+          if (bgRef.current) {
+            gsap.fromTo(bgRef.current,
+              { y: 0, scale: 1, x: 0 },
+              { y: '-35vh', scale: 1.25, x: '-4%', ease: 'none',
+                scrollTrigger: { trigger, start: 'top top', end: 'bottom bottom', scrub: 3 } })
+          }
+          if (leftMountRef.current) {
+            gsap.fromTo(leftMountRef.current,
+              { xPercent: 0, yPercent: 28, scale: 1 },
+              { yPercent: 0, scale: 2.5, ease: 'none',
+                scrollTrigger: { trigger, start: 'top top', end: 'bottom bottom', scrub: 1.5 } })
+          }
+          if (rightMountRef.current) {
+            gsap.fromTo(rightMountRef.current,
+              { xPercent: 0, yPercent: 28, scale: 1 },
+              { yPercent: 0, scale: 2.1, ease: 'none',
+                scrollTrigger: { trigger, start: 'top top', end: 'bottom bottom', scrub: 1.5 } })
+          }
+          if (exodiaRef.current) {
+            gsap.fromTo(exodiaRef.current,
+              { yPercent: 0, scale: 1.2 },
+              { yPercent: -180, scale: 0.9, ease: 'none',
+                scrollTrigger: { trigger, start: 'top top', end: 'bottom bottom', scrub: 1 } })
+          }
+          if (hutRef.current) {
+            gsap.fromTo(hutRef.current,
+              { yPercent: 0, scale: 1 },
+              { yPercent: 120, scale: 0.9, ease: 'none',
+                scrollTrigger: { trigger, start: 'top top', end: 'bottom bottom', scrub: 1 } })
+          }
+        }, containerRef)
+
+        scrollCtxRef.current = ctx
+      },
+    })
+
+    // Mountains shrink back to natural size/position from their screen-filling state
+    tl.to(leftMountRef.current, {
+        scale: 1,
+        yPercent: 28,
+        transformOrigin: 'bottom left',
+        duration: 1.6,
+        ease: 'power3.inOut',
+      })
+      .to(rightMountRef.current, {
+        scale: 1,
+        yPercent: 28,
+        transformOrigin: 'bottom right',
+        duration: 1.6,
+        ease: 'power3.inOut',
+      }, '<')
+      // Exodia rises in as the mountains pull back
+      .to(exodiaRef.current, {
+        opacity: 1,
+        scale: 1.2,
+        yPercent: 0,
+        duration: 1.1,
+        ease: 'power2.out',
+      }, '-=1.0')
+      // Reset transformOrigin to bottom center so scroll parallax scaling looks right
+      .set(leftMountRef.current,  { transformOrigin: 'bottom center' })
+      .set(rightMountRef.current, { transformOrigin: 'bottom center' })
+
+    return () => {
+      tl.kill()
+      lenis?.start()
+      scrollCtxRef.current?.revert()
+    }
   }, [])
 
   return (

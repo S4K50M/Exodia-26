@@ -1,4 +1,8 @@
-import { Routes, Route } from 'react-router-dom'
+import { Routes, Route, useLocation } from 'react-router-dom'
+import { useRef, useEffect } from 'react';
+import Lenis from 'lenis';
+import gsap from 'gsap';
+import { ScrollTrigger } from 'gsap/ScrollTrigger';
 
 import { Navbar } from './components/Navbar'
 import { HomePage } from './pages/HomePage'
@@ -7,6 +11,14 @@ import { TeamPage } from './pages/TeamPage'
 import { MerchandisePage } from './pages/MerchandisePage'
 
 import './App.css'
+
+function ScrollToTop() {
+  const { pathname } = useLocation()
+  useEffect(() => {
+    window.scrollTo(0, 0)
+  }, [pathname])
+  return null
+}
 
 function App() {
   const containerRef = useRef<HTMLDivElement | null>(null)
@@ -145,6 +157,7 @@ function App() {
 
   return (
     <>
+      <ScrollToTop />
       <Navbar />
       <Routes>
         <Route path="/" element={<HomePage />} />
