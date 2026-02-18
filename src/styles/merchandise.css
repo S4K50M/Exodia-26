@@ -1,0 +1,94 @@
+/* Merchandise page */
+.merchandise-page {
+  min-height: 100vh;
+  color: #f5f5f7;
+}
+
+.merchandise-scroll-trigger {
+  height: 300vh;
+  position: relative;
+}
+
+.merchandise-stage {
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  width: 100%;
+  overflow: hidden;
+}
+
+/* Background */
+.merchandise-bg {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+}
+
+.merchandise-bg img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+/* Side elements */
+.merchandise-side {
+  position: absolute;
+  top: 0;
+  height: 100vh;
+  width: auto;
+  pointer-events: none;
+}
+
+.merchandise-side-left {
+  left: 0;
+  z-index: 3;
+}
+
+.merchandise-side-right {
+  right: 0;
+  z-index: 3;
+}
+
+.merchandise-side img {
+  width: auto;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+  display: block;
+}
+
+/* Background side elements - behind left/right */
+.merchandise-side-bg {
+  position: absolute;
+  top: 0;
+  height: 100vh;
+  width: auto;
+  pointer-events: none;
+}
+
+.merchandise-side-bg-left {
+  left: 0;
+  z-index: 2;
+}
+
+.merchandise-side-bg-right {
+  right: 0;
+  z-index: 2;
+}
+
+.merchandise-side-bg img {
+  width: auto;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+  display: block;
+}
+
+@media (max-width: 720px) {
+  .merchandise-side img,
+  .merchandise-side-bg img {
+    object-fit: contain;
+  }
+}
