@@ -65,65 +65,243 @@
   object-position: bottom;
 }
 
-/* Cards wrap - emerges from below */
+/* Cards wrap - emerges from below (section entrance via GSAP) */
 .events-cards-wrap {
   position: absolute;
   inset: 0;
   z-index: 3;
   pointer-events: auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transform-origin: center center;
 }
 
-/* Event cards container - parabolic path */
-.event-cards-container {
+/* Carousel: center card prominent, left/right visible, rest blurred */
+.events-carousel {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.events-carousel-viewport {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* arc-stage: fills the viewport; cards are absolutely centred inside */
+.events-carousel-arc-stage {
+  position: relative;
+  width: 100%;
+  height: 100%;
+}
+
+/* Prev/Next buttons */
+.events-carousel-btn {
+  position: absolute;
+  z-index: 20;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  background: rgba(15, 15, 35, 0.75);
+  backdrop-filter: blur(12px);
+  cursor: pointer;
+  transition: background 0.2s ease, border-color 0.2s ease, transform 0.2s ease;
+  color: #f5f5f7;
+  font-size: 1.25rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  line-height: 1;
+}
+.events-carousel-btn::after {
+  content: '';
+  width: 10px;
+  height: 10px;
+  border: 2px solid currentColor;
+  border-top: none;
+  border-right: none;
+  transform: rotate(-45deg);
+}
+.events-carousel-btn:hover {
+  background: rgba(255, 255, 255, 0.12);
+  border-color: rgba(255, 255, 255, 0.4);
+  transform: translateY(-50%) scale(1.05);
+}
+.events-carousel-btn-left {
+  left: 1.5rem;
+}
+.events-carousel-btn-left::after {
+  margin-left: 3px;
+  border-top: none;
+  border-right: none;
+  transform: rotate(-45deg);
+}
+.events-carousel-btn-right {
+  right: 1.5rem;
+}
+.events-carousel-btn-right::after {
+  border-top: none;
+  border-right: none;
+  border-left: none;
+  border-bottom: none;
+  border-left: 2px solid currentColor;
+  border-bottom: 2px solid currentColor;
+  transform: rotate(135deg);
+  margin-right: 3px;
+}
+
+/* Carousel cards - water-themed glass UI; GSAP controls transform/opacity/filter */
+.events-carousel-card {
+  flex-shrink: 0;
+  padding: 0;
+  border-radius: 20px;
+  background:
+    linear-gradient(
+      160deg,
+      rgba(80, 180, 220, 0.18) 0%,
+      rgba(20, 80, 140, 0.30) 50%,
+      rgba(10, 40, 90, 0.42) 100%
+    );
+  border: 1px solid rgba(120, 210, 255, 0.25);
+  backdrop-filter: blur(18px) saturate(1.6);
+  -webkit-backdrop-filter: blur(18px) saturate(1.6);
+  /* no CSS transform/opacity transition — GSAP owns that */
+  pointer-events: auto;
+  cursor: pointer;
+  overflow: hidden;
+  box-shadow:
+    0 8px 32px rgba(0, 60, 120, 0.35),
+    inset 0 1px 0 rgba(180, 230, 255, 0.2),
+    inset 0 -1px 0 rgba(0, 80, 160, 0.2);
+}
+.events-carousel-card[data-offset='0'] {
+  border-color: rgba(140, 230, 255, 0.45);
+  box-shadow:
+    0 20px 60px rgba(0, 80, 180, 0.55),
+    0 0 0 1px rgba(140, 230, 255, 0.3),
+    inset 0 1px 0 rgba(200, 240, 255, 0.3),
+    inset 0 -1px 0 rgba(0, 100, 200, 0.25);
+}
+.events-carousel-card:hover {
+  filter: blur(0) !important;
+  opacity: 1 !important;
+  border-color: rgba(160, 240, 255, 0.55);
+}
+
+/* --- card image --- */
+.event-card-img-wrap {
+  position: relative;
+  width: 100%;
+  height: 160px;
+  overflow: hidden;
+  border-radius: 20px 20px 0 0;
+}
+.event-card-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  /* slight aqua tint over the image */
+  filter: brightness(0.88) saturate(1.15) hue-rotate(5deg);
+  transition: transform 0.4s ease, filter 0.4s ease;
+}
+.events-carousel-card:hover .event-card-img {
+  transform: scale(1.05);
+  filter: brightness(0.95) saturate(1.3) hue-rotate(5deg);
+}
+/* shimmer / water-surface gradient over image */
+.event-card-img-overlay {
   position: absolute;
   inset: 0;
+  background: linear-gradient(
+    180deg,
+    rgba(60, 160, 220, 0.08) 0%,
+    rgba(10, 50, 120, 0.45) 100%
+  );
   pointer-events: none;
 }
 
-.event-card {
-  position: absolute;
-  width: 280px;
-  padding: 1.5rem;
-  border-radius: 16px;
-  background: rgba(15, 15, 35, 0.85);
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  backdrop-filter: blur(12px);
-  transition: filter 0.3s ease, opacity 0.3s ease, transform 0.15s ease;
-  pointer-events: auto;
-  cursor: pointer;
+/* --- card text area --- */
+.event-card-inner {
+  padding: 1rem 1.25rem 1.25rem;
+  position: relative;
+}
+/* thin top divider that mimics a water surface line */
+.event-card-inner::before {
+  content: '';
+  display: block;
+  width: 40%;
+  height: 1px;
+  margin: 0 auto 0.75rem;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(140, 220, 255, 0.6),
+    transparent
+  );
 }
 
 .event-card-inner h3 {
-  margin: 0 0 0.25rem;
-  font-size: 1.25rem;
+  margin: 0 0 0.3rem;
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: #e8f6ff;
+  letter-spacing: 0.01em;
+  text-shadow: 0 1px 8px rgba(0, 120, 200, 0.5);
 }
 
 .event-card-date {
-  display: block;
-  font-size: 0.8rem;
-  color: rgba(255, 255, 255, 0.6);
+  display: inline-block;
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: rgba(140, 220, 255, 0.85);
+  background: rgba(0, 80, 160, 0.35);
+  border: 1px solid rgba(100, 200, 255, 0.25);
+  padding: 0.15em 0.6em;
+  border-radius: 20px;
   margin-bottom: 0.5rem;
 }
 
 .event-card-inner p {
   margin: 0;
-  font-size: 0.9rem;
-  color: rgba(220, 222, 230, 0.9);
-}
-
-.event-card.center {
-  z-index: 10;
-  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
-}
-
-.event-card:hover {
-  filter: blur(0) !important;
-  opacity: 1 !important;
+  font-size: 0.85rem;
+  color: rgba(200, 230, 250, 0.85);
+  line-height: 1.5;
 }
 
 @media (max-width: 720px) {
-  .event-card {
-    width: 220px;
+  .events-carousel-btn {
+    width: 40px;
+    height: 40px;
+  }
+  .events-carousel-btn-left {
+    left: 0.75rem;
+  }
+  .events-carousel-btn-right {
+    right: 0.75rem;
+  }
+  .events-carousel-strip {
+    padding: 0 1rem;
+  }
+  .events-carousel-card {
     padding: 1rem;
+  }
+  .event-card-inner h3 {
+    font-size: 1.1rem;
   }
 }
