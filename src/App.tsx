@@ -9,6 +9,7 @@ import { HomePage } from './pages/HomePage'
 import { EventsPage } from './pages/EventsPage'
 import { TeamPage } from './pages/TeamPage'
 import { MerchandisePage } from './pages/MerchandisePage'
+import { RegisterPage } from './pages/RegisterPage'
 
 import './App.css'
 
@@ -164,6 +165,7 @@ function App() {
         <Route path="/events" element={<EventsPage />} />
         <Route path="/team" element={<TeamPage />} />
         <Route path="/merchandise" element={<MerchandisePage />} />
+        <Route path="/register" element={<RegisterPage />} />
       </Routes>
     </>
   )
