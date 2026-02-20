@@ -49,14 +49,15 @@ export function Navbar({ shouldAnimate = false }: NavbarProps) {
   }, [shouldAnimate])
 
   return (
-    <nav ref={navRef} className="navbar">
+    <nav ref={navRef} className="navbar flex items-center justify-between p-4">
       <Link
         to="/"
         className={`navbar-brand ${location.pathname === '/' ? 'active' : ''}`}
       >
         Exodia
       </Link>
-      <ul ref={linksRef} className="navbar-links">
+      
+      <ul ref={linksRef} className="navbar-links flex items-center gap-6">
         <li>
           <Link
             to="/events"
@@ -79,6 +80,23 @@ export function Navbar({ shouldAnimate = false }: NavbarProps) {
             className={location.pathname === '/merchandise' ? 'active' : ''}
           >
             Merchandise
+          </Link>
+        </li>
+        
+        {/* --- ADDED REGISTER BUTTON HERE --- */}
+        <li>
+          <Link
+            to="/register"
+            className={`
+              inline-block px-5 py-2 font-bold text-black rounded-lg
+              bg-gradient-to-r from-yellow-500 to-yellow-400 
+              shadow-[0_0_10px_rgba(234,179,8,0.4)]
+              transition-all duration-300 transform 
+              hover:-translate-y-1 hover:shadow-[0_0_20px_rgba(234,179,8,0.8)] hover:from-yellow-400 hover:to-yellow-300
+              ${location.pathname === '/register' ? 'ring-2 ring-white/50' : ''}
+            `}
+          >
+            Register
           </Link>
         </li>
       </ul>
