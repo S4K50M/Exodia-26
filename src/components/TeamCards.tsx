@@ -77,7 +77,6 @@ export function TeamCards({ members }: TeamCardsProps) {
     return () => window.removeEventListener('scroll', onScroll)
   }, [])
 
-  const n = members.length
 
   // Slower endless loop
   const cycles = 1.5 // Lower value = slower movement
