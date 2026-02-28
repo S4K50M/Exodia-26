@@ -83,6 +83,118 @@ function AdminLogin({ onLoginSuccess }: { onLoginSuccess: () => void }) {
   );
 }
 
+
+/**
+ * NOTIFICATION SYSTEM COMPONENT
+ */
+function NotificationTab() {
+  const [notifications, setNotifications] = useState<any[]>([]);
+  const [heading, setHeading] = useState('');
+  const [body, setBody] = useState('');
+  const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    fetchNotifications();
+  }, []);
+
+  const fetchNotifications = async () => {
+    const { data, error } = await supabase
+      .from('notifications')
+      .select('*')
+      .order('created_at', { ascending: false });
+    if (!error) setNotifications(data || []);
+  };
+
+  const handleCompose = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+    const { error } = await supabase
+      .from('notifications')
+      .insert([{ heading, body }]);
+
+    if (error) {
+      alert("Error: " + error.message);
+    } else {
+      setHeading('');
+      setBody('');
+      fetchNotifications();
+    }
+    setLoading(false);
+  };
+
+  const handleDelete = async (id: string) => {
+    if (!confirm("Delete this notification?")) return;
+    const { error } = await supabase.from('notifications').delete().eq('id', id);
+    if (!error) setNotifications(prev => prev.filter(n => n.id !== id));
+  };
+
+  return (
+    <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 animate-in fade-in slide-in-from-bottom-4 duration-500">
+      
+      {/* Compose Section */}
+      <div className="space-y-6">
+        <h2 className="text-xl font-bold text-yellow-500 uppercase tracking-tight">Compose Notification</h2>
+        <form onSubmit={handleCompose} className="bg-zinc-900 p-6 rounded-2xl border border-white/10 space-y-4">
+          <div>
+            <label className="block text-xs font-bold text-gray-500 uppercase mb-2 ml-1">Heading</label>
+            <input 
+              value={heading}
+              onChange={(e) => setHeading(e.target.value)}
+              placeholder="e.g. Workshop Update"
+              className="w-full bg-white/5 border border-white/10 p-3 rounded-xl outline-none focus:ring-2 focus:ring-yellow-500 transition-all"
+              required
+            />
+          </div>
+          <div>
+            <label className="block text-xs font-bold text-gray-500 uppercase mb-2 ml-1">Body Message</label>
+            <textarea 
+              value={body}
+              onChange={(e) => setBody(e.target.value)}
+              placeholder="Type your announcement here..."
+              rows={4}
+              className="w-full bg-white/5 border border-white/10 p-3 rounded-xl outline-none focus:ring-2 focus:ring-yellow-500 transition-all resize-none"
+              required
+            />
+          </div>
+          <button 
+            type="submit" 
+            disabled={loading}
+            className="w-full py-3 bg-yellow-500 hover:bg-yellow-400 text-black font-black rounded-xl transition-all uppercase tracking-widest text-sm"
+          >
+            {loading ? 'Posting...' : 'Post Notification'}
+          </button>
+        </form>
+      </div>
+
+      {/* List Section */}
+      <div className="space-y-6">
+        <h2 className="text-xl font-bold text-gray-400 uppercase tracking-tight">Current Notifications</h2>
+        <div className="space-y-4 max-h-[60vh] overflow-y-auto pr-2 custom-scrollbar">
+          {notifications.length === 0 && <p className="text-gray-600 italic">No notifications found.</p>}
+          {notifications.map((n) => (
+            <div key={n.id} className="group bg-zinc-900/50 border border-white/5 p-5 rounded-2xl relative hover:border-white/20 transition-all">
+              <button 
+                onClick={() => handleDelete(n.id)}
+                className="absolute top-4 right-4 text-gray-600 hover:text-red-500 transition-colors"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                  <path fillRule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z" clipRule="evenodd" />
+                </svg>
+              </button>
+              <h3 className="font-bold text-white text-lg pr-8">{n.heading}</h3>
+              <p className="text-gray-400 text-sm mt-1 leading-relaxed">{n.body}</p>
+              <p className="text-[10px] text-zinc-600 mt-4 font-mono">
+                {new Date(n.created_at).toLocaleString()}
+              </p>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+
 /**
  * MAIN ADMIN PAGE COMPONENT
  */
@@ -217,7 +329,7 @@ export function AdminPage() {
 
         {/* Tab System */}
         <div className="flex gap-8 border-b border-white/10 mb-8 pb-1">
-          {['approval', 'registered-list', 'settings'].map((tab) => (
+          {['approval', 'notification', 'merch'].map((tab) => (
             <button
               key={tab}
               onClick={() => setActiveTab(tab)}
@@ -313,14 +425,15 @@ export function AdminPage() {
               ))}
             </div>
           </div>
-        ) : (
-          <div className="flex flex-col items-center justify-center h-96 text-zinc-700">
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-16 w-16 mb-4 opacity-20" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-            </svg>
-            <p className="text-xl font-medium tracking-tight uppercase opacity-30">Coming Soon</p>
-          </div>
-        )}
+        ) : activeTab == 'notification'?(
+          <NotificationTab />
+        ):(
+            <div className="flex flex-col items-center justify-center h-96 text-zinc-700">
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-16 w-16 mb-4 opacity-20" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                <p className="text-xl font-medium tracking-tight uppercase opacity-30">Coming Soon</p>
+            </div>        )}
       </div>
     </div>
   );
