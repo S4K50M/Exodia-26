@@ -5,6 +5,7 @@ import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 
 import { Navbar } from './components/Navbar'
+import { NotificationSidebar } from './components/notifbar';
 import { HomePage } from './pages/HomePage'
 import { EventsPage } from './pages/EventsPage'
 import { TeamPage } from './pages/TeamPage'
@@ -31,6 +32,7 @@ function App() {
   const hutRef = useRef<HTMLImageElement | null>(null)
   const leftMountRef = useRef<HTMLImageElement | null>(null)
   const rightMountRef = useRef<HTMLImageElement | null>(null)
+  const [isNotifyOpen,setIsNotifyOpen] = useState(false)
 
   useEffect(() => {
     const lenis = new Lenis({
@@ -161,8 +163,9 @@ function App() {
   return (
     <>
       <ScrollToTop />
-      <Navbar onRegisterClick={() => setIsRegisterOpen(true)} />
+      <Navbar onRegisterClick={() => setIsRegisterOpen(true)} onNotifyClick={() => setIsNotifyOpen(true)} />
       <RegisterModal isOpen={isRegisterOpen} onClose={() => setIsRegisterOpen(false)} />
+      <NotificationSidebar isOpen={isNotifyOpen} onClose={()=> setIsNotifyOpen(false)} />
       <Routes>
         <Route path="/" element={<HomePage />} />
         <Route path="/events" element={<EventsPage />} />
