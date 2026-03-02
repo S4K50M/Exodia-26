@@ -9,6 +9,8 @@ import rightDragon from '../assets/events/right_dragon.png'
 
 import { EventCards } from '../components/EventCards'
 
+import Events from '../data/events.json'
+
 import '../styles/events.css'
 
 import { LoadingScreen } from '../components/LoadingScreen'
