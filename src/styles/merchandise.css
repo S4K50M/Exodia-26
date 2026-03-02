@@ -39,6 +39,7 @@
   height: 100vh;
   width: auto;
   pointer-events: none;
+  overflow: hidden;
 }
 
 .merchandise-side-left {
@@ -54,6 +55,7 @@
 .merchandise-side img {
   width: auto;
   height: 100%;
+  min-width: 100%;
   object-fit: cover;
   object-position: center;
   display: block;
@@ -66,6 +68,7 @@
   height: 100vh;
   width: auto;
   pointer-events: none;
+  overflow: hidden;
 }
 
 .merchandise-side-bg-left {
@@ -81,14 +84,52 @@
 .merchandise-side-bg img {
   width: auto;
   height: 100%;
+  min-width: 100%;
   object-fit: cover;
   object-position: center;
   display: block;
 }
 
 @media (max-width: 720px) {
+  .merchandise-scroll-trigger {
+    height: 250vh;
+  }
+
+  .merchandise-side {
+    width: 45vw;
+    overflow: hidden;
+  }
+
+  .merchandise-side-bg {
+    width: 45vw;
+    overflow: hidden;
+  }
+
   .merchandise-side img,
   .merchandise-side-bg img {
-    object-fit: contain;
+    height: 100vh;
+    width: auto;
+    min-width: 100%;
+    object-fit: cover;
+  }
+
+  .merchandise-side-left img,
+  .merchandise-side-bg-left img {
+    object-position: right center;
+  }
+
+  .merchandise-side-right img,
+  .merchandise-side-bg-right img {
+    object-position: left center;
+  }
+}
+
+@media (max-width: 480px) {
+  .merchandise-side {
+    width: 50vw;
+  }
+
+  .merchandise-side-bg {
+    width: 50vw;
   }
 }

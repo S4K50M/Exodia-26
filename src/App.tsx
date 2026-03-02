@@ -1,5 +1,5 @@
 import { Routes, Route, useLocation } from 'react-router-dom'
-import { useRef, useEffect } from 'react';
+import { useRef, useEffect, useState } from 'react';
 import Lenis from 'lenis';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
@@ -9,7 +9,7 @@ import { HomePage } from './pages/HomePage'
 import { EventsPage } from './pages/EventsPage'
 import { TeamPage } from './pages/TeamPage'
 import { MerchandisePage } from './pages/MerchandisePage'
-import { RegisterPage } from './pages/RegisterPage'
+import { RegisterModal } from './components/RegisterModal'
 import {AdminPage} from './pages/AdminPage';
 
 import './App.css'
@@ -23,6 +23,7 @@ function ScrollToTop() {
 }
 
 function App() {
+  const [isRegisterOpen, setIsRegisterOpen] = useState(false)
   const containerRef = useRef<HTMLDivElement | null>(null)
   const scrollTriggerRef = useRef<HTMLDivElement | null>(null)
   const bgRef = useRef<HTMLDivElement | null>(null)
@@ -160,13 +161,13 @@ function App() {
   return (
     <>
       <ScrollToTop />
-      <Navbar />
+      <Navbar onRegisterClick={() => setIsRegisterOpen(true)} />
+      <RegisterModal isOpen={isRegisterOpen} onClose={() => setIsRegisterOpen(false)} />
       <Routes>
         <Route path="/" element={<HomePage />} />
         <Route path="/events" element={<EventsPage />} />
         <Route path="/team" element={<TeamPage />} />
         <Route path="/merchandise" element={<MerchandisePage />} />
-        <Route path="/register" element={<RegisterPage />} />
         <Route path="/admin" element={<AdminPage />}/>
       </Routes>
     </>

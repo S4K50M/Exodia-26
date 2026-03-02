@@ -11,6 +11,9 @@ import { EventCards } from '../components/EventCards'
 
 import '../styles/events.css'
 
+import { LoadingScreen } from '../components/LoadingScreen'
+import { EventsSVG } from '../assets/loading/EventsSVG'
+
 gsap.registerPlugin(ScrollTrigger)
 
 const EVENT_DATA = [
@@ -117,6 +120,7 @@ export function EventsPage() {
   }, [])
 
   return (
+    <LoadingScreen svg={<EventsSVG />}>
     <div className="events-page" ref={containerRef}>
       <div className="events-scroll-trigger" ref={scrollTriggerRef}>
         <div className="events-stage">
@@ -148,5 +152,6 @@ export function EventsPage() {
         </div>
       </div>
     </div>
+    </LoadingScreen>
   )
 }

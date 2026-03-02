@@ -9,6 +9,11 @@ import hut from '../assets/home/hut.png'
 import leftMountain from '../assets/home/left_mountain.png'
 import rightMountain from '../assets/home/right_mountain.png'
 
+import '../styles/home.css'
+
+import { LoadingScreen } from '../components/LoadingScreen'
+import { HomeSVG } from '../assets/loading/HomeSVG'
+
 gsap.registerPlugin(ScrollTrigger)
 
 export function HomePage() {
@@ -23,6 +28,7 @@ export function HomePage() {
   const leftMountRef = useRef<HTMLImageElement | null>(null)
   const rightMountRef = useRef<HTMLImageElement | null>(null)
   const lenisRef = useRef<Lenis | null>(null)
+  const aboutRef = useRef<HTMLDivElement | null>(null)
   
   const hasIntroPlayed = useRef(false)
 
@@ -59,24 +65,25 @@ export function HomePage() {
 
     mm.add({
       isMobile: "(max-width: 768px)",
-      isDesktop: "(min-width: 769px)"
+      isTablet: "(min-width: 769px) and (max-width: 1199px)",
+      isDesktop: "(min-width: 1200px)"
     }, (context) => {
-      const { isMobile } = context.conditions as { isMobile: boolean, isDesktop: boolean }
+      const { isMobile, isTablet } = context.conditions as { isMobile: boolean, isTablet: boolean, isDesktop: boolean }
 
       // ── DYNAMIC VARIABLES BASED ON SCREEN SIZE ──
-      // Bumped mobile scale way up to 5.5 so it fills the tall vertical space
-      const initMountScale = isMobile ? 5.5 : 3.2 
-      // Reduced gap on mobile so mountains don't spread too far off-screen
-      const gapX = isMobile ? 6 : 22 
-      const mountY = isMobile ? 15 : 28
-      const exodiaFinalScale = isMobile ? 0.9 : 1.2
+      const initMountScale = isMobile ? 5.5 : isTablet ? 4.0 : 3.2
+      const gapX = isMobile ? 100 : isTablet ? 45 : 10
+      const mountY = isMobile ? 10 : isTablet ? 16 : 22
+      const exodiaFinalScale = isMobile ? 0.9 : isTablet ? 1.0 : 1.2
+      const originL = isMobile || isTablet ? 'bottom left' : 'bottom center'
+      const originR = isMobile || isTablet ? 'bottom right' : 'bottom center'
 
       if (!hasIntroPlayed.current) {
         lenis?.stop()
         
         // ── INTRO START STATES ────────────────────────────────────────────────────
-        gsap.set(leftMountRef.current, { scale: initMountScale, xPercent: 0, yPercent: 0, transformOrigin: 'bottom left' })
-        gsap.set(rightMountRef.current, { scale: initMountScale, xPercent: 0, yPercent: 0, transformOrigin: 'bottom right' })
+        gsap.set(leftMountRef.current, { scale: initMountScale, xPercent: 0, yPercent: 0, transformOrigin: originL })
+        gsap.set(rightMountRef.current, { scale: initMountScale, xPercent: 0, yPercent: 0, transformOrigin: originR })
         gsap.set(exodiaRef.current, { opacity: 0, scale: 0.85, yPercent: 10 })
         gsap.set(countdownRef.current, { opacity: 0, y: 15 }) // Countdown starts hidden slightly lower
       }
@@ -91,25 +98,25 @@ export function HomePage() {
           if (bgRef.current) {
             gsap.fromTo(bgRef.current,
               { y: 0, scale: 1, x: 0 },
-              { y: isMobile ? '-20vh' : '-35vh', scale: 1.25, x: '-4%', ease: 'none',
+              { y: isMobile ? '-20vh' : isTablet ? '-28vh' : '-35vh', scale: 1.25, x: '-4%', ease: 'none',
                 scrollTrigger: { trigger, start: 'top top', end: 'bottom bottom', scrub: 3 } })
           }
           if (leftMountRef.current) {
             gsap.fromTo(leftMountRef.current,
-              { xPercent: -gapX, yPercent: mountY, scale: 1 },
-              { xPercent: -(gapX + 15), yPercent: 0, scale: 2.5, ease: 'none',
+              { xPercent: -gapX, yPercent: mountY, scale: 1, transformOrigin: originL },
+              { xPercent: -(gapX + (isMobile ? 40 : isTablet ? 20 : 10)), yPercent: 0, scale: isMobile ? 1.6 : isTablet ? 1.8 : 2, ease: 'none',
                 scrollTrigger: { trigger, start: 'top top', end: 'bottom bottom', scrub: 1.5 } })
           }
           if (rightMountRef.current) {
             gsap.fromTo(rightMountRef.current,
-              { xPercent: gapX, yPercent: mountY, scale: 1 },
-              { xPercent: gapX + 15, yPercent: 0, scale: 2.1, ease: 'none',
+              { xPercent: gapX, yPercent: mountY, scale: 1, transformOrigin: originR },
+              { xPercent: gapX + (isMobile ? 40 : isTablet ? 20 : 10), yPercent: 0, scale: isMobile ? 1.4 : isTablet ? 1.6 : 1.8, ease: 'none',
                 scrollTrigger: { trigger, start: 'top top', end: 'bottom bottom', scrub: 1.5 } })
           }
           if (exodiaRef.current) {
             gsap.fromTo(exodiaRef.current,
               { yPercent: 0, scale: exodiaFinalScale },
-              { yPercent: -180, scale: exodiaFinalScale * 0.75, ease: 'none',
+              { yPercent: isMobile ? -350 : isTablet ? -220 : -180, scale: exodiaFinalScale * 0.75, ease: 'none',
                 scrollTrigger: { trigger, start: 'top top', end: 'bottom bottom', scrub: 1 } })
           }
           // Fade countdown out rapidly as soon as user scrolls
@@ -131,10 +138,10 @@ export function HomePage() {
       // ── INTRO ANIMATION (Only runs once) ──────────────────────────────────────
       if (!hasIntroPlayed.current) {
         tl.to(leftMountRef.current, {
-            scale: 1, xPercent: -gapX, yPercent: mountY, transformOrigin: 'bottom left', duration: 1.6, ease: 'power3.inOut'
+            scale: 1, xPercent: -gapX, yPercent: mountY, transformOrigin: originL, duration: 1.6, ease: 'power3.inOut'
           })
           .to(rightMountRef.current, {
-            scale: 1, xPercent: gapX, yPercent: mountY, transformOrigin: 'bottom right', duration: 1.6, ease: 'power3.inOut'
+            scale: 1, xPercent: gapX, yPercent: mountY, transformOrigin: originR, duration: 1.6, ease: 'power3.inOut'
           }, '<')
           .to(exodiaRef.current, {
             opacity: 1, scale: exodiaFinalScale, yPercent: 0, duration: 1.1, ease: 'power2.out'
@@ -143,11 +150,11 @@ export function HomePage() {
           .to(countdownRef.current, {
             opacity: 1, y: 0, duration: 0.8, ease: 'power2.out'
           }, '-=0.6')
-          .set(leftMountRef.current,  { transformOrigin: 'bottom center' })
-          .set(rightMountRef.current, { transformOrigin: 'bottom center' })
+          .set(leftMountRef.current,  { transformOrigin: originL })
+          .set(rightMountRef.current, { transformOrigin: originR })
       } else {
-         gsap.set(leftMountRef.current, { scale: 1, xPercent: -gapX, yPercent: mountY, transformOrigin: 'bottom center' })
-         gsap.set(rightMountRef.current, { scale: 1, xPercent: gapX, yPercent: mountY, transformOrigin: 'bottom center' })
+         gsap.set(leftMountRef.current, { scale: 1, xPercent: -gapX, yPercent: mountY, transformOrigin: originL })
+         gsap.set(rightMountRef.current, { scale: 1, xPercent: gapX, yPercent: mountY, transformOrigin: originR })
          gsap.set(exodiaRef.current, { opacity: 1, scale: exodiaFinalScale, yPercent: 0 })
          gsap.set(countdownRef.current, { opacity: 1, y: 0 })
       }
@@ -163,7 +170,42 @@ export function HomePage() {
     }
   }, [])
 
+  // ── About Us fade-in animation ───────────────────────────────────────────────
+  useEffect(() => {
+    if (!aboutRef.current || !scrollTriggerRef.current) return
+
+    const aboutEl = aboutRef.current
+
+    const ctx = gsap.context(() => {
+      gsap.fromTo(
+        aboutEl,
+        { opacity: 0, yPercent: 30 },
+        {
+          opacity: 1,
+          yPercent: 0,
+          ease: 'power2.out',
+          scrollTrigger: {
+            trigger: scrollTriggerRef.current,
+            start: '50% top',
+            end: '60% top',
+            scrub: 1,
+            onUpdate: (self) => {
+              if (self.progress > 0.05) {
+                aboutEl.style.pointerEvents = 'auto'
+              } else {
+                aboutEl.style.pointerEvents = 'none'
+              }
+            },
+          },
+        }
+      )
+    })
+
+    return () => ctx.revert()
+  }, [])
+
   return (
+    <LoadingScreen svg={<HomeSVG />}>
     <div className="app" ref={containerRef}>
       <main className="parallax-page">
         <div className="scroll-trigger" ref={scrollTriggerRef}>
@@ -203,9 +245,20 @@ export function HomePage() {
             <div className="layer layer-hut">
               <img ref={hutRef} src={hut} alt="" />
             </div>
+
+            {/* About Us - overlaid on top of parallax stage */}
+            <div className="about-us-overlay" ref={aboutRef}>
+              <div className="about-us-content">
+                <h2 className="about-us-title">About Us</h2>
+                <p className="about-us-text">
+                  With a thunderbolt of lightning and mountains that have witnessed millennia, Exodia returns to you. Exodia'26 is IIT Mandi's celebration of creativity, innovation and culture right in the heart of Himalayas. This year, Exodia brings together the binding forces of the nature: Ethereal Earth, Fiery Fire, ever-wandering Air, Water and boundless Ether. Exodia'26 unites cultural performances, unique artistic installations and the nightly showcase of our diverse and vibrant community energy. Here nature awaits your creativity and memories that will find their way to your heart again and again.
+                </p>
+              </div>
+            </div>
           </div>
         </div>
       </main>
     </div>
+    </LoadingScreen>
   )
 }

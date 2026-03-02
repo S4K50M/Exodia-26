@@ -11,6 +11,9 @@ import rightBg from '../assets/merchendise/right_bg.png'
 
 import '../styles/merchandise.css'
 
+import { LoadingScreen } from '../components/LoadingScreen'
+import { MerchSVG } from '../assets/loading/MerchSVG'
+
 gsap.registerPlugin(ScrollTrigger)
 
 export function MerchandisePage() {
@@ -143,11 +146,12 @@ export function MerchandisePage() {
   }, [])
 
   return (
+    <LoadingScreen svg={<MerchSVG />}>
     <div className="merchandise-page" ref={containerRef}>
       <div className="merchandise-scroll-trigger" ref={scrollTriggerRef}>
         <div className="merchandise-stage">
           {/* Background */}
-          <div className="merchandise-bg">
+          <div className="merchandise-bg" ref={bgRef}>
             <img src={bg} alt="" />
           </div>
 
@@ -178,5 +182,6 @@ export function MerchandisePage() {
         </div>
       </div>
     </div>
+    </LoadingScreen>
   )
 }

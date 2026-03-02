@@ -53,13 +53,13 @@
   inset: 0;
   width: 100%;
   height: 100%;
-  object-fit: contain;
+  object-fit: cover;
   object-position: center top;
 }
 
-/* 2. exodia - centered, above bg */
+/* 2. exodia - centered, above mountains so text stays visible */
 .layer-exodia {
-  z-index: 2;
+  z-index: 5;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -84,8 +84,8 @@
 .mountain-right {
   position: absolute;
   bottom: 0;
-  width: 50%;
-  height: 85%;
+  width: 48%;
+  height: 90%;
   display: flex;
   align-items: flex-end;
   transform-origin: bottom center;
@@ -105,7 +105,7 @@
 .mountain-right img {
   height: 100%;
   width: auto;
-  max-width: 100%;
+  max-width: none;
   object-fit: contain;
   object-position: bottom;
 }
@@ -216,22 +216,74 @@
   color: rgba(220, 222, 230, 0.9);
 }
 
+/* Tablet: 721px – 1199px */
+@media (min-width: 721px) and (max-width: 1199px) {
+  .layer-exodia img {
+    width: min(42vw, 340px);
+  }
+
+  .layer-hut img {
+    width: min(30vw, 260px);
+  }
+
+  .mountain-left,
+  .mountain-right {
+    width: 50%;
+    height: 85%;
+  }
+}
+
 @media (max-width: 720px) {
   .navbar {
-    padding-inline: 1rem;
+    padding-inline: 0.75rem;
     border-radius: 20px;
+    top: 0.75rem;
   }
 
   .navbar-links {
-    gap: 0.25rem;
+    gap: 0.2rem;
   }
 
   .navbar-links a {
-    padding-inline: 0.6rem;
+    padding: 0.3rem 0.5rem;
+    font-size: 0.75rem;
   }
 
   .layer-bg img {
-    /* On mobile, ensure the first (background) image fills the whole screen */
     object-fit: cover;
+  }
+
+  .layer-exodia img {
+    width: min(70vw, 280px);
+  }
+
+  .layer-hut img {
+    width: min(45vw, 200px);
+  }
+
+  .scroll-trigger {
+    height: 280vh;
+  }
+
+  .mountain-left,
+  .mountain-right {
+    width: 55%;
+    height: 75%;
+  }
+}
+
+@media (max-width: 480px) {
+  .navbar {
+    padding-inline: 0.5rem;
+    top: 0.5rem;
+  }
+
+  .navbar-brand {
+    font-size: 0.9rem;
+  }
+
+  .navbar-links a {
+    padding: 0.25rem 0.4rem;
+    font-size: 0.7rem;
   }
 }

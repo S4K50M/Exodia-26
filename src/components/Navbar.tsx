@@ -4,9 +4,10 @@ import gsap from 'gsap'
 
 interface NavbarProps {
   shouldAnimate?: boolean
+  onRegisterClick?: () => void
 }
 
-export function Navbar({ shouldAnimate = false }: NavbarProps) {
+export function Navbar({ shouldAnimate = false, onRegisterClick }: NavbarProps) {
   const location = useLocation()
   const navRef = useRef<HTMLElement>(null)
   const linksRef = useRef<HTMLUListElement>(null)
@@ -83,21 +84,20 @@ export function Navbar({ shouldAnimate = false }: NavbarProps) {
           </Link>
         </li>
         
-        {/* --- ADDED REGISTER BUTTON HERE --- */}
+        {/* --- REGISTER BUTTON (opens overlay) --- */}
         <li>
-          <Link
-            to="/register"
+          <button
+            onClick={onRegisterClick}
             className={`
               inline-block px-5 py-2 font-bold text-black rounded-lg
               bg-gradient-to-r from-yellow-500 to-yellow-400 
               shadow-[0_0_10px_rgba(234,179,8,0.4)]
-              transition-all duration-300 transform 
+              transition-all duration-300 transform cursor-pointer border-none
               hover:-translate-y-1 hover:shadow-[0_0_20px_rgba(234,179,8,0.8)] hover:from-yellow-400 hover:to-yellow-300
-              ${location.pathname === '/register' ? 'ring-2 ring-white/50' : ''}
             `}
           >
             Register
-          </Link>
+          </button>
         </li>
       </ul>
     </nav>
