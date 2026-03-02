@@ -5,7 +5,7 @@ import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 
 import { Navbar } from './components/Navbar'
-import { NotificationSidebar } from './components/notifbar';
+import { NotificationSidebar } from './components/NotifBar';
 import { HomePage } from './pages/HomePage'
 import { EventsPage } from './pages/EventsPage'
 import { TeamPage } from './pages/TeamPage'
