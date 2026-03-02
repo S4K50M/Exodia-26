@@ -38,7 +38,7 @@
 .events-dragon {
   position: absolute;
   bottom: 0;
-  z-index: 2;
+  z-index: 5; /* keep dragons behind the cards */
   pointer-events: none;
 }
 
@@ -63,18 +63,6 @@
   max-width: 45vw;
   object-fit: contain;
   object-position: bottom;
-}
-
-/* Cards wrap - emerges from below (section entrance via GSAP) */
-.events-cards-wrap {
-  position: absolute;
-  inset: 0;
-  z-index: 3;
-  pointer-events: auto;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transform-origin: center center;
 }
 
 /* Carousel: center card prominent, left/right visible, rest blurred */
@@ -102,6 +90,9 @@
   position: relative;
   width: 100%;
   height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 /* Prev/Next buttons */
@@ -234,34 +225,8 @@
   pointer-events: none;
 }
 
-/* --- card text area --- */
-.event-card-inner {
-  padding: 1rem 1.25rem 1.25rem;
-  position: relative;
-}
-/* thin top divider that mimics a water surface line */
-.event-card-inner::before {
-  content: '';
-  display: block;
-  width: 40%;
-  height: 1px;
-  margin: 0 auto 0.75rem;
-  background: linear-gradient(
-    90deg,
-    transparent,
-    rgba(140, 220, 255, 0.6),
-    transparent
-  );
-}
 
-.event-card-inner h3 {
-  margin: 0 0 0.3rem;
-  font-size: 1.15rem;
-  font-weight: 700;
-  color: #e8f6ff;
-  letter-spacing: 0.01em;
-  text-shadow: 0 1px 8px rgba(0, 120, 200, 0.5);
-}
+
 
 .event-card-date {
   display: inline-block;
@@ -326,4 +291,118 @@
   .events-carousel-btn-right {
     right: 0.25rem;
   }
+}
+/* Update this section in your events.css */
+
+.event-asset {
+  position: absolute;
+  height: 80vh;
+  width: auto; /* Ensure width scales with height */
+  pointer-events: none;
+  z-index: 5;
+  object-fit: contain;
+}
+
+.sword-left { 
+  left: -5%; /* Start slightly off-screen for a better parallax feel */
+  top: 10%; 
+}
+
+.sword-right { 
+  right: -5%; 
+  top: 10%; 
+}
+
+.events-dragon {
+  z-index: 10; /* Dragon remains in front of swords */
+}
+
+/* Ensure cards are above dragons even when GSAP transforms create stacking contexts */
+.events-cards-wrap {
+  z-index: 999 !important;
+}
+
+/* Reset and fix the cards wrapper */
+.events-cards-wrap {
+  position: absolute; /* Change back to absolute */
+  inset: 0;           /* Fill the stage */
+  z-index: 25;        /* Bring to the very front */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: auto; /* Allow clicking the cards */
+  opacity: 1;         /* Show on load so cards are centered immediately */
+  transform: none; /* Allow GSAP yPercent to control vertical placement */
+}
+
+/* --- card text area --- */
+.event-card-inner {
+  padding: 1rem;
+  position: relative;
+  box-sizing: border-box;
+  /* Add flex properties to perfectly center the text */
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  height: 100%;
+}
+
+/* Thin top divider - changed to absolute so it doesn't push text down */
+.event-card-inner::before {
+  content: '';
+  position: absolute;
+  top: 1rem; /* Locked to the top */
+  left: 50%;
+  transform: translateX(-50%);
+  display: block;
+  width: 40%;
+  height: 1px;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(140, 220, 255, 0.6),
+    transparent
+  );
+}
+
+.event-card-inner h3 {
+  color: #fbbf24;
+  text-shadow: 0 0 10px rgba(251, 191, 36, 0.3);
+  font-family: 'Exo 2', sans-serif;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  text-align: center;
+  margin: 0;
+}
+
+/* --- OVERLAY FIXES --- */
+.event-details-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(10, 25, 50, 0.85); /* Deepened the background to match theme */
+  backdrop-filter: blur(16px) saturate(1.2);
+  -webkit-backdrop-filter: blur(16px) saturate(1.2);
+  z-index: 9999; /* Bumped up z-index to cover navbar/everything */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.event-details-modal {
+  /* Made it 100% of the screen */
+  background: transparent;
+  border: none;
+  width: 100vw;
+  height: 100vh;
+  max-width: none;
+  border-radius: 0;
+  box-shadow: none;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 2rem;
+  box-sizing: border-box;
 }
