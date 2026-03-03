@@ -107,69 +107,16 @@ export function MerchandisePage() {
         gsap.to(bgRef.current, { scale: 1.08, duration: 8, ease: 'sine.inOut', yoyo: true, repeat: -1, delay: 2 })
       }
       if (leftBgRef.current) {
-<<<<<<< HEAD
         gsap.fromTo(leftBgRef.current, { x: '-100%' }, { x: '0%', duration: 1.8, ease: 'power3.out', delay: 0.2 })
-=======
-        gsap.fromTo(
-          leftBgRef.current,
-          { x: '-18%', z: 0 },
-          {
-            x: '-8%',
-            z: 50,
-            ease: 'none',
-            scrollTrigger: {
-              trigger,
-              start: 'top top',
-              end: 'bottom bottom',
-              scrub: 1.5,
-            },
-          }
-        )
->>>>>>> 828fb2edbcb9f4ec9bd1e8fd4648fdfb6cb17349
       }
       if (rightBgRef.current) {
-<<<<<<< HEAD
         gsap.fromTo(rightBgRef.current, { x: '100%' }, { x: '0%', duration: 1.8, ease: 'power3.out', delay: 0.2 })
-=======
-        gsap.fromTo(
-          rightBgRef.current,
-          { x: '18%', z: 0 },
-          {
-            x: '8%',
-            z: 50,
-            ease: 'none',
-            scrollTrigger: {
-              trigger,
-              start: 'top top',
-              end: 'bottom bottom',
-              scrub: 1.5,
-            },
-          }
-        )
->>>>>>> 828fb2edbcb9f4ec9bd1e8fd4648fdfb6cb17349
       }
       if (leftRef.current) {
-<<<<<<< HEAD
         gsap.fromTo(leftRef.current, { x: '-120%' }, { x: '0%', duration: 2, ease: 'power3.out', delay: 0.4 })
       }
       if (rightRef.current) {
         gsap.fromTo(rightRef.current, { x: '120%' }, { x: '0%', duration: 2, ease: 'power3.out', delay: 0.4 })
-=======
-        gsap.fromTo(
-          leftRef.current,
-          { x: '-15%' },
-          {
-            x: '-12%',
-            ease: 'none',
-            scrollTrigger: {
-              trigger,
-              start: 'top top',
-              end: 'bottom bottom',
-              scrub: 2,
-            },
-          }
-        )
->>>>>>> 828fb2edbcb9f4ec9bd1e8fd4648fdfb6cb17349
       }
 
       /* ScrollTrigger: pin hero and animate content from center → top */
@@ -195,20 +142,12 @@ export function MerchandisePage() {
       /* Cards section entrance */
       if (cardsSectionRef.current) {
         gsap.fromTo(
-<<<<<<< HEAD
           cardsSectionRef.current,
           { opacity: 0, y: 80 },
           {
             opacity: 1,
             y: 0,
             duration: 1,
-=======
-          rightRef.current,
-          { x: '12%' },
-          {
-            x: '12%',
-            ease: 'none',
->>>>>>> 828fb2edbcb9f4ec9bd1e8fd4648fdfb6cb17349
             scrollTrigger: {
               trigger: cardsSectionRef.current,
               start: 'top 90%',
