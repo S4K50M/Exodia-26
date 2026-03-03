@@ -14,11 +14,13 @@ interface EventCardsProps {
   events: Event[]
 }
 
-const CARD_WIDTH = 280
-const CARD_HEIGHT = 140
-const STEP = CARD_WIDTH + 36           // horizontal gap between card centres
-const ARC_DIP = -350                    // px the centre card sits BELOW side cards
-const VISIBLE = 4                      // rendered slots each side
+const IS_MOBILE = typeof window !== 'undefined' && window.matchMedia('(max-width: 720px)').matches
+
+const CARD_WIDTH = IS_MOBILE ? 160 : 280
+const CARD_HEIGHT = IS_MOBILE ? 90 : 140
+const STEP = CARD_WIDTH + (IS_MOBILE ? 20 : 36)  // horizontal gap between card centres
+const ARC_DIP = IS_MOBILE ? -200 : -350           // px the centre card sits BELOW side cards
+const VISIBLE = 4                                 // rendered slots each side
 const TWEEN_DURATION = 0.62
 const SCROLL_COOLDOWN_MS = 650
 
@@ -64,6 +66,8 @@ export function EventCards({ events }: EventCardsProps) {
   const cardRefs = useRef<(HTMLDivElement | null)[]>([])
   const viewportRef = useRef<HTMLDivElement | null>(null)
   const lastWheelTime = useRef(0)
+  const lastSwipeTime = useRef(0)
+  const touchStartX = useRef(0)
   const [openIdx, setOpenIdx] = useState<number | null>(null)
 
   useEffect(() => { currentIndexRef.current = currentIndex }, [currentIndex])
@@ -152,6 +156,29 @@ export function EventCards({ events }: EventCardsProps) {
     return () => el.removeEventListener('wheel', onWheel)
   }, [goNext])
 
+  // swipe left/right → navigate carousel on mobile
+  useEffect(() => {
+    const el = viewportRef.current
+    if (!el) return
+    const onTouchStart = (e: TouchEvent) => {
+      touchStartX.current = e.touches[0].clientX
+    }
+    const onTouchEnd = (e: TouchEvent) => {
+      const delta = touchStartX.current - e.changedTouches[0].clientX
+      if (Math.abs(delta) < 40) return   // too small — treat as tap, not swipe
+      const now = Date.now()
+      if (now - lastSwipeTime.current < SCROLL_COOLDOWN_MS) return
+      lastSwipeTime.current = now
+      delta > 0 ? goNext() : goPrev()
+    }
+    el.addEventListener('touchstart', onTouchStart, { passive: true })
+    el.addEventListener('touchend', onTouchEnd, { passive: true })
+    return () => {
+      el.removeEventListener('touchstart', onTouchStart)
+      el.removeEventListener('touchend', onTouchEnd)
+    }
+  }, [goNext, goPrev])
+
   // close with Escape
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
@@ -198,34 +225,34 @@ export function EventCards({ events }: EventCardsProps) {
         <div className="event-details-overlay" onClick={() => setOpenIdx(null)}>
           <div className="event-details-modal" onClick={(e) => e.stopPropagation()}>
             
-            <button onClick={() => setOpenIdx(null)} aria-label="Close" style={{ position: 'absolute', top: '3rem', right: '3rem', background: 'transparent', border: 'none', color: '#fbbf24', fontSize: '2.5rem', cursor: 'pointer', transition: 'transform 0.2s' }}>✕</button>
+            <button onClick={() => setOpenIdx(null)} aria-label="Close" className="event-modal-close">✕</button>
             
-            <h2 style={{ margin: '0 0 1.5rem 0', color: '#e4d5b7', fontSize: 'clamp(2.5rem, 6vw, 4.5rem)', textTransform: 'uppercase', letterSpacing: '2px', textShadow: '0 0 20px rgba(251,191,36,0.4)' }}>
+            <h2 className="event-modal-title">
               {extEvents[openIdx].title}
             </h2>
             
-            <p style={{ color: 'rgba(200,230,250,0.9)', fontSize: '1.25rem', maxWidth: '800px', lineHeight: '1.6', margin: '0 0 2.5rem 0' }}>
+            <p className="event-modal-desc">
               {extEvents[openIdx].desc}
             </p>
             
-            <div style={{ display: 'flex', gap: '3rem', marginBottom: '3.5rem', justifyContent: 'center' }}>
-              <p style={{ margin: 0, color: 'rgba(140,220,255,1)', fontSize: '1.2rem', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '1px' }}>
+            <div className="event-modal-meta">
+              <p style={{ margin: 0, color: 'rgba(140,220,255,1)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '1px' }}>
                 Dates: <span style={{ fontWeight: 400, color: '#e4d5b7' }}>{extEvents[openIdx].date}</span>
               </p>
-              <p style={{ margin: 0, color: 'rgba(140,220,255,1)', fontSize: '1.2rem', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '1px' }}>
+              <p style={{ margin: 0, color: 'rgba(140,220,255,1)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '1px' }}>
                 Type: <span style={{ fontWeight: 400, color: '#e4d5b7' }}>{extEvents[openIdx].eventType}</span>
               </p>
             </div>
             
-            <div style={{ display: 'flex', gap: '1.5rem', justifyContent: 'center' }}>
+            <div className="event-modal-actions">
               {extEvents[openIdx].rulebook && (
                 <a href={extEvents[openIdx].rulebook} target="_blank" rel="noopener noreferrer">
-                  <button style={{ background: '#e4d5b7', border: 'none', padding: '0.8rem 2.5rem', borderRadius: '50px', fontSize: '1.1rem', fontWeight: 'bold', cursor: 'pointer', boxShadow: '0 4px 20px rgba(253, 247, 232, 0.4)' }}>
+                  <button className="event-modal-btn-primary">
                     Open Rulebook
                   </button>
                 </a>
               )}
-              <button onClick={() => setOpenIdx(null)} style={{ background: 'rgba(207, 248, 255, 0.4)', color: '#e4d5b7', border: '2px solid #e4d5b7', padding: '0.8rem 2.5rem', borderRadius: '50px', fontSize: '1.1rem', fontWeight: 'bold', cursor: 'pointer', backdropFilter: 'blur(5px)' }}>
+              <button onClick={() => setOpenIdx(null)} className="event-modal-btn-secondary">
                 Close
               </button>
             </div>

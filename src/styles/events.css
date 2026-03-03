@@ -249,14 +249,62 @@
   line-height: 1.5;
 }
 
+/* Sword assets - base (desktop) styles must come BEFORE media queries */
+.event-asset {
+  position: absolute;
+  height: 80vh;
+  width: auto;
+  pointer-events: none;
+  z-index: 5;
+  object-fit: contain;
+}
+
+.sword-left {
+  left: -5%;
+  top: 10%;
+}
+
+.sword-right {
+  right: -5%;
+  top: 10%;
+}
+
 @media (max-width: 720px) {
   .events-scroll-trigger {
     height: 400vh;
   }
 
+  /* Move heading higher on mobile */
+  .events-heading-container {
+    top: 35% !important;
+  }
+
+  /* Center dragons vertically on mobile */
+  .events-dragon {
+    bottom: auto;
+    top: 50%;
+    transform: translateY(-50%);
+    align-items: center;
+  }
+
   .events-dragon img {
-    max-height: 50vh;
-    max-width: 50vw;
+    max-height: 55vh;
+    max-width: 48vw;
+  }
+
+  /* Swords: match dragon height, pinned to outer edges like desktop */
+  .event-asset {
+    height: 25vh;
+  }
+
+  .sword-left {
+    left: -3%;
+    top: 30%;
+  }
+
+  .sword-right {
+    right: -3%;
+    top: 30%;
   }
 
   .events-carousel-btn {
@@ -291,26 +339,6 @@
   .events-carousel-btn-right {
     right: 0.25rem;
   }
-}
-/* Update this section in your events.css */
-
-.event-asset {
-  position: absolute;
-  height: 80vh;
-  width: auto; /* Ensure width scales with height */
-  pointer-events: none;
-  z-index: 5;
-  object-fit: contain;
-}
-
-.sword-left { 
-  left: -5%; /* Start slightly off-screen for a better parallax feel */
-  top: 10%; 
-}
-
-.sword-right { 
-  right: -5%; 
-  top: 10%; 
 }
 
 .events-dragon {
@@ -405,4 +433,108 @@
   text-align: center;
   padding: 2rem;
   box-sizing: border-box;
+}
+
+/* Modal inner elements */
+.event-modal-close {
+  position: absolute;
+  top: 3rem;
+  right: 3rem;
+  background: transparent;
+  border: none;
+  color: #fbbf24;
+  font-size: 2.5rem;
+  cursor: pointer;
+  transition: transform 0.2s;
+}
+
+.event-modal-title {
+  margin: 0 0 1.5rem 0;
+  color: #e4d5b7;
+  font-size: clamp(2.5rem, 6vw, 4.5rem);
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  text-shadow: 0 0 20px rgba(251,191,36,0.4);
+}
+
+.event-modal-desc {
+  color: rgba(200,230,250,0.9);
+  font-size: 1.25rem;
+  max-width: 800px;
+  line-height: 1.6;
+  margin: 0 0 2.5rem 0;
+}
+
+.event-modal-meta {
+  display: flex;
+  gap: 3rem;
+  margin-bottom: 3.5rem;
+  justify-content: center;
+  font-size: 1.2rem;
+}
+
+.event-modal-actions {
+  display: flex;
+  gap: 1.5rem;
+  justify-content: center;
+}
+
+.event-modal-btn-primary {
+  background: #e4d5b7;
+  border: none;
+  padding: 0.8rem 2.5rem;
+  border-radius: 50px;
+  font-size: 1.1rem;
+  font-weight: bold;
+  cursor: pointer;
+  box-shadow: 0 4px 20px rgba(253,247,232,0.4);
+}
+
+.event-modal-btn-secondary {
+  background: rgba(207,248,255,0.4);
+  color: #e4d5b7;
+  border: 2px solid #e4d5b7;
+  padding: 0.8rem 2.5rem;
+  border-radius: 50px;
+  font-size: 1.1rem;
+  font-weight: bold;
+  cursor: pointer;
+  backdrop-filter: blur(5px);
+}
+
+@media (max-width: 720px) {
+  .event-modal-close {
+    top: 1.2rem;
+    right: 1.2rem;
+    font-size: 1.8rem;
+  }
+
+  .event-modal-title {
+    font-size: clamp(1.4rem, 7vw, 2rem);
+    margin-bottom: 0.8rem;
+    letter-spacing: 1px;
+  }
+
+  .event-modal-desc {
+    font-size: 0.9rem;
+    margin-bottom: 1.2rem;
+    padding: 0 0.5rem;
+  }
+
+  .event-modal-meta {
+    gap: 1.2rem;
+    margin-bottom: 1.5rem;
+    font-size: 0.85rem;
+    flex-wrap: wrap;
+  }
+
+  .event-modal-actions {
+    gap: 0.8rem;
+  }
+
+  .event-modal-btn-primary,
+  .event-modal-btn-secondary {
+    padding: 0.6rem 1.5rem;
+    font-size: 0.9rem;
+  }
 }
