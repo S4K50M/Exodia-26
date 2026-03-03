@@ -133,3 +133,41 @@
     width: 50vw;
   }
 }
+
+
+/* Centered Button Wrapper */
+.merchandise-center-content {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 50; /* Ensures it sits above your background layers */
+  pointer-events: none; /* Let clicks pass through the invisible wrapper... */
+}
+
+/* The Button Itself */
+.merchandise-buy-btn {
+  pointer-events: auto; /* ...but catch clicks on the button */
+  padding: 1rem 2.5rem;
+  border: none;
+  border-radius: 3rem;
+  font-size: 1.2rem;
+  font-weight: 800;
+  color: #000;
+  background: linear-gradient(135deg, #c084fc, #a78bfa);
+  cursor: pointer;
+  transition: transform 300ms cubic-bezier(0.175, 0.885, 0.32, 1.275), box-shadow 300ms ease;
+  box-shadow: 0 0 20px rgba(192, 132, 252, 0.4), 0 4px 6px rgba(0, 0, 0, 0.3);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.merchandise-buy-btn:hover {
+  transform: translateY(-4px) scale(1.05);
+  box-shadow: 0 0 30px rgba(192, 132, 252, 0.6), 0 8px 12px rgba(0, 0, 0, 0.4);
+}
+
+.merchandise-buy-btn:active {
+  transform: translateY(2px) scale(0.98);
+}

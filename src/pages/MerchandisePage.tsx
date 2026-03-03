@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import Lenis from 'lenis'
 import gsap from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
@@ -13,6 +13,7 @@ import '../styles/merchandise.css'
 
 import { LoadingScreen } from '../components/LoadingScreen'
 import { MerchSVG } from '../assets/loading/MerchSVG'
+import { MerchModal } from '../components/MerchModal' // Adjust path if necessary
 
 gsap.registerPlugin(ScrollTrigger)
 
@@ -24,6 +25,9 @@ export function MerchandisePage() {
   const rightRef = useRef<HTMLDivElement | null>(null)
   const leftBgRef = useRef<HTMLDivElement | null>(null)
   const rightBgRef = useRef<HTMLDivElement | null>(null)
+
+  // Add state for the modal
+  const [isModalOpen, setIsModalOpen] = useState(false)
 
   useEffect(() => {
     const lenis = new Lenis({
@@ -146,34 +150,48 @@ export function MerchandisePage() {
   }, [])
 
   return (
-    <LoadingScreen svg={<MerchSVG />}>
-    <div className="merchandise-page" ref={containerRef}>
-      <div className="merchandise-scroll-trigger" ref={scrollTriggerRef}>
-        <div className="merchandise-stage">
-          {/* Background */}
-          <div className="merchandise-bg" ref={bgRef}>
-            <img src={bg} alt="" />
-          </div>
+    <>
+      <LoadingScreen svg={<MerchSVG />}>
+        <div className="merchandise-page" ref={containerRef}>
+          <div className="merchandise-scroll-trigger" ref={scrollTriggerRef}>
+            <div className="merchandise-stage">
+              {/* Background */}
+              <div className="merchandise-bg" ref={bgRef}>
+                <img src={bg} alt="" />
+              </div>
 
-          {/* Background elements - behind left/right, move forward on scroll */}
-          <div className="merchandise-side-bg merchandise-side-bg-left" ref={leftBgRef}>
-            <img src={leftBg} alt="" />
-          </div>
-          <div className="merchandise-side-bg merchandise-side-bg-right" ref={rightBgRef}>
-            <img src={rightBg} alt="" />
-          </div>
+              {/* Background elements - behind left/right, move forward on scroll */}
+              <div className="merchandise-side-bg merchandise-side-bg-left" ref={leftBgRef}>
+                <img src={leftBg} alt="" />
+              </div>
+              <div className="merchandise-side-bg merchandise-side-bg-right" ref={rightBgRef}>
+                <img src={rightBg} alt="" />
+              </div>
 
-          {/* Foreground elements - left/right, slight movement */}
-          <div className="merchandise-side merchandise-side-left" ref={leftRef}>
-            <img src={left} alt="" />
-          </div>
-          <div className="merchandise-side merchandise-side-right" ref={rightRef}>
-            <img src={right} alt="" />
-            
+              {/* Foreground elements - left/right, slight movement */}
+              <div className="merchandise-side merchandise-side-left" ref={leftRef}>
+                <img src={left} alt="" />
+              </div>
+              <div className="merchandise-side merchandise-side-right" ref={rightRef}>
+                <img src={right} alt="" />
+              </div>
+
+              {/* Centered Button Area */}
+              <div className="merchandise-center-content">
+                <button 
+                  className="merchandise-buy-btn"
+                  onClick={() => setIsModalOpen(true)}
+                >
+                  Buy Merchandise
+                </button>
+              </div>
+
+            </div>
           </div>
         </div>
-      </div>
-    </div>
-    </LoadingScreen>
+      </LoadingScreen>
+
+      <MerchModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} />
+    </>
   )
 }
