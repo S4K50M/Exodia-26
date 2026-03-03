@@ -4,6 +4,16 @@ import supabase from '../utils/supabase'
 
 import background from '../assets/merchendise/background.png'
 
+// Merch product images
+import hoodieFront from '../assets/merch/final mockup collage front.png'
+import hoodieBack from '../assets/merch/final mockup collage back.png'
+import hoodieSide from '../assets/merch/final mockup collage side.png'
+import hoodieCollage from '../assets/merch/final mockup collage.png'
+import teeFront from '../assets/merch/mockup-tee-front.png'
+import teeBack from '../assets/merch/mockup-tee-back.png'
+import acidFront from '../assets/merch/acid-wash-front.png'
+import acidBack from '../assets/merch/acid-wash-back.png'
+
 import '../styles/merch-modal.css'
 
 interface MerchModalProps {
@@ -21,9 +31,27 @@ const MERCH_OPTIONS = [
 
 const SIZES = ['S', 'M', 'L', 'XL', 'XXL']
 
+const MERCH_GALLERY = [
+  { id: 'hoodie', name: 'Oversized Hoodie', price: 669, views: [
+    { src: hoodieFront, label: 'Front' },
+    { src: hoodieBack, label: 'Back' },
+    { src: hoodieSide, label: 'Side' },
+    { src: hoodieCollage, label: 'Collage' },
+  ]},
+  { id: 'tee', name: 'Oversized Tee', price: 349, views: [
+    { src: teeFront, label: 'Front' },
+    { src: teeBack, label: 'Back' },
+  ]},
+  { id: 'acid_tee', name: 'Acid Wash Tee', price: 399, views: [
+    { src: acidFront, label: 'Front' },
+    { src: acidBack, label: 'Back' },
+  ]},
+]
+
 export function MerchModal({ isOpen, onClose }: MerchModalProps) {
   const overlayRef = useRef<HTMLDivElement | null>(null)
   const contentRef = useRef<HTMLDivElement | null>(null)
+  const cardsRef = useRef<(HTMLDivElement | null)[]>([])
 
   // Form State
   const [formData, setFormData] = useState({
@@ -39,6 +67,81 @@ export function MerchModal({ isOpen, onClose }: MerchModalProps) {
   
   // Toast State
   const [toast, setToast] = useState<{ msg: string; type: 'error' | 'success' } | null>(null)
+
+  // Per-card active view index (each product has its own carousel)
+  const [activeViews, setActiveViews] = useState<number[]>(MERCH_GALLERY.map(() => 0))
+
+  // Fullscreen viewer state
+  const [viewerOpen, setViewerOpen] = useState(false)
+  const [viewerProduct, setViewerProduct] = useState(0)
+  const [viewerIndex, setViewerIndex] = useState(0)
+  const touchStartX = useRef(0)
+  const touchDeltaX = useRef(0)
+
+  // Per-card touch
+  const cardTouchStart = useRef(0)
+  const cardTouchDelta = useRef(0)
+  const cardTouchProduct = useRef(0)
+
+  const setCardView = (productIdx: number, viewIdx: number) => {
+    setActiveViews(prev => { const n = [...prev]; n[productIdx] = viewIdx; return n })
+  }
+
+  const cardPrev = (pIdx: number) => {
+    const views = MERCH_GALLERY[pIdx].views
+    setActiveViews(prev => { const n = [...prev]; n[pIdx] = (n[pIdx] - 1 + views.length) % views.length; return n })
+  }
+
+  const cardNext = (pIdx: number) => {
+    const views = MERCH_GALLERY[pIdx].views
+    setActiveViews(prev => { const n = [...prev]; n[pIdx] = (n[pIdx] + 1) % views.length; return n })
+  }
+
+  const handleCardTouchStart = (e: React.TouchEvent, pIdx: number) => {
+    cardTouchStart.current = e.touches[0].clientX; cardTouchDelta.current = 0; cardTouchProduct.current = pIdx
+  }
+  const handleCardTouchMove = (e: React.TouchEvent) => { cardTouchDelta.current = e.touches[0].clientX - cardTouchStart.current }
+  const handleCardTouchEnd = () => {
+    if (Math.abs(cardTouchDelta.current) > 40) {
+      if (cardTouchDelta.current < 0) cardNext(cardTouchProduct.current)
+      else cardPrev(cardTouchProduct.current)
+    }
+    cardTouchDelta.current = 0
+  }
+
+  const openViewer = (productIdx: number) => {
+    setViewerProduct(productIdx)
+    setViewerIndex(activeViews[productIdx])
+    setViewerOpen(true)
+  }
+
+  const closeViewer = () => setViewerOpen(false)
+
+  const currentProduct = MERCH_GALLERY[viewerProduct]
+  const viewerPrev = () => setViewerIndex((i) => (i - 1 + currentProduct.views.length) % currentProduct.views.length)
+  const viewerNext = () => setViewerIndex((i) => (i + 1) % currentProduct.views.length)
+
+  const handleTouchStart = (e: React.TouchEvent) => { touchStartX.current = e.touches[0].clientX; touchDeltaX.current = 0 }
+  const handleTouchMove = (e: React.TouchEvent) => { touchDeltaX.current = e.touches[0].clientX - touchStartX.current }
+  const handleTouchEnd = () => {
+    if (Math.abs(touchDeltaX.current) > 50) {
+      if (touchDeltaX.current < 0) viewerNext()
+      else viewerPrev()
+    }
+    touchDeltaX.current = 0
+  }
+
+  // Keyboard nav for viewer
+  useEffect(() => {
+    if (!viewerOpen) return
+    const handleKey = (e: KeyboardEvent) => {
+      if (e.key === 'ArrowLeft') viewerPrev()
+      else if (e.key === 'ArrowRight') viewerNext()
+      else if (e.key === 'Escape') closeViewer()
+    }
+    window.addEventListener('keydown', handleKey)
+    return () => window.removeEventListener('keydown', handleKey)
+  }, [viewerOpen, viewerProduct])
 
   // Calculate dynamic total price
   const totalAmount = useMemo(() => {
@@ -61,6 +164,14 @@ export function MerchModal({ isOpen, onClose }: MerchModalProps) {
         { y: 40, opacity: 0, scale: 0.95 },
         { y: 0, opacity: 1, scale: 1, duration: 0.5, ease: 'back.out(1.2)', delay: 0.15 }
       )
+      // Stagger animate each product card
+      const cards = cardsRef.current.filter(Boolean)
+      if (cards.length) {
+        gsap.fromTo(cards,
+          { y: 60, opacity: 0, scale: 0.9 },
+          { y: 0, opacity: 1, scale: 1, duration: 0.6, ease: 'back.out(1.4)', stagger: 0.15, delay: 0.4 }
+        )
+      }
     } else {
       gsap.to(contentRef.current, { y: 30, opacity: 0, scale: 0.95, duration: 0.3, ease: 'power2.in' })
       gsap.to(overlayRef.current, {
@@ -211,47 +322,128 @@ return (
       className="merch-overlay" 
       onClick={handleOverlayClick} 
       style={{ display: 'none', opacity: 0 }}
-      // 1. Stop wheel and touch events from bubbling up to the parallax background
       onWheel={(e) => e.stopPropagation()}
       onTouchMove={(e) => e.stopPropagation()}
     >
-      {/* Background image layer */}
       <div className="merch-bg-layer" style={{ backgroundImage: `url(${background})` }} />
 
-      {/* Toast Notification */}
       {toast && (
         <div className={`merch-toast merch-toast-${toast.type}`}>
           {toast.msg}
         </div>
       )}
 
+      {/* Fullscreen Viewer */}
+      {viewerOpen && (
+        <div className="merch-viewer-overlay" onClick={closeViewer}>
+          <div className="merch-viewer-container" onClick={(e) => e.stopPropagation()}
+            onTouchStart={handleTouchStart} onTouchMove={handleTouchMove} onTouchEnd={handleTouchEnd}
+          >
+            <button className="merch-viewer-close" onClick={closeViewer}>&times;</button>
+            <button className="merch-viewer-arrow merch-viewer-arrow-left" onClick={viewerPrev}>&#8249;</button>
+            
+            <div className="merch-viewer-img-wrap">
+              <img src={currentProduct.views[viewerIndex].src} alt={currentProduct.views[viewerIndex].label} />
+            </div>
+
+            <button className="merch-viewer-arrow merch-viewer-arrow-right" onClick={viewerNext}>&#8250;</button>
+
+            <div className="merch-viewer-info">
+              <h3>{currentProduct.name} — ₹{currentProduct.price}</h3>
+              <span className="merch-viewer-view-label">{currentProduct.views[viewerIndex].label} View</span>
+              <div className="merch-viewer-dots">
+                {currentProduct.views.map((_, i) => (
+                  <span key={i} className={`merch-viewer-dot ${i === viewerIndex ? 'active' : ''}`} onClick={() => setViewerIndex(i)} />
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Content */}
-      <div 
-        ref={contentRef} 
-        className="merch-content"
-        // 2. Tell Lenis natively to ignore this scrollable container
-        data-lenis-prevent="true" 
-      >
-        <button className="merch-close-btn" onClick={onClose} aria-label="Close">
-          &times;
-        </button>
+      <div ref={contentRef} className="merch-content" data-lenis-prevent="true">
+        <button className="merch-close-btn" onClick={onClose} aria-label="Close">&times;</button>
 
-        <h1 className="merch-title">Buy Merchandise</h1>
+        <h1 className="merch-title">Exodia'26 Merchandise</h1>
+        <p className="merch-subtitle">Grab your official fest gear — limited drops, unlimited vibes</p>
 
-        <div className="merch-body">
-          {/* QR Section */}
+        {/* ─── HERO PRODUCT SHOWCASE ─── */}
+        <div className="merch-hero-grid">
+          {MERCH_GALLERY.map((product, pIdx) => (
+            <div 
+              key={product.id} 
+              className="merch-product-card"
+              ref={el => { cardsRef.current[pIdx] = el }}
+            >
+              {/* Image area with swipe */}
+              <div 
+                className="merch-card-img-area"
+                onTouchStart={(e) => handleCardTouchStart(e, pIdx)}
+                onTouchMove={handleCardTouchMove}
+                onTouchEnd={handleCardTouchEnd}
+                onClick={() => openViewer(pIdx)}
+              >
+                <img 
+                  src={product.views[activeViews[pIdx]].src} 
+                  alt={`${product.name} ${product.views[activeViews[pIdx]].label}`} 
+                  className="merch-card-img"
+                />
+                <span className="merch-card-expand-hint">Click to expand</span>
+                
+                {/* Mini arrows */}
+                {product.views.length > 1 && (
+                  <>
+                    <button className="merch-card-arrow merch-card-arrow-l" onClick={(e) => { e.stopPropagation(); cardPrev(pIdx) }}>&#8249;</button>
+                    <button className="merch-card-arrow merch-card-arrow-r" onClick={(e) => { e.stopPropagation(); cardNext(pIdx) }}>&#8250;</button>
+                  </>
+                )}
+              </div>
+
+              {/* View dots */}
+              <div className="merch-card-dots">
+                {product.views.map((v, i) => (
+                  <button 
+                    key={i} 
+                    className={`merch-card-dot ${i === activeViews[pIdx] ? 'active' : ''}`}
+                    onClick={() => setCardView(pIdx, i)}
+                  >
+                    {v.label}
+                  </button>
+                ))}
+              </div>
+
+              {/* Info */}
+              <div className="merch-card-info">
+                <h3 className="merch-card-name">{product.name}</h3>
+                <span className="merch-card-price">₹{product.price}</span>
+              </div>
+            </div>
+          ))}
+        </div>
+
+        {/* ─── DIVIDER ─── */}
+        <div className="merch-divider">
+          <span>Place Your Order</span>
+        </div>
+
+        {/* ─── ORDER SECTION ─── */}
+        <div className="merch-order-section">
+          {/* QR */}
           <div className="merch-qr-section">
             <img
               src="https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=upi://pay?pa=example@upi&pn=Exodia"
               alt="Payment QR Code"
               className="merch-qr-img"
             />
-            <p className="merch-qr-label">Scan to Pay</p>
-            <div className="merch-fee-box">
-              <p className="merch-fee-label">Total Payable:</p>
-              <p className="merch-fee-amount">₹{totalAmount}</p>
+            <div className="merch-qr-details">
+              <p className="merch-qr-label">Scan to Pay</p>
+              <div className="merch-fee-box">
+                <p className="merch-fee-label">Total Payable</p>
+                <p className="merch-fee-amount">₹{totalAmount}</p>
+              </div>
+              <p className="merch-qr-note">Select items below, pay, then submit.</p>
             </div>
-            <p className="merch-qr-note">Please select your items and complete the payment before submitting.</p>
           </div>
 
           {/* Form */}
@@ -270,7 +462,6 @@ return (
                 <input name="phone" value={formData.phone} onChange={handleInputChange} type="tel" placeholder="+91 98765 43210" />
               </div>
 
-              {/* Merch Selection */}
               <div className="merch-field merch-field-full">
                 <label>Select Merchandise</label>
                 <div className="merch-selection-list">
@@ -279,22 +470,13 @@ return (
                     return (
                       <div key={option.id} className="merch-item-row">
                         <label className="merch-checkbox-label">
-                          <input
-                            type="checkbox"
-                            checked={isSelected}
-                            onChange={() => handleMerchToggle(option.id)}
-                          />
+                          <input type="checkbox" checked={isSelected} onChange={() => handleMerchToggle(option.id)} />
                           <span className="merch-item-name">{option.name}</span>
                           <span className="merch-item-price">₹{option.price}</span>
                         </label>
                         
-                        {/* Dynamic Size Dropdowns */}
                         {isSelected && option.type === 'single' && (
-                          <select 
-                            className="merch-size-select"
-                            value={itemSizes[option.id]?.size1 || ''}
-                            onChange={(e) => handleSizeChange(option.id, 'size1', e.target.value)}
-                          >
+                          <select className="merch-size-select" value={itemSizes[option.id]?.size1 || ''} onChange={(e) => handleSizeChange(option.id, 'size1', e.target.value)}>
                             <option value="" disabled>Select Size</option>
                             {SIZES.map(size => <option key={size} value={size}>{size}</option>)}
                           </select>
@@ -302,20 +484,11 @@ return (
 
                         {isSelected && option.type === 'combo' && option.sizeLabels && (
                           <div className="merch-combo-sizes">
-                            <select 
-                              className="merch-size-select"
-                              value={itemSizes[option.id]?.size1 || ''}
-                              onChange={(e) => handleSizeChange(option.id, 'size1', e.target.value)}
-                            >
+                            <select className="merch-size-select" value={itemSizes[option.id]?.size1 || ''} onChange={(e) => handleSizeChange(option.id, 'size1', e.target.value)}>
                               <option value="" disabled>{option.sizeLabels[0]}</option>
                               {SIZES.map(size => <option key={size} value={size}>{size}</option>)}
                             </select>
-                            
-                            <select 
-                              className="merch-size-select"
-                              value={itemSizes[option.id]?.size2 || ''}
-                              onChange={(e) => handleSizeChange(option.id, 'size2', e.target.value)}
-                            >
+                            <select className="merch-size-select" value={itemSizes[option.id]?.size2 || ''} onChange={(e) => handleSizeChange(option.id, 'size2', e.target.value)}>
                               <option value="" disabled>{option.sizeLabels[1]}</option>
                               {SIZES.map(size => <option key={size} value={size}>{size}</option>)}
                             </select>
