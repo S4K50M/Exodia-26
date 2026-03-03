@@ -1,0 +1,118 @@
+/* ========================================================= */
+/* --- 404 Fallback Page ---                                 */
+/* ========================================================= */
+
+.not-found-container {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  /* Deep, dark void background */
+  background: radial-gradient(circle at center, #0f2040 0%, #050a15 100%);
+  color: #f5f5f7;
+  text-align: center;
+  padding: 2rem;
+  overflow: hidden;
+  position: relative;
+}
+
+/* Subtle, breathing elemental aura behind the text */
+.not-found-glow {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 60vw;
+  height: 60vw;
+  max-width: 800px;
+  max-height: 800px;
+  background: radial-gradient(circle, rgba(140, 220, 255, 0.08) 0%, transparent 70%);
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: 0;
+  animation: pulse-glow 8s ease-in-out infinite;
+}
+
+.not-found-content {
+  position: relative;
+  z-index: 10;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+/* The giant floating 404 */
+.error-code {
+  font-family: 'Brush Script MT', cursive;
+  font-size: clamp(8rem, 25vw, 15rem);
+  margin: 0;
+  line-height: 1;
+  color: #e4d5b7;
+  text-shadow: 0 0 40px rgba(228, 213, 183, 0.3), 0 0 80px rgba(251, 191, 36, 0.2);
+  animation: float 6s ease-in-out infinite;
+}
+
+/* Title text */
+.error-title {
+  font-family: 'Exo 2', sans-serif;
+  font-size: clamp(2rem, 5vw, 3.5rem);
+  color: #fbbf24;
+  text-transform: uppercase;
+  letter-spacing: 4px;
+  margin: 1rem 0;
+  text-shadow: 0 4px 15px rgba(0, 0, 0, 0.8);
+}
+
+/* Description text */
+.error-desc {
+  font-size: clamp(1rem, 2.5vw, 1.25rem);
+  color: rgba(207, 248, 255, 0.8);
+  max-width: 600px;
+  line-height: 1.6;
+  margin-bottom: 3.5rem;
+  padding: 0 1rem;
+}
+
+/* Return Button (Matches your primary modal button style) */
+.return-home-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+  background: #e4d5b7;
+  color: #0a1932;
+  border: none;
+  padding: 1rem 2.5rem;
+  border-radius: 50px;
+  font-size: 1.1rem;
+  font-weight: bold;
+  text-decoration: none; /* In case standard <a> tags apply */
+  cursor: pointer;
+  box-shadow: 0 4px 20px rgba(228, 213, 183, 0.3);
+  transition: all 0.3s ease;
+}
+
+.return-home-btn:hover {
+  background: #fff;
+  transform: translateY(-5px);
+  box-shadow: 0 8px 30px rgba(228, 213, 183, 0.6), 0 0 20px rgba(251, 191, 36, 0.5);
+}
+
+.btn-icon {
+  transition: transform 0.4s ease;
+}
+
+.return-home-btn:hover .btn-icon {
+  /* Gives the compass a nice spin on hover */
+  transform: rotate(180deg); 
+}
+
+/* --- Animations --- */
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-20px); }
+}
+
+@keyframes pulse-glow {
+  0%, 100% { opacity: 0.5; transform: translate(-50%, -50%) scale(1); }
+  50% { opacity: 1; transform: translate(-50%, -50%) scale(1.1); }
+}

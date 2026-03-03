@@ -12,6 +12,7 @@ import { TeamPage } from './pages/TeamPage'
 import { MerchandisePage } from './pages/MerchandisePage'
 import { RegisterModal } from './components/RegisterModal'
 import {AdminPage} from './pages/AdminPage';
+import { NotFoundPage} from './pages/NotFoundPage';
 
 import './App.css'
 
@@ -172,6 +173,7 @@ function App() {
         <Route path="/team" element={<TeamPage />} />
         <Route path="/merchandise" element={<MerchandisePage />} />
         <Route path="/admin" element={<AdminPage />}/>
+        <Route path="*" element={<NotFoundPage />} />
       </Routes>
     </>
   )

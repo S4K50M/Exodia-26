@@ -167,14 +167,6 @@ export function MerchandisePage() {
           <div className="merchandise-side merchandise-side-left" ref={leftRef}>
             <img src={left} alt="" />
           </div>
-          {/* --- ADDED: Coming Soon Text --- */}
-          <div 
-            className="absolute inset-0 flex items-center justify-center pointer-events-none z-50"
-          >
-            <h1 className="text-5xl md:text-7xl lg:text-9xl font-black text-transparent bg-clip-text bg-gradient-to-b from-yellow-300 to-yellow-600 uppercase tracking-[0.2em] drop-shadow-[0_0_40px_rgba(234,179,8,0.5)] text-center px-4">
-              Coming Soon
-            </h1>
-          </div>
           <div className="merchandise-side merchandise-side-right" ref={rightRef}>
             <img src={right} alt="" />
             
