@@ -1,4 +1,5 @@
 import { useRef, useEffect, useState, useCallback } from 'react'
+import { createPortal } from 'react-dom'
 import gsap from 'gsap'
 
 export interface Event {
@@ -232,8 +233,8 @@ export function EventCards({ events }: EventCardsProps) {
           ))}
         </div>
       </div>
-      {/* Details overlay (click a card to open) */}
-      {openIdx !== null && extEvents[openIdx] && (
+      {/* Details overlay — rendered via portal so it escapes GSAP-transformed ancestors */}
+      {openIdx !== null && extEvents[openIdx] && createPortal(
         <div className="event-details-overlay" onClick={() => setOpenIdx(null)}>
           <div className="event-details-modal" onClick={(e) => e.stopPropagation()}>
             
@@ -243,7 +244,7 @@ export function EventCards({ events }: EventCardsProps) {
               {extEvents[openIdx].title}
             </h2>
             
-            <p style={{ color: 'rgba(104, 181, 233, 0.9)', fontSize: '1.25rem', maxWidth: '800px', lineHeight: '1.6', margin: '0 0 2.5rem 0' }}>
+            <p style={{ color: 'rgba(190, 225, 255, 0.95)', fontSize: '1.25rem', maxWidth: '800px', lineHeight: '1.6', margin: '0 0 2.5rem 0' }}>
               {extEvents[openIdx].desc}
             </p>
             
@@ -253,7 +254,7 @@ export function EventCards({ events }: EventCardsProps) {
                   margin: 0,
                   padding: '0.5rem 1rem',
                   borderRadius: '8px',
-                  color: 'rgba(104, 181, 233, 1)',
+                  color: 'rgba(190, 225, 255, 1)',
                   backgroundColor: 'transparent',
                   fontSize: '1.2rem',
                   fontWeight: 600,
@@ -263,11 +264,11 @@ export function EventCards({ events }: EventCardsProps) {
                   cursor: 'pointer'
                 }}
                 onMouseEnter={(e) => {
-                  e.currentTarget.style.color = 'rgba(60, 140, 190, 1)';
+                  e.currentTarget.style.color = 'rgba(140, 200, 255, 1)';
                   e.currentTarget.style.backgroundColor = 'rgba(104, 181, 233, 0.12)';
                 }}
                 onMouseLeave={(e) => {
-                  e.currentTarget.style.color = 'rgba(104, 181, 233, 1)';
+                  e.currentTarget.style.color = 'rgba(190, 225, 255, 1)';
                   e.currentTarget.style.backgroundColor = 'transparent';
                 }}
               >
@@ -279,7 +280,7 @@ export function EventCards({ events }: EventCardsProps) {
                   margin: 0,
                   padding: '0.5rem 1rem',
                   borderRadius: '8px',
-                  color: 'rgba(104, 181, 233, 1)',
+                  color: 'rgba(190, 225, 255, 1)',
                   backgroundColor: 'transparent',
                   fontSize: '1.2rem',
                   fontWeight: 600,
@@ -289,11 +290,11 @@ export function EventCards({ events }: EventCardsProps) {
                   cursor: 'pointer'
                 }}
                 onMouseEnter={(e) => {
-                  e.currentTarget.style.color = 'rgba(60, 140, 190, 1)';
+                  e.currentTarget.style.color = 'rgba(140, 200, 255, 1)';
                   e.currentTarget.style.backgroundColor = 'rgba(104, 181, 233, 0.12)';
                 }}
                 onMouseLeave={(e) => {
-                  e.currentTarget.style.color = 'rgba(104, 181, 233, 1)';
+                  e.currentTarget.style.color = 'rgba(190, 225, 255, 1)';
                   e.currentTarget.style.backgroundColor = 'transparent';
                 }}
               >
@@ -316,7 +317,7 @@ export function EventCards({ events }: EventCardsProps) {
             
           </div>
         </div>
-      )}
+      , document.body)}
     </div>
   )
 }

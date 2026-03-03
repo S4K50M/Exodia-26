@@ -288,10 +288,10 @@
     top: 35% !important;
   }
 
-  /* Center dragons vertically on mobile */
+  /* Shift dragons lower on mobile so they sit below the cards */
   .events-dragon {
     bottom: auto;
-    top: 50%;
+    top: 62%;
     transform: translateY(-50%);
     align-items: center;
   }
@@ -301,19 +301,19 @@
     max-width: 48vw;
   }
 
-  /* Swords: match dragon height, pinned to outer edges like desktop */
+  /* Swords: sit right on top of the dragons */
   .event-asset {
     height: 25vh;
   }
 
   .sword-left {
     left: -3%;
-    top: 30%;
+    top: 40%;
   }
 
   .sword-right {
     right: -3%;
-    top: 30%;
+    top: 40%;
   }
 
   .events-carousel-btn {
@@ -330,10 +330,10 @@
     padding: 0;
   }
   .event-card-inner h3 {
-    font-size: 1rem;
+    font-size: 0.72rem;
   }
   .event-card-inner p {
-    font-size: 0.8rem;
+    font-size: 0.65rem;
   }
 }
 
@@ -412,17 +412,17 @@
   letter-spacing: 1px;
   text-align: center;
   margin: 0;
-  font-size: 1.3rem; /* Slightly larger text */
+  font-size: 0.6rem;
 }
 
 /* --- OVERLAY FIXES --- */
 .event-details-overlay {
   position: fixed;
   inset: 0;
-  background: rgba(164, 193, 244, 0.244); /* Deepened the background to match theme */
-  backdrop-filter: blur(16px) saturate(1.2);
-  -webkit-backdrop-filter: blur(16px) saturate(1.2);
-  z-index: 9999; /* Bumped up z-index to cover navbar/everything */
+  background: rgba(4, 8, 24, 0.78);
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+  z-index: 9999;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -442,7 +442,7 @@
   align-items: center;
   justify-content: center;
   text-align: center;
-  padding: 2rem;
+  padding: 1rem;
   box-sizing: border-box;
 }
 
@@ -580,14 +580,29 @@
 /* Responsive adjustments for controls */
 @media (max-width: 720px) {
   .events-controls {
-    top: 10%;
-    flex-direction: column; 
-    gap: 0.8rem;
-    width: 90%;
+    top: 8%;
+    flex-direction: row;
+    gap: 0.6rem;
+    width: 92%;
+    left: 50%;
+    transform: translateX(-50%);
+    justify-content: center;
+    align-items: center;
   }
-  
+
+  .events-search-bar {
+    flex: 1;
+    min-width: 0;
+    padding: 0.5rem 1rem;
+  }
+
   .events-search-bar input {
-    width: 100%; 
+    width: 100%;
+    font-size: 0.9rem;
+  }
+
+  .events-filter-wrap {
+    flex-shrink: 0;
   }
 }
 
