@@ -4,6 +4,9 @@ import { Maximize2, Minimize2 } from 'lucide-react'
 import mapImg from '../assets/map/map.png'
 import '../styles/map.css'
 
+import { LoadingScreen } from '../components/LoadingScreen'
+import { MapSVG } from '../assets/loading/MapSVG'
+
 /* ─── Types ──────────────────────────────────────────────────────────────── */
 interface Node { id: string; x: number; y: number }
 interface Edge { source: string; target: string; weight: number }
@@ -175,6 +178,7 @@ export function MapPage() {
       : ''
 
   return (
+    <LoadingScreen svg={<MapSVG />}>
     <div className="map-page">
       {/* ── Controls ─────────────────────────────────────────────────────── */}
       <div className="map-controls">
@@ -283,5 +287,6 @@ export function MapPage() {
         </div>
       </div>
     </div>
+    </LoadingScreen>
   )
 }
