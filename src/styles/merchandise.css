@@ -95,43 +95,28 @@
     height: 250vh;
   }
 
-  .merchandise-side {
-    width: 45vw;
-    overflow: hidden;
-  }
-
+  /* Let side panels render at natural image width (same as desktop).
+     The stage overflow:hidden clips whatever exceeds the viewport.
+     Constraining width was cropping the arch. */
+  .merchandise-side,
   .merchandise-side-bg {
-    width: 45vw;
-    overflow: hidden;
+    width: auto;
+    overflow: visible;
   }
 
   .merchandise-side img,
   .merchandise-side-bg img {
     height: 100vh;
     width: auto;
-    min-width: 100%;
-    object-fit: cover;
-  }
-
-  .merchandise-side-left img,
-  .merchandise-side-bg-left img {
-    object-position: right center;
-  }
-
-  .merchandise-side-right img,
-  .merchandise-side-bg-right img {
-    object-position: left center;
+    min-width: unset;
+    object-fit: unset;
+    object-position: unset;
+    display: block;
   }
 }
 
 @media (max-width: 480px) {
-  .merchandise-side {
-    width: 50vw;
-  }
-
-  .merchandise-side-bg {
-    width: 50vw;
-  }
+  /* No additional width constraints — keep natural sizing */
 }
 
 

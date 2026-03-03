@@ -77,9 +77,9 @@ export function MerchandisePage() {
       if (leftBgRef.current) {
         gsap.fromTo(
           leftBgRef.current,
-          { x: '-20%', z: 0 },
+          { x: '-18%', z: 0 },
           {
-            x: '20%',
+            x: '-8%',
             z: 50,
             ease: 'none',
             scrollTrigger: {
@@ -95,9 +95,9 @@ export function MerchandisePage() {
       if (rightBgRef.current) {
         gsap.fromTo(
           rightBgRef.current,
-          { x: '20%', z: 0 },
+          { x: '18%', z: 0 },
           {
-            x: '-20%',
+            x: '8%',
             z: 50,
             ease: 'none',
             scrollTrigger: {
@@ -114,9 +114,9 @@ export function MerchandisePage() {
       if (leftRef.current) {
         gsap.fromTo(
           leftRef.current,
-          { x: '-30%' },
+          { x: '-15%' },
           {
-            x: '0%',
+            x: '-12%',
             ease: 'none',
             scrollTrigger: {
               trigger,
@@ -131,9 +131,9 @@ export function MerchandisePage() {
       if (rightRef.current) {
         gsap.fromTo(
           rightRef.current,
-          { x: '30%' },
+          { x: '12%' },
           {
-            x: '0%',
+            x: '12%',
             ease: 'none',
             scrollTrigger: {
               trigger,
