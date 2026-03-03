@@ -1,0 +1,242 @@
+/* ─── Map page ─────────────────────────────────────────────────────────── */
+.map-page {
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background: #0a0a1a;
+  color: #f5f5f7;
+  overflow: hidden;
+}
+
+/* ── Controls bar ──────────────────────────────────────────────────────── */
+.map-controls {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 15;                  /* below navbar (z-index: 20) */
+  padding-top: 110px;           /* push below navbar */
+  padding-bottom: 12px;
+  background: linear-gradient(180deg, rgba(10,10,26,0.95) 60%, transparent);
+  pointer-events: none;
+}
+
+.map-controls-inner {
+  pointer-events: auto;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  gap: 16px;
+  padding: 0 1rem;
+  flex-wrap: wrap;
+}
+
+.map-select-group {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.map-select-group label {
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: rgba(140, 220, 255, 0.85);
+  padding-left: 4px;
+}
+
+.map-select-group select {
+  appearance: none;
+  -webkit-appearance: none;
+  background: #1e1e3a;
+  border: 1px solid rgba(255,255,255,0.15);
+  border-radius: 12px;
+  padding: 10px 36px 10px 14px;
+  font-size: 0.95rem;
+  color: #f5f5f7;
+  min-width: 200px;
+  outline: none;
+  cursor: pointer;
+  transition: border-color 0.2s, box-shadow 0.2s;
+  /* chevron */
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20' fill='%23888'%3E%3Cpath fill-rule='evenodd' d='M5.23 7.21a.75.75 0 011.06.02L10 11.06l3.71-3.83a.75.75 0 111.08 1.04l-4.25 4.38a.75.75 0 01-1.08 0L5.21 8.27a.75.75 0 01.02-1.06z' clip-rule='evenodd'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 10px center;
+  background-size: 18px;
+}
+
+.map-select-group select:focus {
+  border-color: rgba(140, 220, 255, 0.6);
+  box-shadow: 0 0 0 3px rgba(140, 220, 255, 0.15);
+}
+
+.map-select-group select option {
+  background: #1e1e3a;
+  color: #f5f5f7;
+}
+
+.map-clear-btn {
+  padding: 10px 24px;
+  border: 2px solid rgba(239,68,68,0.6);
+  border-radius: 12px;
+  background: rgba(239,68,68,0.1);
+  color: #fca5a5;
+  font-size: 0.9rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  cursor: pointer;
+  transition: background 0.2s, border-color 0.2s, color 0.2s;
+}
+
+.map-clear-btn:hover {
+  background: rgba(239,68,68,0.25);
+  border-color: rgba(239,68,68,0.8);
+  color: #fee2e2;
+}
+
+/* ── Map viewport ──────────────────────────────────────────────────────── */
+.map-viewport {
+  flex: 1;
+  overflow: hidden;
+  padding-top: 180px;           /* space for controls */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.map-canvas {
+  position: relative;
+  max-width: 100%;
+  max-height: 100%;
+}
+
+.map-image {
+  display: block;
+  max-width: 100%;
+  max-height: calc(100vh - 200px);
+  width: auto;
+  height: auto;
+  object-fit: contain;
+  user-select: none;
+  -webkit-user-drag: none;
+}
+
+.map-svg-overlay {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+
+/* ── Fullscreen button ──────────────────────────────────────────────────── */
+.map-fullscreen-btn {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  z-index: 10;
+  background: rgba(10, 10, 26, 0.75);
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  border-radius: 8px;
+  color: #f5f5f7;
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  backdrop-filter: blur(8px);
+  transition: background 0.2s, border-color 0.2s;
+}
+
+.map-fullscreen-btn:hover {
+  background: rgba(30, 30, 60, 0.9);
+  border-color: rgba(140, 220, 255, 0.5);
+}
+
+/* ── Fullscreen state — only map-canvas enters fullscreen ───────────────── */
+/* The controls bar is outside map-canvas, so it hides automatically.       */
+.map-canvas:-webkit-full-screen,
+.map-canvas:fullscreen {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #0a0a1a;
+  width: 100vw  !important;
+  height: 100vh !important;
+  max-width: 100vw  !important;
+  max-height: 100vh !important;
+}
+
+.map-canvas:-webkit-full-screen .map-image,
+.map-canvas:fullscreen .map-image {
+  max-width: 100vw  !important;
+  max-height: 100vh !important;
+  width: auto;
+  height: auto;
+  object-fit: contain;
+}
+
+/* SVG overlay already uses position:absolute / inset:0 so it self-adjusts */
+
+/* ── Mobile ─────────────────────────────────────────────────────────────── */
+@media (max-width: 720px) {
+  .map-controls {
+    padding-top: 82px;   /* more breathing room below navbar */
+    padding-bottom: 8px;
+  }
+
+  .map-controls-inner {
+    gap: 6px;
+    flex-wrap: nowrap;        /* keep From / To / Clear in one row */
+    padding: 0 0.5rem;
+  }
+
+  .map-select-group {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .map-select-group label {
+    font-size: 0.6rem;
+  }
+
+  .map-select-group select {
+    min-width: 0;
+    width: 100%;
+    font-size: 0.78rem;
+    padding: 7px 24px 7px 8px;
+    border-radius: 8px;
+  }
+
+  .map-clear-btn {
+    padding: 7px 12px;
+    font-size: 0.75rem;
+    white-space: nowrap;
+    align-self: flex-end;
+    border-radius: 8px;
+  }
+
+  .map-viewport {
+    padding-top: 148px;
+  }
+
+  .map-image {
+    max-height: calc(100vh - 162px);
+    max-width: 100vw;
+  }
+
+  .map-canvas {
+    min-width: auto;
+    max-width: 100vw;
+  }
+
+  .map-fullscreen-btn {
+    width: 40px;
+    height: 40px;
+    top: 6px;
+    right: 6px;
+  }
+}

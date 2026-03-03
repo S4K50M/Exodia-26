@@ -82,6 +82,14 @@ export function Navbar({ shouldAnimate = false, onRegisterClick, onNotifyClick }
             Merchandise
           </Link>
         </li>
+        <li>
+          <Link
+            to="/map"
+            className={location.pathname === '/map' ? 'active' : ''}
+          >
+            Map
+          </Link>
+        </li>
         
         {/* --- NOTIFICATION BUTTON --- */}
         <li>
