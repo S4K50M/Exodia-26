@@ -72,7 +72,8 @@ export function HomePage() {
 
       // ── DYNAMIC VARIABLES BASED ON SCREEN SIZE ──
       const initMountScale = isMobile ? 5.5 : isTablet ? 4.0 : 3.2
-      const gapX = isMobile ? 100 : isTablet ? 45 : 10
+      const mountScale     = isMobile ? 1.5 : isTablet ? 1.4 : 1.3   // resting size after intro
+      const gapX = isMobile ? 145 : isTablet ? 45 : 10
       const mountY = isMobile ? 10 : isTablet ? 16 : 22
       const exodiaFinalScale = isMobile ? 0.9 : isTablet ? 1.0 : 1.2
       const originL = isMobile || isTablet ? 'bottom left' : 'bottom center'
@@ -103,14 +104,14 @@ export function HomePage() {
           }
           if (leftMountRef.current) {
             gsap.fromTo(leftMountRef.current,
-              { xPercent: -gapX, yPercent: mountY, scale: 1, transformOrigin: originL },
-              { xPercent: -(gapX + (isMobile ? 40 : isTablet ? 20 : 10)), yPercent: 0, scale: isMobile ? 1.6 : isTablet ? 1.8 : 2, ease: 'none',
+              { xPercent: -gapX, yPercent: mountY, scale: mountScale, transformOrigin: originL },
+              { xPercent: -(gapX + (isMobile ? 70 : isTablet ? 20 : 10)), yPercent: 0, scale: isMobile ? 2.2 : isTablet ? 2.4 : 2.7, ease: 'none',
                 scrollTrigger: { trigger, start: 'top top', end: 'bottom bottom', scrub: 1.5 } })
           }
           if (rightMountRef.current) {
             gsap.fromTo(rightMountRef.current,
-              { xPercent: gapX, yPercent: mountY, scale: 1, transformOrigin: originR },
-              { xPercent: gapX + (isMobile ? 40 : isTablet ? 20 : 10), yPercent: 0, scale: isMobile ? 1.4 : isTablet ? 1.6 : 1.8, ease: 'none',
+              { xPercent: gapX, yPercent: mountY, scale: mountScale, transformOrigin: originR },
+              { xPercent: gapX + (isMobile ? 70 : isTablet ? 20 : 10), yPercent: 0, scale: isMobile ? 2.0 : isTablet ? 2.2 : 2.4, ease: 'none',
                 scrollTrigger: { trigger, start: 'top top', end: 'bottom bottom', scrub: 1.5 } })
           }
           if (exodiaRef.current) {
@@ -138,10 +139,10 @@ export function HomePage() {
       // ── INTRO ANIMATION (Only runs once) ──────────────────────────────────────
       if (!hasIntroPlayed.current) {
         tl.to(leftMountRef.current, {
-            scale: 1, xPercent: -gapX, yPercent: mountY, transformOrigin: originL, duration: 1.6, ease: 'power3.inOut'
+            scale: mountScale, xPercent: -gapX, yPercent: mountY, transformOrigin: originL, duration: 1.6, ease: 'power3.inOut'
           })
           .to(rightMountRef.current, {
-            scale: 1, xPercent: gapX, yPercent: mountY, transformOrigin: originR, duration: 1.6, ease: 'power3.inOut'
+            scale: mountScale, xPercent: gapX, yPercent: mountY, transformOrigin: originR, duration: 1.6, ease: 'power3.inOut'
           }, '<')
           .to(exodiaRef.current, {
             opacity: 1, scale: exodiaFinalScale, yPercent: 0, duration: 1.1, ease: 'power2.out'
@@ -153,8 +154,8 @@ export function HomePage() {
           .set(leftMountRef.current,  { transformOrigin: originL })
           .set(rightMountRef.current, { transformOrigin: originR })
       } else {
-         gsap.set(leftMountRef.current, { scale: 1, xPercent: -gapX, yPercent: mountY, transformOrigin: originL })
-         gsap.set(rightMountRef.current, { scale: 1, xPercent: gapX, yPercent: mountY, transformOrigin: originR })
+         gsap.set(leftMountRef.current, { scale: mountScale, xPercent: -gapX, yPercent: mountY, transformOrigin: originL })
+         gsap.set(rightMountRef.current, { scale: mountScale, xPercent: gapX, yPercent: mountY, transformOrigin: originR })
          gsap.set(exodiaRef.current, { opacity: 1, scale: exodiaFinalScale, yPercent: 0 })
          gsap.set(countdownRef.current, { opacity: 1, y: 0 })
       }
@@ -220,15 +221,7 @@ export function HomePage() {
               
               <div 
                 ref={countdownRef} 
-                style={{
-                  fontFamily: "'Brush Script MT', 'Caveat', 'Pacifico', cursive",
-                  fontSize: 'clamp(1.5rem, 4vw, 2.5rem)', // Responsive font size
-                  color: '#e4d5b7', // Matches the Exodia aesthetic
-                  textShadow: '2px 2px 8px rgba(0,0,0,0.7)',
-                  marginTop: '-4%', // Pulls it slightly closer to the logo
-                  position: 'relative',
-                  zIndex: 10
-                }}
+                className="countdown-text"
               >
                 {daysRemaining} days to go....
               </div>
