@@ -258,14 +258,62 @@
   line-height: 1.5;
 }
 
+/* Sword assets - base (desktop) styles must come BEFORE media queries */
+.event-asset {
+  position: absolute;
+  height: 80vh;
+  width: auto;
+  pointer-events: none;
+  z-index: 5;
+  object-fit: contain;
+}
+
+.sword-left {
+  left: -5%;
+  top: 10%;
+}
+
+.sword-right {
+  right: -5%;
+  top: 10%;
+}
+
 @media (max-width: 720px) {
   .events-scroll-trigger {
     height: 400vh;
   }
 
+  /* Move heading higher on mobile */
+  .events-heading-container {
+    top: 35% !important;
+  }
+
+  /* Center dragons vertically on mobile */
+  .events-dragon {
+    bottom: auto;
+    top: 50%;
+    transform: translateY(-50%);
+    align-items: center;
+  }
+
   .events-dragon img {
-    max-height: 50vh;
-    max-width: 50vw;
+    max-height: 55vh;
+    max-width: 48vw;
+  }
+
+  /* Swords: match dragon height, pinned to outer edges like desktop */
+  .event-asset {
+    height: 25vh;
+  }
+
+  .sword-left {
+    left: -3%;
+    top: 30%;
+  }
+
+  .sword-right {
+    right: -3%;
+    top: 30%;
   }
 
   .events-carousel-btn {
@@ -300,26 +348,6 @@
   .events-carousel-btn-right {
     right: 0.25rem;
   }
-}
-/* Update this section in your events.css */
-
-.event-asset {
-  position: absolute;
-  height: 80vh;
-  width: auto; /* Ensure width scales with height */
-  pointer-events: none;
-  z-index: 5;
-  object-fit: contain;
-}
-
-.sword-left { 
-  left: -5%; /* Start slightly off-screen for a better parallax feel */
-  top: 10%; 
-}
-
-.sword-right { 
-  right: -5%; 
-  top: 10%; 
 }
 
 .events-dragon {
@@ -417,26 +445,27 @@
   padding: 2rem;
   box-sizing: border-box;
 }
+
 /* ========================================================= */
 /* --- Search & Filter Controls ---                          */
 /* ========================================================= */
 
 .events-controls {
   position: absolute;
-  top: 15%; /* Adjusted to sit centered above the carousel */
-  left: 50%;
-  transform: translateX(-50%);
-  z-index: 1000 !important;
+  top: 15%; 
+  left: 0;             /* Start from the left edge */
+  width: 100%;         /* Span the full width of the parent */
+  z-index: 1000 !important; 
   display: flex;
-  gap: 1.5rem; /* Better spacing between search and filter */
-  pointer-events: auto;
-  justify-content: center;
+  gap: 1.5rem; 
+  pointer-events: none; /* Allows clicks to pass through the empty space between items */
+  justify-content: center; /* Flexbox will perfectly center the items */
   align-items: center;
-  width: max-content;
 }
 
 /* --- Search Bar --- */
 .events-search-bar {
+  pointer-events: auto; /* Re-enable clicks for the search bar */
   display: flex;
   align-items: center;
   gap: 0.5rem;
@@ -449,6 +478,7 @@
   color: #fbbf24;
   transition: border-color 0.3s ease, box-shadow 0.3s ease;
 }
+
 
 .events-search-bar:focus-within {
   border-color: rgba(251, 191, 36, 0.6);
@@ -479,10 +509,11 @@
   color: #fbbf24;
 }
 
-/* --- Filter Dropdown --- */
 .events-filter-wrap {
+  pointer-events: auto; /* Re-enable clicks for the filter button */
   position: relative;
 }
+
 
 .events-filter-btn {
   display: flex;
@@ -546,27 +577,16 @@
   font-weight: bold;
 }
 
-/* --- No Events Fallback --- */
-.no-events-message {
-  color: #fbbf24;
-  font-size: 1.5rem;
-  font-family: 'Exo 2', sans-serif;
-  text-transform: uppercase;
-  letter-spacing: 2px;
-  text-shadow: 0 0 15px rgba(251, 191, 36, 0.3);
-  text-align: center;
-}
-
 /* Responsive adjustments for controls */
 @media (max-width: 720px) {
   .events-controls {
     top: 10%;
-    flex-direction: column; /* Stacks nicely on mobile */
+    flex-direction: column; 
     gap: 0.8rem;
     width: 90%;
   }
   
   .events-search-bar input {
-    width: 90%; /* Take full available width when stacked */
+    width: 100%; 
   }
 }
