@@ -1,7 +1,8 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useRef, useState, useMemo } from 'react'
 import Lenis from 'lenis'
 import gsap from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
+import { Search, Filter, X } from 'lucide-react'
 
 import bg from '../assets/events/bg.png'
 import leftDragon from '../assets/events/left_dragon.png'
@@ -28,25 +29,48 @@ export function EventsPage() {
   const cardsWrapRef = useRef<HTMLDivElement | null>(null)
   const headingRef = useRef<HTMLDivElement | null>(null)
 
-  // Flatten the complex JSON structure for the EventCards component
-  // Attach a human-friendly `eventType` so the card overlay can show it.
-  const ALL_EVENTS = Object.entries(EventsRaw.Exodia_2026_Events).flatMap(([key, arr]) => {
-    const humanType = key
-      .replace(/_/g, ' ')
-      .replace(/Events?$/i, 'Event')
-      .replace(/\b\w/g, (c) => c.toUpperCase())
-    return (arr as any[])
-      .map((e, i) => ({ raw: e, index: i }))
-      .filter(({ raw }) => raw && raw.event_name)
-      .map(({ raw, index }) => ({
-        id: `${key}-${index}`,
-        title: raw.event_name,
-        desc: raw.description,
-        date: raw.dates,
-        rulebook: raw.rulebook_link,
-        eventType: humanType,
-      }))
-  })
+  const controlsRef = useRef<HTMLDivElement | null>(null)
+
+  // 1. Filter & Search State
+  const [searchTerm, setSearchTerm] = useState('')
+  const [activeFilter, setActiveFilter] = useState<string>('All')
+  const [isFilterOpen, setIsFilterOpen] = useState(false)
+
+  // 2. Parse and format JSON Data
+  const ALL_EVENTS = useMemo(() => {
+    return Object.entries(EventsRaw.Exodia_2026_Events).flatMap(([key, arr]) => {
+      const humanType = key
+        .replace(/_/g, ' ')
+        .replace(/Events?$/i, 'Event')
+        .replace(/\b\w/g, (c) => c.toUpperCase())
+      return (arr as any[])
+        .map((e, i) => ({ raw: e, index: i }))
+        .filter(({ raw }) => raw && raw.event_name) // Automatically ignores "General Rules" objects
+        .map(({ raw, index }) => ({
+          id: `${key}-${index}`,
+          title: raw.event_name,
+          desc: raw.description,
+          date: raw.dates,
+          rulebook: raw.rulebook_link,
+          eventType: humanType,
+        }))
+    })
+  }, [])
+
+  // 3. Extract unique event types for the filter dropdown
+  const eventTypes = useMemo(() => {
+    const types = new Set(ALL_EVENTS.map(e => e.eventType))
+    return ['All', ...Array.from(types)]
+  }, [ALL_EVENTS])
+
+  // 4. Compute the filtered list
+  const filteredEvents = useMemo(() => {
+    return ALL_EVENTS.filter(e => {
+      const matchesSearch = e.title.toLowerCase().includes(searchTerm.toLowerCase())
+      const matchesFilter = activeFilter === 'All' || e.eventType === activeFilter
+      return matchesSearch && matchesFilter
+    })
+  }, [ALL_EVENTS, searchTerm, activeFilter])
 
 
   useEffect(() => {
@@ -65,90 +89,33 @@ export function EventsPage() {
     if (!trigger) return
 
     const ctx = gsap.context(() => {
-      // 1. Heading Fade Animation
       if (headingRef.current) {
         gsap.fromTo(headingRef.current,
           { opacity: 1, y: 0 },
-          {
-            opacity: 0,
-            y: -100,
-            ease: 'power1.inOut',
-            scrollTrigger: {
-              trigger,
-              start: 'top top',
-              end: '20% top',
-              scrub: 1
-            }
-          }
+          { opacity: 0, y: -100, ease: 'power1.inOut', scrollTrigger: { trigger, start: 'top top', end: '20% top', scrub: 1 } }
+        )
+      }
+      gsap.to(leftSwordRef.current, { x: '-100%', opacity: 0, scrollTrigger: { trigger, start: 'top top', end: '30% top', scrub: 2 } })
+      gsap.to(rightSwordRef.current, { x: '100%', opacity: 0, scrollTrigger: { trigger, start: 'top top', end: '30% top', scrub: 2 } })
+
+      if (leftDragonRef.current) {
+        gsap.to(leftDragonRef.current, { x: '-20%', y: '50%', rotate: -10, scrollTrigger: { trigger, start: 'top top', end: '50% top', scrub: 1.5 } })
+      }
+      if (rightDragonRef.current) {
+        gsap.to(rightDragonRef.current, { x: '20%', y: '50%', rotate: 10, scrollTrigger: { trigger, start: 'top top', end: '50% top', scrub: 1.5 } })
+      }
+
+      if (controlsRef.current) {
+        gsap.fromTo(controlsRef.current,
+          { y: 50, opacity: 0 },
+          { y: 0, opacity: 1, ease: 'none', scrollTrigger: { trigger, start: '15% top', end: '40% top', scrub: 1 } }
         )
       }
 
-      // 2. Horizontal Sword Parallax
-      gsap.to(leftSwordRef.current, {
-        x: '-100%',
-        opacity: 0,
-        scrollTrigger: {
-          trigger,
-          start: 'top top',
-          end: '30% top',
-          scrub: 2
-        }
-      })
-      gsap.to(rightSwordRef.current, {
-        x: '100%',
-        opacity: 0,
-        scrollTrigger: {
-          trigger,
-          start: 'top top',
-          end: '30% top',
-          scrub: 2
-        }
-      })
-
-      // 3. Diagonal Dragon Parallax (Moves down and out)
-      if (leftDragonRef.current) {
-        gsap.to(leftDragonRef.current, {
-          x: '-20%',
-          y: '50%',
-          rotate: -10,
-          scrollTrigger: {
-            trigger,
-            start: 'top top',
-            end: '50% top',
-            scrub: 1.5,
-          }
-        })
-      }
-      if (rightDragonRef.current) {
-        gsap.to(rightDragonRef.current, {
-          x: '20%',
-          y: '50%',
-          rotate: 10,
-          scrollTrigger: {
-            trigger,
-            start: 'top top',
-            end: '50% top',
-            scrub: 1.5,
-          }
-        })
-      }
-
-      // 4. Cards Emergence
       if (cardsWrapRef.current) {
         gsap.fromTo(cardsWrapRef.current,
           { yPercent: 100, opacity: 0, scale: 0.9 },
-          {
-            yPercent: 0,
-            opacity: 1,
-            scale: 1,
-            ease: 'none',
-            scrollTrigger: {
-              trigger,
-              start: '15% top',
-              end: '40% top',
-              scrub: 1,
-            }
-          }
+          { yPercent: 0, opacity: 1, scale: 1, ease: 'none', scrollTrigger: { trigger, start: '15% top', end: '40% top', scrub: 1 } }
         )
       }
     }, containerRef)
@@ -163,6 +130,53 @@ export function EventsPage() {
           <div className="events-stage">
             <div className="events-bg">
               <img src={bg} alt="" />
+            </div>
+
+            {/* --- NEW: Search & Filter Controls --- */}
+            <div className="events-controls" ref={controlsRef}>
+              <div className="events-search-bar">
+                <Search size={18} color="#fbbf24" />
+                <input 
+                  type="text" 
+                  placeholder="Search events..." 
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                />
+                {searchTerm && (
+                  <X 
+                    size={18} 
+                    className="clear-icon" 
+                    onClick={() => setSearchTerm('')} 
+                  />
+                )}
+              </div>
+
+              <div className="events-filter-wrap">
+                <button 
+                  className="events-filter-btn"
+                  onClick={() => setIsFilterOpen(!isFilterOpen)}
+                >
+                  <Filter size={18} />
+                  <span>{activeFilter}</span>
+                </button>
+
+                {isFilterOpen && (
+                  <div className="events-filter-dropdown">
+                    {eventTypes.map(type => (
+                      <button 
+                        key={type} 
+                        className={`filter-option ${activeFilter === type ? 'active' : ''}`}
+                        onClick={() => {
+                          setActiveFilter(type)
+                          setIsFilterOpen(false)
+                        }}
+                      >
+                        {type}
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
             </div>
 
             {/* Heading Section */}
@@ -188,11 +202,9 @@ export function EventsPage() {
               </h1>
             </div>
 
-            {/* Swords (Behind Dragons) */}
             <img ref={leftSwordRef} src={leftSword} className="event-asset sword-left" alt="" />
             <img ref={rightSwordRef} src={rightSword} className="event-asset sword-right" alt="" />
 
-            {/* Dragons */}
             <div className="events-dragon events-dragon-left">
               <img ref={leftDragonRef} src={leftDragon} alt="" />
             </div>
@@ -200,10 +212,18 @@ export function EventsPage() {
               <img ref={rightDragonRef} src={rightDragon} alt="" />
             </div>
 
-            {/* Cards */}
+            {/* Cards Wrap */}
             <div className="events-cards-wrap" ref={cardsWrapRef}>
-              <EventCards events={ALL_EVENTS} />
+              {filteredEvents.length > 0 ? (
+                // Important: Added a key so the carousel remounts and resets index when data length changes
+                <EventCards key={`${activeFilter}-${searchTerm}`} events={filteredEvents} />
+              ) : (
+                <div className="no-events-message">
+                  No events found.
+                </div>
+              )}
             </div>
+            
           </div>
         </div>
       </div>

@@ -136,6 +136,18 @@ export function EventCards({ events }: EventCardsProps) {
   const goNext = useCallback(() => setCurrentIndex((i) => i + 1), [])
   const goPrev = useCallback(() => setCurrentIndex((i) => i - 1), [])
 
+  useEffect(() => {
+    // Pause auto-scroll if the details modal is open
+    if (openIdx !== null) return
+
+    const autoPlay = setInterval(() => {
+      goNext()
+    }, 5000)
+
+    // Cleanup interval on unmount or when modal opens
+    return () => clearInterval(autoPlay)
+  }, [goNext, openIdx])
+  
   // scroll down → next card
   useEffect(() => {
     const el = viewportRef.current
@@ -179,7 +191,7 @@ export function EventCards({ events }: EventCardsProps) {
                 width: CARD_WIDTH,
                 height: CARD_HEIGHT,
                 position: 'absolute',
-                top: '40%',
+                top: '50%',
                 left: '50%',
                 marginLeft: -(CARD_WIDTH / 2),
                 marginTop: -(CARD_HEIGHT / 2),
@@ -200,23 +212,68 @@ export function EventCards({ events }: EventCardsProps) {
             
             <button onClick={() => setOpenIdx(null)} aria-label="Close" style={{ position: 'absolute', top: '3rem', right: '3rem', background: 'transparent', border: 'none', color: '#fbbf24', fontSize: '2.5rem', cursor: 'pointer', transition: 'transform 0.2s' }}>✕</button>
             
-            <h2 style={{ margin: '0 0 1.5rem 0', color: '#e4d5b7', fontSize: 'clamp(2.5rem, 6vw, 4.5rem)', textTransform: 'uppercase', letterSpacing: '2px', textShadow: '0 0 20px rgba(251,191,36,0.4)' }}>
+            <h2 style={{ margin: '0 0 1.5rem 0', color: '#f3af26', fontSize: 'clamp(2.5rem, 6vw, 4.5rem)', textTransform: 'uppercase', letterSpacing: '2px', textShadow: '0 0 20px rgba(251,191,36,0.4)' }}>
               {extEvents[openIdx].title}
             </h2>
             
-            <p style={{ color: 'rgba(200,230,250,0.9)', fontSize: '1.25rem', maxWidth: '800px', lineHeight: '1.6', margin: '0 0 2.5rem 0' }}>
+            <p style={{ color: 'rgba(104, 181, 233, 0.9)', fontSize: '1.25rem', maxWidth: '800px', lineHeight: '1.6', margin: '0 0 2.5rem 0' }}>
               {extEvents[openIdx].desc}
             </p>
             
             <div style={{ display: 'flex', gap: '3rem', marginBottom: '3.5rem', justifyContent: 'center' }}>
-              <p style={{ margin: 0, color: 'rgba(140,220,255,1)', fontSize: '1.2rem', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '1px' }}>
-                Dates: <span style={{ fontWeight: 400, color: '#e4d5b7' }}>{extEvents[openIdx].date}</span>
+              <p
+                style={{
+                  margin: 0,
+                  padding: '0.5rem 1rem',
+                  borderRadius: '8px',
+                  color: 'rgba(104, 181, 233, 1)',
+                  backgroundColor: 'transparent',
+                  fontSize: '1.2rem',
+                  fontWeight: 600,
+                  textTransform: 'uppercase',
+                  letterSpacing: '1px',
+                  transition: 'all 0.3s ease',
+                  cursor: 'pointer'
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.color = 'rgba(60, 140, 190, 1)';
+                  e.currentTarget.style.backgroundColor = 'rgba(104, 181, 233, 0.12)';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.color = 'rgba(104, 181, 233, 1)';
+                  e.currentTarget.style.backgroundColor = 'transparent';
+                }}
+              >
+                Dates: <span style={{ fontWeight: 400, color: '#f3af26' }}>{extEvents[openIdx].date}</span>
               </p>
-              <p style={{ margin: 0, color: 'rgba(140,220,255,1)', fontSize: '1.2rem', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '1px' }}>
-                Type: <span style={{ fontWeight: 400, color: '#e4d5b7' }}>{extEvents[openIdx].eventType}</span>
+
+              <p
+                style={{
+                  margin: 0,
+                  padding: '0.5rem 1rem',
+                  borderRadius: '8px',
+                  color: 'rgba(104, 181, 233, 1)',
+                  backgroundColor: 'transparent',
+                  fontSize: '1.2rem',
+                  fontWeight: 600,
+                  textTransform: 'uppercase',
+                  letterSpacing: '1px',
+                  transition: 'all 0.3s ease',
+                  cursor: 'pointer'
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.color = 'rgba(60, 140, 190, 1)';
+                  e.currentTarget.style.backgroundColor = 'rgba(104, 181, 233, 0.12)';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.color = 'rgba(104, 181, 233, 1)';
+                  e.currentTarget.style.backgroundColor = 'transparent';
+                }}
+              >
+                Type: <span style={{ fontWeight: 400, color: '#f3af26' }}>{extEvents[openIdx].eventType}</span>
               </p>
             </div>
-            
+                        
             <div style={{ display: 'flex', gap: '1.5rem', justifyContent: 'center' }}>
               {extEvents[openIdx].rulebook && (
                 <a href={extEvents[openIdx].rulebook} target="_blank" rel="noopener noreferrer">
