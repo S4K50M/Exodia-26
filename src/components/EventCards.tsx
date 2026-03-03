@@ -239,7 +239,6 @@ export function EventCards({ events }: EventCardsProps) {
             
             <button onClick={() => setOpenIdx(null)} aria-label="Close" className="event-modal-close">✕</button>
             
-<<<<<<< HEAD
             <h2 style={{ margin: '0 0 1.5rem 0', color: '#f3af26', fontSize: 'clamp(2.5rem, 6vw, 4.5rem)', textTransform: 'uppercase', letterSpacing: '2px', textShadow: '0 0 20px rgba(251,191,36,0.4)' }}>
               {extEvents[openIdx].title}
             </h2>
@@ -303,26 +302,6 @@ export function EventCards({ events }: EventCardsProps) {
             </div>
                         
             <div style={{ display: 'flex', gap: '1.5rem', justifyContent: 'center' }}>
-=======
-            <h2 className="event-modal-title">
-              {extEvents[openIdx].title}
-            </h2>
-            
-            <p className="event-modal-desc">
-              {extEvents[openIdx].desc}
-            </p>
-            
-            <div className="event-modal-meta">
-              <p style={{ margin: 0, color: 'rgba(140,220,255,1)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '1px' }}>
-                Dates: <span style={{ fontWeight: 400, color: '#e4d5b7' }}>{extEvents[openIdx].date}</span>
-              </p>
-              <p style={{ margin: 0, color: 'rgba(140,220,255,1)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '1px' }}>
-                Type: <span style={{ fontWeight: 400, color: '#e4d5b7' }}>{extEvents[openIdx].eventType}</span>
-              </p>
-            </div>
-            
-            <div className="event-modal-actions">
->>>>>>> e95ae5255da6b8bdf67d2138a2f0a6cdbfb89a20
               {extEvents[openIdx].rulebook && (
                 <a href={extEvents[openIdx].rulebook} target="_blank" rel="noopener noreferrer">
                   <button className="event-modal-btn-primary">

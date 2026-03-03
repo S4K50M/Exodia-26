@@ -590,3 +590,79 @@
     width: 100%; 
   }
 }
+
+/* ========================================================= */
+/* --- Event Details Modal Buttons ---                       */
+/* ========================================================= */
+
+/* The big "X" close icon in the top right */
+.event-modal-close {
+  position: absolute;
+  top: 3rem;
+  right: 3rem;
+  background: transparent;
+  border: none;
+  color: #fbbf24;
+  font-size: 2.5rem;
+  cursor: pointer;
+  transition: transform 0.3s ease, color 0.3s ease, text-shadow 0.3s ease;
+  z-index: 10;
+}
+
+.event-modal-close:hover {
+  transform: rotate(90deg) scale(1.2); /* Satisfying spin and pop on hover */
+  color: #fff;
+  text-shadow: 0 0 15px rgba(251, 191, 36, 0.8);
+}
+
+/* Primary Button (Open Rulebook) - Solid gold/sand */
+.event-modal-btn-primary {
+  background: #e4d5b7;
+  color: #0a1932; /* Deep blue/black for sharp contrast */
+  border: none;
+  padding: 0.8rem 2.5rem;
+  border-radius: 50px;
+  font-size: 1.1rem;
+  font-weight: bold;
+  cursor: pointer;
+  box-shadow: 0 4px 20px rgba(228, 213, 183, 0.4);
+  transition: all 0.3s ease;
+}
+
+.event-modal-btn-primary:hover {
+  background: #fff;
+  transform: translateY(-3px);
+  box-shadow: 0 8px 25px rgba(228, 213, 183, 0.6), 0 0 15px rgba(251, 191, 36, 0.5);
+}
+
+/* Secondary Button (Close) - Glassy outline */
+.event-modal-btn-secondary {
+  background: rgba(207, 248, 255, 0.05); 
+  color: #e4d5b7;
+  border: 2px solid #e4d5b7;
+  padding: 0.8rem 2.5rem;
+  border-radius: 50px;
+  font-size: 1.1rem;
+  font-weight: bold;
+  cursor: pointer;
+  backdrop-filter: blur(5px);
+  -webkit-backdrop-filter: blur(5px);
+  transition: all 0.3s ease;
+}
+
+.event-modal-btn-secondary:hover {
+  background: rgba(228, 213, 183, 0.15);
+  color: #fff;
+  border-color: #fff;
+  transform: translateY(-3px);
+  box-shadow: 0 8px 25px rgba(207, 248, 255, 0.15);
+}
+
+/* Make sure the close button stays visible on small mobile screens */
+@media (max-width: 720px) {
+  .event-modal-close {
+    top: 1.5rem;
+    right: 1.5rem;
+    font-size: 2rem;
+  }
+}
