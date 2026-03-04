@@ -8,11 +8,38 @@
   inset: 0;
   z-index: 100;
   display: flex;
-  align-items: center;
+  align-items: flex-start; /* 👈 Changed from center so it scrolls naturally */
   justify-content: center;
   background: rgba(0, 0, 0, 0.75);
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
+  overflow-y: auto; /* 👈 Make the overlay itself scrollable */
+  padding: 2rem 1rem; /* 👈 Adds spacing at the top/bottom so it doesn't hit edges */
+  scroll-behavior: smooth;
+  -webkit-overflow-scrolling: touch; /* Enables buttery momentum scrolling on iOS/mobile */
+  scrollbar-width: thin; /* Firefox */
+  scrollbar-color: rgba(192, 132, 252, 0.5) transparent; /* Firefox: thumb color | track color */
+}
+
+/* ── Overlay Scrollbar (WebKit) ──────────────────────────────────────────── */
+.merch-overlay::-webkit-scrollbar {
+  width: 6px; /* Slightly wider than before so it's easier to grab */
+}
+
+.merch-overlay::-webkit-scrollbar-track {
+  background: rgba(0, 0, 0, 0.2); /* Subtle dark track so it blends with the overlay */
+  border-radius: 10px;
+  margin: 0.5rem 0; /* Keeps the scrollbar from hitting the absolute top/bottom edges */
+}
+
+.merch-overlay::-webkit-scrollbar-thumb {
+  background: rgba(192, 132, 252, 0.4); /* Your theme's purple with some transparency */
+  border-radius: 10px;
+}
+
+/* Make it glow a bit brighter when the user hovers over it */
+.merch-overlay::-webkit-scrollbar-thumb:hover {
+  background: rgba(192, 132, 252, 0.8);
 }
 
 .merch-bg-layer {
@@ -29,11 +56,9 @@
 .merch-content {
   position: relative;
   z-index: 10;
-  width: 95%;
+  width: 100%; /* 👈 Changed to 100% since the overlay now handles padding */
   max-width: 1140px;
-  max-height: 92vh;
-  overflow-y: auto;
-  overscroll-behavior: contain;
+  margin: auto; /* 👈 Vertically centers the modal when it's shorter than the screen */
   background: rgba(8, 8, 28, 0.7);
   backdrop-filter: blur(28px) saturate(160%);
   -webkit-backdrop-filter: blur(28px) saturate(160%);
@@ -44,6 +69,9 @@
     0 32px 80px rgba(0, 0, 0, 0.6),
     inset 0 1px 0 rgba(255, 255, 255, 0.06);
   color: #f5f5f7;
+  overscroll-behavior: contain;
+  /* ❌ Removed max-height: 92vh; */
+  /* ❌ Removed overflow-y: auto; */
 }
 
 .merch-content::-webkit-scrollbar { width: 5px; }

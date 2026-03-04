@@ -409,7 +409,11 @@ export function MerchandisePage() {
 
         {/* ═══ Order Modal Overlay ═══ */}
         {orderOpen && (
-          <div className="merch-overlay" onClick={closeOrder}>
+          <div className="merch-overlay" 
+            onClick={closeOrder}
+            onWheel={(e) => e.stopPropagation()}    
+            onTouchMove={(e) => e.stopPropagation()}
+          >
             <div className="merch-content" onClick={e => e.stopPropagation()}>
               <button className="merch-close-btn" onClick={closeOrder}>&times;</button>
               <h2 className="merch-title">Place Your Order</h2>

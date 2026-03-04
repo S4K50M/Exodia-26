@@ -202,7 +202,13 @@ export function RegisterModal({ isOpen, onClose }: RegisterModalProps) {
   )
 
   return (
-    <div ref={overlayRef} className="register-overlay" onClick={handleOverlayClick} style={{ display: 'none', opacity: 0 }}>
+    <div ref={overlayRef} 
+      className="register-overlay" 
+      onClick={handleOverlayClick} 
+      style={{ display: 'none', opacity: 0 }}
+      onWheel={(e) => e.stopPropagation()}   
+      onTouchMove={(e) => e.stopPropagation()} 
+    >
       {/* Particles canvas */}
       <canvas ref={canvasRef} className="register-particles" />
 
