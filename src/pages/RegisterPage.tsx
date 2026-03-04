@@ -1,10 +1,11 @@
 import React, { useEffect, useState } from 'react';
 
-import bottomLeft from '../assets/register/left-bottom.png';
-import bottomRight from '../assets/register/right-bottom.png';
-import background from '../assets/register/background.png';
-import leftSide from '../assets/register/side-left.png';
-import rightSide from '../assets/register/side-right.png';
+import bottomLeft from '../assets/register/left-bottom.webp';
+import bottomRight from '../assets/register/right-bottom.webp';
+import background from '../assets/register/background.webp';
+import leftSide from '../assets/register/side-left.webp';
+import rightSide from '../assets/register/side-right.webp';
+import qr from '../assets/register/qr.png';
 
 // Ensure your supabase client is correctly configured in this file
 import supabase from '../utils/supabase';
@@ -149,9 +150,10 @@ export function RegisterPage() {
           {/* Left Side: QR Code & Info */}
           <div className="flex flex-col items-center justify-center w-full lg:w-1/3 p-6 bg-white/5 rounded-xl border border-white/10">
             <img 
-              src="/qr.png" 
+              src={qr} 
               alt="Payment" 
               className="w-48 h-48 border-4 border-yellow-500 rounded-lg shadow-lg mb-4" 
+              decoding="async"
             />
             <p className="text-lg font-bold text-white mb-1">Scan to Pay</p>
             <div className="bg-yellow-500/20 border border-yellow-500/50 text-yellow-200 px-4 py-2 rounded-md mt-4 text-center w-full">

@@ -3,11 +3,11 @@ import gsap from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
 import { Search, Filter, X } from 'lucide-react'
 
-import bg from '../assets/events/bg.png'
-import leftDragon from '../assets/events/left_dragon.png'
-import rightDragon from '../assets/events/right_dragon.png'
-import leftSword from '../assets/events/left_sword.png'
-import rightSword from '../assets/events/right_sword.png'
+import bg from '../assets/events/bg.webp'
+import leftDragon from '../assets/events/left_dragon.webp'
+import rightDragon from '../assets/events/right_dragon.webp'
+import leftSword from '../assets/events/left_sword.webp'
+import rightSword from '../assets/events/right_sword.webp'
 
 import { EventCards } from '../components/EventCards'
 import EventsRaw from '../data/events.json'
@@ -123,7 +123,7 @@ export function EventsPage() {
         <div className="events-scroll-trigger" ref={scrollTriggerRef}>
           <div className="events-stage">
             <div className="events-bg">
-              <img src={bg} alt="" />
+              <img src={bg} alt="" decoding="async" fetchPriority="high" />
             </div>
 
             {/* --- NEW: Search & Filter Controls --- */}
@@ -196,14 +196,26 @@ export function EventsPage() {
               </h1>
             </div>
 
-            <img ref={leftSwordRef} src={leftSword} className="event-asset sword-left" alt="" />
-            <img ref={rightSwordRef} src={rightSword} className="event-asset sword-right" alt="" />
+            <img
+              ref={leftSwordRef}
+              src={leftSword}
+              className="event-asset sword-left"
+              alt=""
+              decoding="async"
+            />
+            <img
+              ref={rightSwordRef}
+              src={rightSword}
+              className="event-asset sword-right"
+              alt=""
+              decoding="async"
+            />
 
             <div className="events-dragon events-dragon-left">
-              <img ref={leftDragonRef} src={leftDragon} alt="" />
+              <img ref={leftDragonRef} src={leftDragon} alt="" decoding="async" />
             </div>
             <div className="events-dragon events-dragon-right">
-              <img ref={rightDragonRef} src={rightDragon} alt="" />
+              <img ref={rightDragonRef} src={rightDragon} alt="" decoding="async" />
             </div>
 
             {/* Cards Wrap */}

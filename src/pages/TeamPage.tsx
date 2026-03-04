@@ -2,12 +2,12 @@ import { useEffect, useRef, useState } from 'react'
 import gsap from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
 
-import bgLeft from '../assets/team/bg_left.png'
-import bgRight from '../assets/team/bg_right.png'
-import cloudLeft from '../assets/team/cloud_left.png'
-import cloudRight from '../assets/team/cloud_right.png'
-import cloudBLeft from '../assets/team/cloud_bleft.png'
-import cloudBRight from '../assets/team/cloud_bright.png'
+import bgLeft from '../assets/team/bg_left.webp'
+import bgRight from '../assets/team/bg_right.webp'
+import cloudLeft from '../assets/team/cloud_left.webp'
+import cloudRight from '../assets/team/cloud_right.webp'
+import cloudBLeft from '../assets/team/cloud_bleft.webp'
+import cloudBRight from '../assets/team/cloud_bright.webp'
 import {TEAM_SECTIONS} from '../data/team'
 import '../styles/team.css'
 
@@ -98,14 +98,14 @@ export function TeamPage() {
         {/* ── Sticky hero with background & clouds ── */}
         <div className="team-stage">
           <div className="team-bg">
-            <div className="team-bg-left"><img src={bgLeft} alt="" /></div>
-            <div className="team-bg-right"><img src={bgRight} alt="" /></div>
+            <div className="team-bg-left"><img src={bgLeft} alt="" decoding="async" fetchPriority="high" /></div>
+            <div className="team-bg-right"><img src={bgRight} alt="" decoding="async" fetchPriority="high" /></div>
           </div>
 
-          <div className="team-cloud team-cloud-tl" ref={cloudTLRef}><img src={cloudLeft} alt="" /></div>
-          <div className="team-cloud team-cloud-tr" ref={cloudTRRef}><img src={cloudRight} alt="" /></div>
-          <div className="team-cloud team-cloud-bl" ref={cloudBLRef}><img src={cloudBLeft} alt="" /></div>
-          <div className="team-cloud team-cloud-br" ref={cloudBRRef}><img src={cloudBRight} alt="" /></div>
+          <div className="team-cloud team-cloud-tl" ref={cloudTLRef}><img src={cloudLeft} alt="" decoding="async" /></div>
+          <div className="team-cloud team-cloud-tr" ref={cloudTRRef}><img src={cloudRight} alt="" decoding="async" /></div>
+          <div className="team-cloud team-cloud-bl" ref={cloudBLRef}><img src={cloudBLeft} alt="" decoding="async" /></div>
+          <div className="team-cloud team-cloud-br" ref={cloudBRRef}><img src={cloudBRight} alt="" decoding="async" /></div>
 
           {/* Hero title */}
           <div className="team-hero-title">

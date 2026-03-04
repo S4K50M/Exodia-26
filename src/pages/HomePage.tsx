@@ -2,11 +2,11 @@ import { useEffect, useRef, useState } from 'react'
 import gsap from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
 
-import bg from '../assets/home/bg.png'
-import exodia from '../assets/home/exodia.png'
-import hut from '../assets/home/hut.png'
-import leftMountain from '../assets/home/left_mountain.png'
-import rightMountain from '../assets/home/right_mountain.png'
+import bg from '../assets/home/bg.webp'
+import exodia from '../assets/home/exodia.webp'
+import hut from '../assets/home/hut.webp'
+import leftMountain from '../assets/home/left_mountain.webp'
+import rightMountain from '../assets/home/right_mountain.webp'
 
 import '../styles/home.css'
 
@@ -204,12 +204,19 @@ export function HomePage() {
         <div className="scroll-trigger" ref={scrollTriggerRef}>
           <div className="parallax-stage">
             <div className="layer layer-bg" ref={bgRef}>
-              <img src={bg} alt="" />
+              <img src={bg} alt="" decoding="async" fetchPriority="high" />
             </div>
             
             {/* Grouped Exodia and Countdown together */}
             <div className="layer layer-exodia" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
-              <img ref={exodiaRef} src={exodia} alt="Exodia" style={{ position: 'relative', zIndex: 10 }} />
+              <img
+                ref={exodiaRef}
+                src={exodia}
+                alt="Exodia"
+                decoding="async"
+                fetchPriority="high"
+                style={{ position: 'relative', zIndex: 10 }}
+              />
               
               <div 
                 ref={countdownRef} 
@@ -221,14 +228,14 @@ export function HomePage() {
 
             <div className="layer layer-mountains">
               <div className="mountain-left" ref={leftMountRef}>
-                <img src={leftMountain} alt="" />
+                <img src={leftMountain} alt="" decoding="async" />
               </div>
               <div className="mountain-right" ref={rightMountRef}>
-                <img src={rightMountain} alt="" />
+                <img src={rightMountain} alt="" decoding="async" />
               </div>
             </div>
             <div className="layer layer-hut">
-              <img ref={hutRef} src={hut} alt="" />
+              <img ref={hutRef} src={hut} alt="" decoding="async" />
             </div>
 
             {/* About Us - overlaid on top of parallax stage */}

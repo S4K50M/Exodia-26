@@ -7,6 +7,7 @@ interface LoadingScreenProps {
   svg: ReactNode
   minDuration?: number
   assets?: string[]
+  maxWaitMs?: number
   showOnce?: boolean
   children: ReactNode
 }
@@ -56,6 +57,7 @@ export function LoadingScreen({
   svg,
   minDuration = 0,
   assets = [],
+  maxWaitMs = 500,
   showOnce = true,
   children,
 }: LoadingScreenProps) {
@@ -65,6 +67,7 @@ export function LoadingScreen({
   const hideTimerRef = useRef<number | null>(null)
   const assetsRef = useRef<string[]>(assets)
   const assetsKey = assets.join('|')
+  const fadeMs = 450
 
   useEffect(() => {
     assetsRef.current = assets
@@ -91,15 +94,23 @@ export function LoadingScreen({
       const remaining = Math.max(0, duration - (Date.now() - start))
       window.setTimeout(resolve, remaining)
     })
+    const waitForMax =
+      maxWaitMs > 0
+        ? new Promise<void>((resolve) => {
+            window.setTimeout(resolve, maxWaitMs)
+          })
+        : null
 
-    Promise.all([waitForAssets, waitForMin]).then(() => {
+    const gate = waitForMax ? Promise.race([waitForAssets, waitForMax]) : waitForAssets
+
+    Promise.all([gate, waitForMin]).then(() => {
       if (cancelled) return
 
       setFadeOut(true)
       hideTimerRef.current = window.setTimeout(() => {
         setShowLoader(false)
         if (showOnce) hasShownGlobalLoader = true
-      }, 600)
+      }, fadeMs)
     })
 
     return () => {
@@ -109,7 +120,7 @@ export function LoadingScreen({
         hideTimerRef.current = null
       }
     }
-  }, [assetsKey, minDuration, showLoader, showOnce])
+  }, [assetsKey, maxWaitMs, minDuration, showLoader, showOnce])
 
   return (
     <>

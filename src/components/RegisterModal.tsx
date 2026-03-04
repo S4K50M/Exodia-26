@@ -3,7 +3,7 @@ import gsap from 'gsap'
 import supabase from '../utils/supabase'
 import { lockBodyScroll } from '../utils/bodyScrollLock'
 
-import background from '../assets/register/background.png'
+import background from '../assets/register/background.webp'
 
 import '../styles/register-modal.css'
 import qr from '../assets/register/qr.png'

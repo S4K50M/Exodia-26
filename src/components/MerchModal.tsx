@@ -5,14 +5,14 @@ import supabase from '../utils/supabase'
 import background from '../assets/merchendise/background.png'
 
 // Merch product images
-import hoodieFront from '../assets/merch/final mockup collage front.png'
-import hoodieBack from '../assets/merch/final mockup collage back.png'
-import hoodieSide from '../assets/merch/final mockup collage side.png'
-import hoodieCollage from '../assets/merch/final mockup collage.png'
-import teeFront from '../assets/merch/mockup-tee-front.png'
-import teeBack from '../assets/merch/mockup-tee-back.png'
-import acidFront from '../assets/merch/acid-wash-front.png'
-import acidBack from '../assets/merch/acid-wash-back.png'
+import hoodieFront from '../assets/merch/final mockup collage front.webp'
+import hoodieBack from '../assets/merch/final mockup collage back.webp'
+import hoodieSide from '../assets/merch/final mockup collage side.webp'
+import hoodieCollage from '../assets/merch/final mockup collage.webp'
+import teeFront from '../assets/merch/mockup-tee-front.webp'
+import teeBack from '../assets/merch/mockup-tee-back.webp'
+import acidFront from '../assets/merch/acid-wash-front.webp'
+import acidBack from '../assets/merch/acid-wash-back.webp'
 
 import '../styles/merch-modal.css'
 

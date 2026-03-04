@@ -6,20 +6,20 @@ import { lockBodyScroll } from '../utils/bodyScrollLock'
 
 gsap.registerPlugin(ScrollTrigger)
 
-import bg from '../assets/merchendise/bg.png'
-import left from '../assets/merchendise/left.png'
-import right from '../assets/merchendise/right.png'
-import leftBg from '../assets/merchendise/left_bg.png'
-import rightBg from '../assets/merchendise/right_bg.png'
+import bg from '../assets/merchendise/bg.webp'
+import left from '../assets/merchendise/left.webp'
+import right from '../assets/merchendise/right.webp'
+import leftBg from '../assets/merchendise/left_bg.webp'
+import rightBg from '../assets/merchendise/right_bg.webp'
 
-import hoodieFront from '../assets/merch/final mockup collage front.png'
-import hoodieBack from '../assets/merch/final mockup collage back.png'
-import hoodieSide from '../assets/merch/final mockup collage side.png'
-import hoodieCollage from '../assets/merch/final mockup collage.png'
-import teeFront from '../assets/merch/mockup-tee-front.png'
-import teeBack from '../assets/merch/mockup-tee-back.png'
-import acidFront from '../assets/merch/acid-wash-front.png'
-import acidBack from '../assets/merch/acid-wash-back.png'
+import hoodieFront from '../assets/merch/final mockup collage front.webp'
+import hoodieBack from '../assets/merch/final mockup collage back.webp'
+import hoodieSide from '../assets/merch/final mockup collage side.webp'
+import hoodieCollage from '../assets/merch/final mockup collage.webp'
+import teeFront from '../assets/merch/mockup-tee-front.webp'
+import teeBack from '../assets/merch/mockup-tee-back.webp'
+import acidFront from '../assets/merch/acid-wash-front.webp'
+import acidBack from '../assets/merch/acid-wash-back.webp'
 
 import '../styles/merchandise.css'
 import '../styles/merch-modal.css'
@@ -370,11 +370,21 @@ export function MerchandisePage() {
         )}
 
         {/* ═══ Fixed Parallax Background — covers entire page ═══ */}
-        <div className="merch-bg-fixed" ref={bgRef}><img src={bg} alt="" /></div>
-        <div className="merch-side-fixed merch-side-left-bg" ref={leftBgRef}><img src={leftBg} alt="" /></div>
-        <div className="merch-side-fixed merch-side-right-bg" ref={rightBgRef}><img src={rightBg} alt="" /></div>
-        <div className="merch-side-fixed merch-side-left-fg" ref={leftRef}><img src={left} alt="" /></div>
-        <div className="merch-side-fixed merch-side-right-fg" ref={rightRef}><img src={right} alt="" /></div>
+        <div className="merch-bg-fixed" ref={bgRef}>
+          <img src={bg} alt="" decoding="async" fetchPriority="high" />
+        </div>
+        <div className="merch-side-fixed merch-side-left-bg" ref={leftBgRef}>
+          <img src={leftBg} alt="" decoding="async" />
+        </div>
+        <div className="merch-side-fixed merch-side-right-bg" ref={rightBgRef}>
+          <img src={rightBg} alt="" decoding="async" />
+        </div>
+        <div className="merch-side-fixed merch-side-left-fg" ref={leftRef}>
+          <img src={left} alt="" decoding="async" />
+        </div>
+        <div className="merch-side-fixed merch-side-right-fg" ref={rightRef}>
+          <img src={right} alt="" decoding="async" />
+        </div>
 
         {/* ═══ Hero Section — centered buy button ═══ */}
         <section className="merch-hero" ref={heroRef}>
