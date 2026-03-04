@@ -1,6 +1,7 @@
 import React, { useEffect, useState, useRef, useCallback } from 'react'
 import gsap from 'gsap'
 import supabase from '../utils/supabase'
+import { lockBodyScroll } from '../utils/bodyScrollLock'
 
 import background from '../assets/register/background.png'
 
@@ -95,6 +96,8 @@ export function RegisterModal({ isOpen, onClose }: RegisterModalProps) {
   const overlayRef = useRef<HTMLDivElement | null>(null)
   const contentRef = useRef<HTMLDivElement | null>(null)
   const canvasRef = useRef<HTMLCanvasElement | null>(null)
+  const unlockScrollRef = useRef<(() => void) | null>(null)
+  const isOpenRef = useRef(isOpen)
 
   // Form State
   const [formData, setFormData] = useState({
@@ -112,12 +115,25 @@ export function RegisterModal({ isOpen, onClose }: RegisterModalProps) {
 
   useParticles(canvasRef, isOpen)
 
+  useEffect(() => {
+    isOpenRef.current = isOpen
+  }, [isOpen])
+
+  // Ensure scroll is unlocked on unmount
+  useEffect(() => {
+    return () => {
+      unlockScrollRef.current?.()
+      unlockScrollRef.current = null
+    }
+  }, [])
+
   // Animate in/out
   useEffect(() => {
     if (!overlayRef.current || !contentRef.current) return
 
     if (isOpen) {
-      document.body.style.overflow = 'hidden'
+      unlockScrollRef.current?.()
+      unlockScrollRef.current = lockBodyScroll()
       gsap.set(overlayRef.current, { display: 'flex' })
       gsap.to(overlayRef.current, { opacity: 1, duration: 0.4, ease: 'power2.out' })
       gsap.fromTo(
@@ -134,11 +150,23 @@ export function RegisterModal({ isOpen, onClose }: RegisterModalProps) {
         ease: 'power2.in',
         onComplete: () => {
           if (overlayRef.current) overlayRef.current.style.display = 'none'
-          document.body.style.overflow = ''
+          if (!isOpenRef.current) {
+            unlockScrollRef.current?.()
+            unlockScrollRef.current = null
+          }
         },
       })
     }
   }, [isOpen])
+
+  useEffect(() => {
+    if (!isOpen) return
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') onClose()
+    }
+    window.addEventListener('keydown', onKeyDown)
+    return () => window.removeEventListener('keydown', onKeyDown)
+  }, [isOpen, onClose])
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData({ ...formData, [e.target.name]: e.target.value })

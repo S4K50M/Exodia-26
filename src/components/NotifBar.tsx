@@ -1,6 +1,7 @@
 import { useEffect, useState, useRef } from 'react';
 import supabase from '../utils/supabase';
 import gsap from 'gsap';
+import { lockBodyScroll } from '../utils/bodyScrollLock';
 
 interface NotificationSidebarProps {
   isOpen: boolean;
@@ -11,6 +12,20 @@ export function NotificationSidebar({ isOpen, onClose }: NotificationSidebarProp
   const [notifications, setNotifications] = useState<any[]>([]);
   const sidebarRef = useRef<HTMLDivElement>(null);
   const overlayRef = useRef<HTMLDivElement>(null);
+  const unlockScrollRef = useRef<(() => void) | null>(null);
+  const isOpenRef = useRef(isOpen);
+
+  useEffect(() => {
+    isOpenRef.current = isOpen;
+  }, [isOpen]);
+
+  // Ensure scroll is unlocked on unmount
+  useEffect(() => {
+    return () => {
+      unlockScrollRef.current?.();
+      unlockScrollRef.current = null;
+    };
+  }, []);
 
   useEffect(() => {
     if (!isOpen) return
@@ -29,15 +44,37 @@ export function NotificationSidebar({ isOpen, onClose }: NotificationSidebarProp
 
   useEffect(() => {
     if (isOpen) {
+      unlockScrollRef.current?.();
+      unlockScrollRef.current = lockBodyScroll();
+
       // Slide in from right and fade in overlay
       gsap.to(sidebarRef.current, { x: 0, duration: 0.6, ease: 'power3.out' });
       gsap.to(overlayRef.current, { opacity: 1, pointerEvents: 'auto', duration: 0.4 });
     } else {
       // Slide out to right
-      gsap.to(sidebarRef.current, { x: '100%', duration: 0.5, ease: 'power3.in' });
+      gsap.to(sidebarRef.current, {
+        x: '100%',
+        duration: 0.5,
+        ease: 'power3.in',
+        onComplete: () => {
+          if (!isOpenRef.current) {
+            unlockScrollRef.current?.();
+            unlockScrollRef.current = null;
+          }
+        },
+      });
       gsap.to(overlayRef.current, { opacity: 0, pointerEvents: 'none', duration: 0.4 });
     }
   }, [isOpen]);
+
+  useEffect(() => {
+    if (!isOpen) return;
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') onClose();
+    };
+    window.addEventListener('keydown', onKeyDown);
+    return () => window.removeEventListener('keydown', onKeyDown);
+  }, [isOpen, onClose]);
 
   return (
     <>

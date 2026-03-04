@@ -2,6 +2,7 @@ import React, { useEffect, useRef, useState, useMemo } from 'react'
 import gsap from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
 import supabase from '../utils/supabase'
+import { lockBodyScroll } from '../utils/bodyScrollLock'
 
 gsap.registerPlugin(ScrollTrigger)
 
@@ -75,6 +76,7 @@ export function MerchandisePage() {
   const [viewerIndex, setViewerIndex] = useState(0)
   const touchStartX = useRef(0)
   const touchDeltaX = useRef(0)
+  const unlockViewerScrollRef = useRef<(() => void) | null>(null)
 
   // Per-card touch
   const cardTouchStart = useRef(0)
@@ -83,6 +85,7 @@ export function MerchandisePage() {
 
   // Order modal
   const [orderOpen, setOrderOpen] = useState(false)
+  const unlockOrderScrollRef = useRef<(() => void) | null>(null)
 
   // Form
   const [formData, setFormData] = useState({ fullName: '', email: '', phone: '', transactionId: '' })
@@ -191,17 +194,28 @@ export function MerchandisePage() {
     cardTouchDelta.current = 0
   }
 
+  useEffect(() => {
+    return () => {
+      unlockViewerScrollRef.current?.()
+      unlockViewerScrollRef.current = null
+      unlockOrderScrollRef.current?.()
+      unlockOrderScrollRef.current = null
+    }
+  }, [])
+
   /* ── Fullscreen viewer ─────────────────────────────────────────────── */
   const openViewer = (productIdx: number) => {
     setViewerProduct(productIdx)
     setViewerIndex(activeViews[productIdx])
     setViewerOpen(true)
-    document.body.style.overflow = 'hidden'
+    unlockViewerScrollRef.current?.()
+    unlockViewerScrollRef.current = lockBodyScroll()
   }
 
   const closeViewer = () => {
     setViewerOpen(false)
-    if (!orderOpen) document.body.style.overflow = ''
+    unlockViewerScrollRef.current?.()
+    unlockViewerScrollRef.current = null
   }
 
   const currentProduct = MERCH_GALLERY[viewerProduct]
@@ -227,8 +241,16 @@ export function MerchandisePage() {
   }, [viewerOpen, viewerProduct]) // eslint-disable-line react-hooks/exhaustive-deps
 
   /* ── Order modal ───────────────────────────────────────────────────── */
-  const openOrder = () => { setOrderOpen(true); document.body.style.overflow = 'hidden' }
-  const closeOrder = () => { setOrderOpen(false); document.body.style.overflow = '' }
+  const openOrder = () => {
+    setOrderOpen(true)
+    unlockOrderScrollRef.current?.()
+    unlockOrderScrollRef.current = lockBodyScroll()
+  }
+  const closeOrder = () => {
+    setOrderOpen(false)
+    unlockOrderScrollRef.current?.()
+    unlockOrderScrollRef.current = null
+  }
 
   useEffect(() => {
     if (!orderOpen) return

@@ -72,6 +72,7 @@ function arcBlur(offset: number): number {
 
 export function EventCards({ events }: EventCardsProps) {
   const n = events.length
+  const enableVirtual = n > RENDER_RADIUS * 2 + 1
   const isMobile = useMediaQuery('(max-width: 720px)')
   const reduceMotion = useMediaQuery('(prefers-reduced-motion: reduce)')
 
@@ -188,6 +189,7 @@ export function EventCards({ events }: EventCardsProps) {
         const next = currentIndex + n
         currentIndexRef.current = next
         setCurrentIndex(next)
+        if (!enableVirtual) snapAll(next)
       }, tweenDuration * 1000 + 60)
       return () => clearTimeout(t)
     }
@@ -196,10 +198,11 @@ export function EventCards({ events }: EventCardsProps) {
         const next = currentIndex - n
         currentIndexRef.current = next
         setCurrentIndex(next)
+        if (!enableVirtual) snapAll(next)
       }, tweenDuration * 1000 + 60)
       return () => clearTimeout(t)
     }
-  }, [currentIndex, n, tweenDuration])
+  }, [currentIndex, enableVirtual, n, snapAll, tweenDuration])
 
   const goNext = useCallback(() => {
     setCurrentIndex((i) => {
@@ -280,7 +283,6 @@ export function EventCards({ events }: EventCardsProps) {
 
   const indicesToRender = useMemo(() => {
     const total = extEvents.length
-    const enableVirtual = n > RENDER_RADIUS * 2 + 1
 
     if (!enableVirtual) {
       const all: number[] = []

@@ -18,19 +18,36 @@ export const routeChunkLoaders: Record<string, () => Promise<unknown>> = {
   '/admin': loadAdminPage,
 }
 
-function safePrefetch(loader?: () => Promise<unknown>) {
-  loader?.().catch(() => {})
+function canPrefetch() {
+  if (typeof navigator === 'undefined') return false
+  const connection = (navigator as any).connection
+  const saveData = connection?.saveData === true
+  const effectiveType = String(connection?.effectiveType ?? '')
+  const slowNetwork = /(^|-)2g$/.test(effectiveType) || effectiveType === 'slow-2g'
+  return !saveData && !slowNetwork
+}
+
+const prefetched = new Set<string>()
+
+function safePrefetch(key: string, loader?: () => Promise<unknown>) {
+  if (!loader) return
+  if (!canPrefetch()) return
+  if (prefetched.has(key)) return
+
+  prefetched.add(key)
+  loader().catch(() => {
+    prefetched.delete(key)
+  })
 }
 
 export function prefetchRoute(pathname: string) {
-  safePrefetch(routeChunkLoaders[pathname])
+  safePrefetch(`route:${pathname}`, routeChunkLoaders[pathname])
 }
 
 export function prefetchRegisterModal() {
-  safePrefetch(loadRegisterModal)
+  safePrefetch('modal:register', loadRegisterModal)
 }
 
 export function prefetchNotifications() {
-  safePrefetch(loadNotificationSidebar)
+  safePrefetch('modal:notifications', loadNotificationSidebar)
 }
-

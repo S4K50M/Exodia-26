@@ -3,6 +3,7 @@ import { useEffect, useRef, useState, useCallback } from 'react'
 import gsap from 'gsap'
 import { Bell } from 'lucide-react';
 import { prefetchNotifications, prefetchRegisterModal, prefetchRoute } from '../routes'
+import { lockBodyScroll } from '../utils/bodyScrollLock'
 
 interface NavbarProps {
   shouldAnimate?: boolean
@@ -18,11 +19,33 @@ export function Navbar({ shouldAnimate = false, onRegisterClick, onNotifyClick }
   const mobileMenuRef = useRef<HTMLDivElement>(null)
   const mobileTimelineRef = useRef<gsap.core.Timeline | null>(null)
   const [menuOpen, setMenuOpen] = useState(false)
+  const unlockScrollRef = useRef<(() => void) | null>(null)
+  const menuOpenRef = useRef(menuOpen)
+
+  useEffect(() => {
+    menuOpenRef.current = menuOpen
+  }, [menuOpen])
+
+  useEffect(() => {
+    return () => {
+      unlockScrollRef.current?.()
+      unlockScrollRef.current = null
+    }
+  }, [])
 
   // Close menu on route change
   useEffect(() => {
     setMenuOpen(false)
   }, [location.pathname])
+
+  useEffect(() => {
+    if (!menuOpen) return
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setMenuOpen(false)
+    }
+    window.addEventListener('keydown', onKeyDown)
+    return () => window.removeEventListener('keydown', onKeyDown)
+  }, [menuOpen])
 
   // GSAP animation for mobile menu
   useEffect(() => {
@@ -36,6 +59,9 @@ export function Navbar({ shouldAnimate = false, onRegisterClick, onNotifyClick }
     const tl = gsap.timeline({ paused: true })
 
     if (menuOpen) {
+      unlockScrollRef.current?.()
+      unlockScrollRef.current = lockBodyScroll()
+
       gsap.set(menu, { display: 'flex' })
       tl.fromTo(menu,
         { opacity: 0, y: -20 },
@@ -53,7 +79,13 @@ export function Navbar({ shouldAnimate = false, onRegisterClick, onNotifyClick }
       )
       .to(menu,
         { opacity: 0, y: -12, duration: 0.25, ease: 'power2.in',
-          onComplete: () =>{ gsap.set(menu, { display: 'none' })}
+          onComplete: () =>{
+            gsap.set(menu, { display: 'none' })
+            if (!menuOpenRef.current) {
+              unlockScrollRef.current?.()
+              unlockScrollRef.current = null
+            }
+          }
         },
         '-=0.1'
       )
@@ -111,9 +143,12 @@ export function Navbar({ shouldAnimate = false, onRegisterClick, onNotifyClick }
 
         {/* Hamburger button — mobile only */}
         <button
+          type="button"
           className={`navbar-hamburger ${menuOpen ? 'open' : ''}`}
           onClick={toggleMenu}
           aria-label="Toggle menu"
+          aria-expanded={menuOpen}
+          aria-controls="navbar-mobile-menu"
         >
           <span className="hamburger-line hamburger-line-1" />
           <span className="hamburger-line hamburger-line-2" />
@@ -129,6 +164,7 @@ export function Navbar({ shouldAnimate = false, onRegisterClick, onNotifyClick }
                 className={location.pathname === to ? 'active' : ''}
                 onMouseEnter={() => prefetchRoute(to)}
                 onFocus={() => prefetchRoute(to)}
+                onTouchStart={() => prefetchRoute(to)}
               >
                  {label}
               </Link>
@@ -138,9 +174,11 @@ export function Navbar({ shouldAnimate = false, onRegisterClick, onNotifyClick }
           {/* --- NOTIFICATION BUTTON --- */}
           <li>
              <button
+               type="button"
                onClick={onNotifyClick}
                onMouseEnter={prefetchNotifications}
                onFocus={prefetchNotifications}
+               onTouchStart={prefetchNotifications}
                className="group relative flex items-center gap-2 px-3 py-2 text-gray-300 hover:text-yellow-400 transition-all duration-300 font-medium cursor-pointer bg-transparent border-none"
              >
               <Bell 
@@ -154,9 +192,11 @@ export function Navbar({ shouldAnimate = false, onRegisterClick, onNotifyClick }
           {/* --- REGISTER BUTTON --- */}
           <li>
              <button
+               type="button"
                onClick={onRegisterClick}
                onMouseEnter={prefetchRegisterModal}
                onFocus={prefetchRegisterModal}
+               onTouchStart={prefetchRegisterModal}
                className={`
                  inline-block px-5 py-2 font-bold text-black rounded-lg
                  bg-gradient-to-r from-yellow-500 to-yellow-400 
@@ -171,8 +211,8 @@ export function Navbar({ shouldAnimate = false, onRegisterClick, onNotifyClick }
         </ul>
       </nav>
 
-      {/* Mobile slide-down menu */}
-       <div ref={mobileMenuRef} className="navbar-mobile-menu" style={{ display: 'none' }}>
+       {/* Mobile slide-down menu */}
+       <div id="navbar-mobile-menu" ref={mobileMenuRef} className="navbar-mobile-menu" style={{ display: 'none' }}>
          {navLinks.map(({ to, label }) => (
            <Link
              key={to}
@@ -181,12 +221,14 @@ export function Navbar({ shouldAnimate = false, onRegisterClick, onNotifyClick }
              onClick={handleMobileLinkClick}
              onMouseEnter={() => prefetchRoute(to)}
              onFocus={() => prefetchRoute(to)}
+             onTouchStart={() => prefetchRoute(to)}
            >
              {label}
            </Link>
          ))}
 
         <button
+          type="button"
           className="mobile-nav-item mobile-notify-btn"
           onClick={() => { onNotifyClick?.(); handleMobileLinkClick(); }}
         >
@@ -195,6 +237,7 @@ export function Navbar({ shouldAnimate = false, onRegisterClick, onNotifyClick }
         </button>
 
         <button
+          type="button"
           className="mobile-nav-item mobile-register-btn"
           onClick={() => { onRegisterClick?.(); handleMobileLinkClick(); }}
         >
