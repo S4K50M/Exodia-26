@@ -1,11 +1,11 @@
 import { useEffect, useRef } from 'react'
-import Lenis from 'lenis'
-import { ScrollTrigger } from 'gsap/ScrollTrigger'
 
-type LenisOptions = ConstructorParameters<typeof Lenis>[0]
+type LenisCtor = typeof import('lenis').default
+type LenisOptions = ConstructorParameters<LenisCtor>[0]
+type LenisInstance = InstanceType<LenisCtor>
 
 export function useLenisScroll(options?: LenisOptions, enabled = true) {
-  const lenisRef = useRef<Lenis | null>(null)
+  const lenisRef = useRef<LenisInstance | null>(null)
   const optionsRef = useRef(options)
   const rafIdRef = useRef<number | null>(null)
 
@@ -17,26 +17,51 @@ export function useLenisScroll(options?: LenisOptions, enabled = true) {
       window.matchMedia?.('(prefers-reduced-motion: reduce)').matches ?? false
     if (reduceMotion) return
 
-    const lenis = new Lenis(optionsRef.current)
-    lenisRef.current = lenis
+    const connection = (navigator as any).connection
+    const saveData = connection?.saveData === true
+    const effectiveType = String(connection?.effectiveType ?? '')
+    const slowNetwork = /(^|-)2g$/.test(effectiveType) || effectiveType === 'slow-2g'
+    if (saveData || slowNetwork) return
 
-    lenis.on('scroll', () => ScrollTrigger.update())
+    let cancelled = false
+    let lenis: LenisInstance | null = null
 
-    const raf = (time: number) => {
-      lenis.raf(time)
-      rafIdRef.current = requestAnimationFrame(raf)
-    }
-    rafIdRef.current = requestAnimationFrame(raf)
+    ;(async () => {
+      try {
+        const [{ default: Lenis }, { default: gsap }, { ScrollTrigger }] = await Promise.all([
+          import('lenis'),
+          import('gsap'),
+          import('gsap/ScrollTrigger'),
+        ])
+        if (cancelled) return
+
+        gsap.registerPlugin(ScrollTrigger)
+
+        lenis = new Lenis(optionsRef.current) as LenisInstance
+        lenisRef.current = lenis
+
+        lenis.on('scroll', () => ScrollTrigger.update())
+
+        const raf = (time: number) => {
+          lenis?.raf(time)
+          rafIdRef.current = requestAnimationFrame(raf)
+        }
+        rafIdRef.current = requestAnimationFrame(raf)
+      } catch {
+        // Ignore (e.g. running in non-browser or module load failure)
+      }
+    })()
 
     return () => {
+      cancelled = true
       if (rafIdRef.current !== null) cancelAnimationFrame(rafIdRef.current)
       rafIdRef.current = null
 
-      lenis.destroy()
+      lenis?.destroy()
+      lenis = null
       lenisRef.current = null
     }
   }, [enabled])
 
   return lenisRef
 }
-

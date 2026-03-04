@@ -80,3 +80,17 @@
     stroke-opacity: 1;
   }
 }
+
+@media (prefers-reduced-motion: reduce) {
+  .loading-overlay {
+    transition: none;
+  }
+
+  .loading-path {
+    animation: none;
+    stroke-dashoffset: 0;
+    fill: currentColor;
+    fill-opacity: 0.25;
+    filter: none;
+  }
+}

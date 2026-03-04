@@ -1,6 +1,5 @@
 import { Link, useLocation } from 'react-router-dom'
 import { useEffect, useRef, useState, useCallback } from 'react'
-import gsap from 'gsap'
 import { Bell } from 'lucide-react';
 import { prefetchNotifications, prefetchRegisterModal, prefetchRoute } from '../routes'
 import { lockBodyScroll } from '../utils/bodyScrollLock'
@@ -13,18 +12,8 @@ interface NavbarProps {
 
 export function Navbar({ shouldAnimate = false, onRegisterClick, onNotifyClick }: NavbarProps) {
   const location = useLocation()
-  const navRef = useRef<HTMLElement>(null)
-  const linksRef = useRef<HTMLUListElement>(null)
-  const hasAnimatedRef = useRef(false)
-  const mobileMenuRef = useRef<HTMLDivElement>(null)
-  const mobileTimelineRef = useRef<gsap.core.Timeline | null>(null)
   const [menuOpen, setMenuOpen] = useState(false)
   const unlockScrollRef = useRef<(() => void) | null>(null)
-  const menuOpenRef = useRef(menuOpen)
-
-  useEffect(() => {
-    menuOpenRef.current = menuOpen
-  }, [menuOpen])
 
   useEffect(() => {
     return () => {
@@ -47,74 +36,17 @@ export function Navbar({ shouldAnimate = false, onRegisterClick, onNotifyClick }
     return () => window.removeEventListener('keydown', onKeyDown)
   }, [menuOpen])
 
-  // GSAP animation for mobile menu
   useEffect(() => {
-    const menu = mobileMenuRef.current
-    if (!menu) return
+    if (!menuOpen) return
 
-    // Kill previous timeline
-    mobileTimelineRef.current?.kill()
+    unlockScrollRef.current?.()
+    unlockScrollRef.current = lockBodyScroll()
 
-    const items = menu.querySelectorAll('.mobile-nav-item')
-    const tl = gsap.timeline({ paused: true })
-
-    if (menuOpen) {
+    return () => {
       unlockScrollRef.current?.()
-      unlockScrollRef.current = lockBodyScroll()
-
-      gsap.set(menu, { display: 'flex' })
-      tl.fromTo(menu,
-        { opacity: 0, y: -20 },
-        { opacity: 1, y: 0, duration: 0.35, ease: 'power3.out' }
-      )
-      .fromTo(items,
-        { opacity: 0, x: -30 },
-        { opacity: 1, x: 0, duration: 0.3, stagger: 0.06, ease: 'power2.out' },
-        '-=0.15'
-      )
-      tl.play()
-    } else {
-      tl.to(items,
-        { opacity: 0, x: 20, duration: 0.2, stagger: 0.03, ease: 'power2.in' }
-      )
-      .to(menu,
-        { opacity: 0, y: -12, duration: 0.25, ease: 'power2.in',
-          onComplete: () =>{
-            gsap.set(menu, { display: 'none' })
-            if (!menuOpenRef.current) {
-              unlockScrollRef.current?.()
-              unlockScrollRef.current = null
-            }
-          }
-        },
-        '-=0.1'
-      )
-      tl.play()
+      unlockScrollRef.current = null
     }
-
-    mobileTimelineRef.current = tl
-    return () => { tl.kill() }
   }, [menuOpen])
-
-  // Desktop entrance animation
-  useEffect(() => {
-    if (shouldAnimate && !hasAnimatedRef.current && navRef.current && linksRef.current) {
-      hasAnimatedRef.current = true
-      const links = linksRef.current.querySelectorAll('li')
-      
-      gsap.set(navRef.current, { y: -100, scale: 0.5, opacity: 1 })
-      gsap.set(links, { opacity: 0 })
-
-      const tl = gsap.timeline({ delay: 0.1 })
-      
-      tl.to(navRef.current, {
-        y: 0, scale: 1, duration: 0.8, ease: 'back.out(1.2)'
-      })
-      .to(links, {
-        opacity: 1, duration: 0.5, stagger: 0.1, ease: 'power2.out'
-      }, '-=0.2')
-    }
-  }, [shouldAnimate])
 
   const toggleMenu = useCallback(() => {
     setMenuOpen(prev => !prev)
@@ -133,12 +65,21 @@ export function Navbar({ shouldAnimate = false, onRegisterClick, onNotifyClick }
 
   return (
     <>
-      <nav ref={navRef} className="navbar flex items-center justify-between p-4">
+      <nav className={`navbar flex items-center justify-between p-4${shouldAnimate ? ' navbar-animate' : ''}`}>
         <Link
           to="/"
           className={`navbar-brand ${location.pathname === '/' ? 'active' : ''}`}
         >
-          Exodia
+          <img
+            src="/exodia.png"
+            alt=""
+            className="navbar-logo"
+            width={28}
+            height={28}
+            decoding="async"
+            aria-hidden="true"
+          />
+          <span className="navbar-brand-text">Exodia</span>
         </Link>
 
         {/* Hamburger button — mobile only */}
@@ -156,7 +97,7 @@ export function Navbar({ shouldAnimate = false, onRegisterClick, onNotifyClick }
         </button>
         
         {/* Desktop links */}
-          <ul ref={linksRef} className="navbar-links flex items-center gap-6">
+          <ul className="navbar-links flex items-center gap-6">
             {navLinks.map(({ to, label }) => (
               <li key={to}>
               <Link
@@ -212,7 +153,11 @@ export function Navbar({ shouldAnimate = false, onRegisterClick, onNotifyClick }
       </nav>
 
        {/* Mobile slide-down menu */}
-       <div id="navbar-mobile-menu" ref={mobileMenuRef} className="navbar-mobile-menu" style={{ display: 'none' }}>
+       <div
+         id="navbar-mobile-menu"
+         className={`navbar-mobile-menu${menuOpen ? ' open' : ''}`}
+         aria-hidden={!menuOpen}
+       >
          {navLinks.map(({ to, label }) => (
            <Link
              key={to}
@@ -222,6 +167,7 @@ export function Navbar({ shouldAnimate = false, onRegisterClick, onNotifyClick }
              onMouseEnter={() => prefetchRoute(to)}
              onFocus={() => prefetchRoute(to)}
              onTouchStart={() => prefetchRoute(to)}
+             tabIndex={menuOpen ? 0 : -1}
            >
              {label}
            </Link>
@@ -231,6 +177,7 @@ export function Navbar({ shouldAnimate = false, onRegisterClick, onNotifyClick }
           type="button"
           className="mobile-nav-item mobile-notify-btn"
           onClick={() => { onNotifyClick?.(); handleMobileLinkClick(); }}
+          tabIndex={menuOpen ? 0 : -1}
         >
           <Bell size={18} />
           Notifications
@@ -240,6 +187,7 @@ export function Navbar({ shouldAnimate = false, onRegisterClick, onNotifyClick }
           type="button"
           className="mobile-nav-item mobile-register-btn"
           onClick={() => { onRegisterClick?.(); handleMobileLinkClick(); }}
+          tabIndex={menuOpen ? 0 : -1}
         >
           Register
         </button>

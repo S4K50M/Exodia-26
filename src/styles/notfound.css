@@ -4,6 +4,7 @@
 
 .not-found-container {
   min-height: 100vh;
+  min-height: 100dvh;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -115,4 +116,11 @@
 @keyframes pulse-glow {
   0%, 100% { opacity: 0.5; transform: translate(-50%, -50%) scale(1); }
   50% { opacity: 1; transform: translate(-50%, -50%) scale(1.1); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .not-found-glow,
+  .error-code {
+    animation: none;
+  }
 }

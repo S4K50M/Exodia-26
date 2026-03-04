@@ -360,6 +360,16 @@
   to { opacity: 1; transform: scale(1) translateY(0); }
 }
 
+@media (prefers-reduced-motion: reduce) {
+  .team-modal-overlay {
+    animation: none;
+  }
+
+  .team-modal-card {
+    animation: none;
+  }
+}
+
 .team-modal-close {
   position: absolute;
   top: 1rem;

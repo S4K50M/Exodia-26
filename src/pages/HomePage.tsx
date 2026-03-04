@@ -1,6 +1,4 @@
 import { useEffect, useRef, useState } from 'react'
-import gsap from 'gsap'
-import { ScrollTrigger } from 'gsap/ScrollTrigger'
 
 import bg from '../assets/home/bg.webp'
 import exodia from '../assets/home/exodia.webp'
@@ -13,8 +11,6 @@ import '../styles/home.css'
 import { LoadingScreen } from '../components/LoadingScreen'
 import { HomeSVG } from '../assets/loading/HomeSVG'
 import { useLenisScroll } from '../utils/useLenisScroll'
-
-gsap.registerPlugin(ScrollTrigger)
 
 export function HomePage() {
   const [daysRemaining, setDaysRemaining] = useState(0)
@@ -49,14 +45,43 @@ export function HomePage() {
     const trigger = scrollTriggerRef.current
     if (!trigger || !leftMountRef.current || !rightMountRef.current || !exodiaRef.current || !countdownRef.current) return
 
-    const lenis = lenisRef.current
-    const mm = gsap.matchMedia()
+    const reduceMotion =
+      window.matchMedia?.('(prefers-reduced-motion: reduce)').matches ?? false
+    if (reduceMotion) return
 
-    mm.add({
+    const connection = (navigator as any).connection
+    const saveData = connection?.saveData === true
+    const effectiveType = String(connection?.effectiveType ?? '')
+    const slowNetwork = /(^|-)2g$/.test(effectiveType) || effectiveType === 'slow-2g'
+    if (saveData || slowNetwork) return
+
+    const startMs = performance.now()
+    let cancelled = false
+    let mm: any = null
+
+    ;(async () => {
+      try {
+        const [{ default: gsap }, { ScrollTrigger }] = await Promise.all([
+          import('gsap'),
+          import('gsap/ScrollTrigger'),
+        ])
+
+        if (cancelled) return
+
+        gsap.registerPlugin(ScrollTrigger)
+
+        // If GSAP lands late, don't mutate the hero (prevents a visible flash/jump).
+        const importDelayMs = performance.now() - startMs
+        if (importDelayMs > 450) return
+
+        const lenis = lenisRef.current
+        mm = gsap.matchMedia()
+
+        mm.add({
       isMobile: "(max-width: 768px)",
       isTablet: "(min-width: 769px) and (max-width: 1199px)",
       isDesktop: "(min-width: 1200px)"
-    }, (context) => {
+    }, (context: any) => {
       const { isMobile, isTablet } = context.conditions as { isMobile: boolean, isTablet: boolean, isDesktop: boolean }
 
       // ── DYNAMIC VARIABLES BASED ON SCREEN SIZE ──
@@ -79,49 +104,92 @@ export function HomePage() {
       }
 
       // ── MASTER TIMELINE ────────────────────────────────────────────────────────
+      const setupScroll = () => {
+        if (bgRef.current) {
+          gsap.fromTo(
+            bgRef.current,
+            { y: 0, scale: 1, x: 0 },
+            {
+              y: isMobile ? '-20vh' : isTablet ? '-28vh' : '-35vh',
+              scale: 1.25,
+              x: '-4%',
+              ease: 'none',
+              scrollTrigger: { trigger, start: 'top top', end: 'bottom bottom', scrub: 3 },
+            }
+          )
+        }
+        if (leftMountRef.current) {
+          gsap.fromTo(
+            leftMountRef.current,
+            { xPercent: -gapX, yPercent: mountY, scale: mountScale, transformOrigin: originL },
+            {
+              xPercent: -(gapX + (isMobile ? 70 : isTablet ? 20 : 10)),
+              yPercent: 0,
+              scale: isMobile ? 2.2 : isTablet ? 2.4 : 2.7,
+              ease: 'none',
+              scrollTrigger: { trigger, start: 'top top', end: 'bottom bottom', scrub: 1.5 },
+            }
+          )
+        }
+        if (rightMountRef.current) {
+          gsap.fromTo(
+            rightMountRef.current,
+            { xPercent: gapX, yPercent: mountY, scale: mountScale, transformOrigin: originR },
+            {
+              xPercent: gapX + (isMobile ? 70 : isTablet ? 20 : 10),
+              yPercent: 0,
+              scale: isMobile ? 2.0 : isTablet ? 2.2 : 2.4,
+              ease: 'none',
+              scrollTrigger: { trigger, start: 'top top', end: 'bottom bottom', scrub: 1.5 },
+            }
+          )
+        }
+        if (exodiaRef.current) {
+          gsap.fromTo(
+            exodiaRef.current,
+            { yPercent: 0, scale: exodiaFinalScale },
+            {
+              yPercent: isMobile ? -350 : isTablet ? -220 : -180,
+              scale: exodiaFinalScale * 0.75,
+              ease: 'none',
+              scrollTrigger: { trigger, start: 'top top', end: 'bottom bottom', scrub: 1 },
+            }
+          )
+        }
+        // Fade countdown out rapidly as soon as user scrolls
+        if (countdownRef.current) {
+          gsap.fromTo(
+            countdownRef.current,
+            { opacity: 1, y: 0 },
+            {
+              opacity: 0,
+              y: -40,
+              ease: 'none',
+              scrollTrigger: { trigger, start: 'top top', end: '15% top', scrub: 0.5 },
+            }
+          )
+        }
+        if (hutRef.current) {
+          gsap.fromTo(
+            hutRef.current,
+            { yPercent: 0, scale: 1 },
+            {
+              yPercent: 120,
+              scale: 0.9,
+              ease: 'none',
+              scrollTrigger: { trigger, start: 'top top', end: 'bottom bottom', scrub: 1 },
+            }
+          )
+        }
+      }
+
       const tl = gsap.timeline({
+        paused: hasIntroPlayed.current,
         delay: hasIntroPlayed.current ? 0 : 0.2,
         onComplete: () => {
           hasIntroPlayed.current = true
           lenis?.start()
-
-          if (bgRef.current) {
-            gsap.fromTo(bgRef.current,
-              { y: 0, scale: 1, x: 0 },
-              { y: isMobile ? '-20vh' : isTablet ? '-28vh' : '-35vh', scale: 1.25, x: '-4%', ease: 'none',
-                scrollTrigger: { trigger, start: 'top top', end: 'bottom bottom', scrub: 3 } })
-          }
-          if (leftMountRef.current) {
-            gsap.fromTo(leftMountRef.current,
-              { xPercent: -gapX, yPercent: mountY, scale: mountScale, transformOrigin: originL },
-              { xPercent: -(gapX + (isMobile ? 70 : isTablet ? 20 : 10)), yPercent: 0, scale: isMobile ? 2.2 : isTablet ? 2.4 : 2.7, ease: 'none',
-                scrollTrigger: { trigger, start: 'top top', end: 'bottom bottom', scrub: 1.5 } })
-          }
-          if (rightMountRef.current) {
-            gsap.fromTo(rightMountRef.current,
-              { xPercent: gapX, yPercent: mountY, scale: mountScale, transformOrigin: originR },
-              { xPercent: gapX + (isMobile ? 70 : isTablet ? 20 : 10), yPercent: 0, scale: isMobile ? 2.0 : isTablet ? 2.2 : 2.4, ease: 'none',
-                scrollTrigger: { trigger, start: 'top top', end: 'bottom bottom', scrub: 1.5 } })
-          }
-          if (exodiaRef.current) {
-            gsap.fromTo(exodiaRef.current,
-              { yPercent: 0, scale: exodiaFinalScale },
-              { yPercent: isMobile ? -350 : isTablet ? -220 : -180, scale: exodiaFinalScale * 0.75, ease: 'none',
-                scrollTrigger: { trigger, start: 'top top', end: 'bottom bottom', scrub: 1 } })
-          }
-          // Fade countdown out rapidly as soon as user scrolls
-          if (countdownRef.current) {
-            gsap.fromTo(countdownRef.current,
-              { opacity: 1, y: 0 },
-              { opacity: 0, y: -40, ease: 'none',
-                scrollTrigger: { trigger, start: 'top top', end: '15% top', scrub: 0.5 } })
-          }
-          if (hutRef.current) {
-            gsap.fromTo(hutRef.current,
-              { yPercent: 0, scale: 1 },
-              { yPercent: 120, scale: 0.9, ease: 'none',
-                scrollTrigger: { trigger, start: 'top top', end: 'bottom bottom', scrub: 1 } })
-          }
+          setupScroll()
         },
       })
 
@@ -147,16 +215,23 @@ export function HomePage() {
          gsap.set(rightMountRef.current, { scale: mountScale, xPercent: gapX, yPercent: mountY, transformOrigin: originR })
          gsap.set(exodiaRef.current, { opacity: 1, scale: exodiaFinalScale, yPercent: 0 })
          gsap.set(countdownRef.current, { opacity: 1, y: 0 })
+         lenis?.start()
+         setupScroll()
       }
 
       return () => {
         tl.kill()
       }
     }, containerRef)
+      } catch {
+        // Ignore dynamic import failures
+      }
+    })()
 
     return () => {
-      mm.revert()
-      lenis?.start()
+      cancelled = true
+      mm?.revert()
+      lenisRef.current?.start()
     }
   }, [])
 
@@ -166,32 +241,78 @@ export function HomePage() {
 
     const aboutEl = aboutRef.current
 
-    const ctx = gsap.context(() => {
-      gsap.fromTo(
-        aboutEl,
-        { opacity: 0, yPercent: 30 },
-        {
-          opacity: 1,
-          yPercent: 0,
-          ease: 'power2.out',
-          scrollTrigger: {
-            trigger: scrollTriggerRef.current,
-            start: '50% top',
-            end: '60% top',
-            scrub: 1,
-            onUpdate: (self) => {
-              if (self.progress > 0.05) {
-                aboutEl.style.pointerEvents = 'auto'
-              } else {
-                aboutEl.style.pointerEvents = 'none'
-              }
-            },
-          },
-        }
-      )
-    })
+    const reduceMotion =
+      window.matchMedia?.('(prefers-reduced-motion: reduce)').matches ?? false
 
-    return () => ctx.revert()
+    const connection = (navigator as any).connection
+    const saveData = connection?.saveData === true
+    const effectiveType = String(connection?.effectiveType ?? '')
+    const slowNetwork = /(^|-)2g$/.test(effectiveType) || effectiveType === 'slow-2g'
+
+    if (reduceMotion || saveData || slowNetwork) {
+      aboutEl.style.opacity = '1'
+      aboutEl.style.transform = 'none'
+      aboutEl.style.pointerEvents = 'auto'
+      return
+    }
+
+    const startMs = performance.now()
+    let cancelled = false
+    let ctx: { revert: () => void } | null = null
+
+    ;(async () => {
+      try {
+        const [{ default: gsap }, { ScrollTrigger }] = await Promise.all([
+          import('gsap'),
+          import('gsap/ScrollTrigger'),
+        ])
+
+        if (cancelled) return
+
+        const importDelayMs = performance.now() - startMs
+        if (importDelayMs > 450) {
+          aboutEl.style.opacity = '1'
+          aboutEl.style.transform = 'none'
+          aboutEl.style.pointerEvents = 'auto'
+          return
+        }
+
+        gsap.registerPlugin(ScrollTrigger)
+
+        ctx = gsap.context(() => {
+          gsap.fromTo(
+            aboutEl,
+            { opacity: 0, yPercent: 30 },
+            {
+              opacity: 1,
+              yPercent: 0,
+              ease: 'power2.out',
+              scrollTrigger: {
+                trigger: scrollTriggerRef.current,
+                start: '50% top',
+                end: '60% top',
+                scrub: 1,
+                onUpdate: (self) => {
+                  if (self.progress > 0.05) {
+                    aboutEl.style.pointerEvents = 'auto'
+                  } else {
+                    aboutEl.style.pointerEvents = 'none'
+                  }
+                },
+              },
+            }
+          )
+        })
+      } catch {
+        // Ignore dynamic import failures
+      }
+    })()
+
+    return () => {
+      cancelled = true
+      ctx?.revert()
+      ctx = null
+    }
   }, [])
 
   return (

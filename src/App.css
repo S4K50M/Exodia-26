@@ -13,6 +13,12 @@
   position: relative;
 }
 
+@media (prefers-reduced-motion: reduce) {
+  .scroll-trigger {
+    height: 100dvh;
+  }
+}
+
 /* Sticky stage - stays in viewport while user scrolls through scroll-trigger */
 .parallax-stage {
   position: sticky;
@@ -151,6 +157,9 @@
 }
 
 .navbar-brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.65rem;
   font-size: 1.1rem;
   font-weight: 600;
   letter-spacing: 0.08em;
@@ -164,6 +173,15 @@
 }
 .navbar-brand.active {
   opacity: 1;
+}
+
+.navbar-logo {
+  width: 28px;
+  height: 28px;
+  border-radius: 8px;
+  box-shadow:
+    0 8px 18px rgba(0, 0, 0, 0.45),
+    0 0 0 1px rgba(255, 255, 255, 0.08);
 }
 
 .navbar-links {
@@ -248,11 +266,11 @@
 
 /* Mobile slide-down menu */
 .navbar-mobile-menu {
-  display: none;
+  display: flex;
   position: fixed;
   top: calc(60px + var(--safe-area-top));
   left: 50%;
-  transform: translateX(-50%);
+  transform: translateX(-50%) translateY(-12px) scale(0.98);
   width: calc(100% - 1.5rem);
   max-width: 400px;
   flex-direction: column;
@@ -267,6 +285,24 @@
               0 0 80px rgba(80, 140, 255, 0.06);
   z-index: 22;
   opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  will-change: transform, opacity;
+  transition:
+    opacity 220ms ease,
+    transform 240ms cubic-bezier(0.2, 0.9, 0.2, 1),
+    visibility 0s linear 240ms;
+}
+
+.navbar-mobile-menu.open {
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
+  transform: translateX(-50%) translateY(0) scale(1);
+  transition:
+    opacity 220ms ease,
+    transform 240ms cubic-bezier(0.2, 0.9, 0.2, 1),
+    visibility 0s linear 0s;
 }
 
 .mobile-nav-item {
@@ -282,8 +318,28 @@
   background: transparent;
   border: 1px solid transparent;
   cursor: pointer;
-  transition: background 180ms ease, border-color 180ms ease, color 180ms ease;
+  opacity: 0;
+  transform: translateY(-6px);
+  transition:
+    opacity 200ms ease,
+    transform 240ms cubic-bezier(0.2, 0.9, 0.2, 1),
+    background 180ms ease,
+    border-color 180ms ease,
+    color 180ms ease;
 }
+
+.navbar-mobile-menu.open .mobile-nav-item {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.navbar-mobile-menu.open .mobile-nav-item:nth-child(1) { transition-delay: 40ms; }
+.navbar-mobile-menu.open .mobile-nav-item:nth-child(2) { transition-delay: 70ms; }
+.navbar-mobile-menu.open .mobile-nav-item:nth-child(3) { transition-delay: 100ms; }
+.navbar-mobile-menu.open .mobile-nav-item:nth-child(4) { transition-delay: 130ms; }
+.navbar-mobile-menu.open .mobile-nav-item:nth-child(5) { transition-delay: 160ms; }
+.navbar-mobile-menu.open .mobile-nav-item:nth-child(6) { transition-delay: 190ms; }
+
 .mobile-nav-item:hover,
 .mobile-nav-item.active {
   background: rgba(255, 255, 255, 0.08);
@@ -331,6 +387,13 @@
   -webkit-backdrop-filter: blur(2px);
 }
 
+@media (prefers-reduced-motion: reduce) {
+  .navbar-mobile-menu,
+  .mobile-nav-item {
+    transition: none;
+  }
+}
+
 .page-content {
   min-height: 100vh;
   padding: 8rem 1.5rem 4rem;
@@ -355,9 +418,10 @@
   align-items: center;
   justify-content: center;
   background: rgba(5, 8, 25, 0.35);
-  backdrop-filter: blur(6px);
-  -webkit-backdrop-filter: blur(6px);
-  pointer-events: none;
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  pointer-events: auto;
+  cursor: progress;
 }
 
 .route-fallback-inner {
@@ -395,6 +459,11 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
+  .route-fallback {
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+  }
+
   .route-spinner {
     animation: none;
   }
@@ -463,6 +532,12 @@
 
   .navbar-brand {
     font-size: 0.9rem;
+  }
+
+  .navbar-logo {
+    width: 24px;
+    height: 24px;
+    border-radius: 7px;
   }
 
   .navbar-mobile-menu {

@@ -21,6 +21,12 @@
   scrollbar-color: rgba(234, 179, 8, 0.5) transparent; /* Amber/Yellow theme */
 }
 
+@media (prefers-reduced-motion: reduce) {
+  .register-overlay {
+    scroll-behavior: auto;
+  }
+}
+
 /* ── Overlay Scrollbar (WebKit) ──────────────────────────────────────────── */
 .register-overlay::-webkit-scrollbar {
   width: 6px;

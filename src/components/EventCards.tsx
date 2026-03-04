@@ -345,74 +345,36 @@ export function EventCards({ events }: EventCardsProps) {
       </div>
       {/* Details overlay — rendered via portal so it escapes GSAP-transformed ancestors */}
       {openIdx !== null && extEvents[openIdx] && createPortal(
-        <div className="event-details-overlay" onClick={() => setOpenIdx(null)}>
+          <div className="event-details-overlay" onClick={() => setOpenIdx(null)}>
           <div className="event-details-modal" onClick={(e) => e.stopPropagation()}>
             
-            <button onClick={() => setOpenIdx(null)} aria-label="Close" className="event-modal-close">✕</button>
+            <button
+              type="button"
+              onClick={() => setOpenIdx(null)}
+              aria-label="Close"
+              className="event-modal-close"
+            >
+              ✕
+            </button>
             
-            <h2 style={{ margin: '0 0 1.5rem 0', color: '#f3af26', fontSize: 'clamp(2.5rem, 6vw, 4.5rem)', textTransform: 'uppercase', letterSpacing: '2px', textShadow: '0 0 20px rgba(251,191,36,0.4)' }}>
+            <h2 className="event-modal-title">
               {extEvents[openIdx].title}
             </h2>
             
-            <p style={{ color: 'rgba(190, 225, 255, 0.95)', fontSize: '1.25rem', maxWidth: '800px', lineHeight: '1.6', margin: '0 0 2.5rem 0' }}>
-              {extEvents[openIdx].desc}
-            </p>
+            {extEvents[openIdx].desc && (
+              <p className="event-modal-desc">{extEvents[openIdx].desc}</p>
+            )}
             
-            <div style={{ display: 'flex', gap: '3rem', marginBottom: '3.5rem', justifyContent: 'center' }}>
-              <p
-                style={{
-                  margin: 0,
-                  padding: '0.5rem 1rem',
-                  borderRadius: '8px',
-                  color: 'rgba(190, 225, 255, 1)',
-                  backgroundColor: 'transparent',
-                  fontSize: '1.2rem',
-                  fontWeight: 600,
-                  textTransform: 'uppercase',
-                  letterSpacing: '1px',
-                  transition: 'all 0.3s ease',
-                  cursor: 'pointer'
-                }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.color = 'rgba(140, 200, 255, 1)';
-                  e.currentTarget.style.backgroundColor = 'rgba(104, 181, 233, 0.12)';
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.color = 'rgba(190, 225, 255, 1)';
-                  e.currentTarget.style.backgroundColor = 'transparent';
-                }}
-              >
-                Dates: <span style={{ fontWeight: 400, color: '#f3af26' }}>{extEvents[openIdx].date}</span>
+            <div className="event-modal-meta">
+              <p className="event-modal-pill">
+                Dates: <span>{extEvents[openIdx].date ?? 'TBA'}</span>
               </p>
-
-              <p
-                style={{
-                  margin: 0,
-                  padding: '0.5rem 1rem',
-                  borderRadius: '8px',
-                  color: 'rgba(190, 225, 255, 1)',
-                  backgroundColor: 'transparent',
-                  fontSize: '1.2rem',
-                  fontWeight: 600,
-                  textTransform: 'uppercase',
-                  letterSpacing: '1px',
-                  transition: 'all 0.3s ease',
-                  cursor: 'pointer'
-                }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.color = 'rgba(140, 200, 255, 1)';
-                  e.currentTarget.style.backgroundColor = 'rgba(104, 181, 233, 0.12)';
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.color = 'rgba(190, 225, 255, 1)';
-                  e.currentTarget.style.backgroundColor = 'transparent';
-                }}
-              >
-                Type: <span style={{ fontWeight: 400, color: '#f3af26' }}>{extEvents[openIdx].eventType}</span>
+              <p className="event-modal-pill">
+                Type: <span>{extEvents[openIdx].eventType ?? 'Event'}</span>
               </p>
             </div>
                         
-            <div style={{ display: 'flex', gap: '1.5rem', justifyContent: 'center' }}>
+            <div className="event-modal-actions">
               {extEvents[openIdx].rulebook && (
                 <a href={extEvents[openIdx].rulebook} target="_blank" rel="noopener noreferrer">
                   <button className="event-modal-btn-primary">
@@ -420,7 +382,7 @@ export function EventCards({ events }: EventCardsProps) {
                   </button>
                 </a>
               )}
-              <button onClick={() => setOpenIdx(null)} className="event-modal-btn-secondary">
+              <button type="button" onClick={() => setOpenIdx(null)} className="event-modal-btn-secondary">
                 Close
               </button>
             </div>

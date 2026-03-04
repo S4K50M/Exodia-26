@@ -21,6 +21,12 @@
   scrollbar-color: rgba(234, 179, 8, 0.5) transparent; /* Firefox: thumb color | track color */
 }
 
+@media (prefers-reduced-motion: reduce) {
+  .merch-overlay {
+    scroll-behavior: auto;
+  }
+}
+
 /* ── Overlay Scrollbar (WebKit) ──────────────────────────────────────────── */
 .merch-overlay::-webkit-scrollbar {
   width: 6px; /* Slightly wider than before so it's easier to grab */
@@ -395,6 +401,20 @@
 @keyframes merchImgPop {
   from { opacity: 0.5; transform: scale(0.92); }
   to { opacity: 1; transform: scale(1); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .merch-viewer-overlay {
+    animation: none;
+  }
+
+  .merch-viewer-img-wrap img {
+    animation: none;
+  }
+
+  .merch-toast {
+    animation: none;
+  }
 }
 
 .merch-viewer-info {

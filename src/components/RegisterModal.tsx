@@ -31,6 +31,17 @@ function useParticles(canvasRef: React.RefObject<HTMLCanvasElement | null>, isOp
   useEffect(() => {
     if (!isOpen || !canvasRef.current) return
 
+    const reduceMotion =
+      window.matchMedia?.('(prefers-reduced-motion: reduce)').matches ?? false
+    if (reduceMotion) return
+
+    const connection = (navigator as any).connection
+    const saveData = connection?.saveData === true
+    const effectiveType = String(connection?.effectiveType ?? '')
+    const slowNetwork =
+      /(^|-)2g$/.test(effectiveType) || effectiveType === 'slow-2g'
+    if (saveData || slowNetwork) return
+
     const canvas = canvasRef.current
     const ctx = canvas.getContext('2d')
     if (!ctx) return
@@ -43,8 +54,26 @@ function useParticles(canvasRef: React.RefObject<HTMLCanvasElement | null>, isOp
     window.addEventListener('resize', resize)
 
     // Initialize particles
-    const PARTICLE_COUNT = 60
-    particlesRef.current = Array.from({ length: PARTICLE_COUNT }, () => ({
+    let particleCount = 60
+    const isMobile = window.matchMedia?.('(max-width: 720px)').matches ?? false
+    if (isMobile) particleCount = 40
+
+    const deviceMemory = (navigator as any).deviceMemory as number | undefined
+    const hardwareConcurrency = (navigator as any).hardwareConcurrency as
+      | number
+      | undefined
+    if (typeof deviceMemory === 'number' && deviceMemory > 0 && deviceMemory <= 4) {
+      particleCount = Math.min(particleCount, 30)
+    }
+    if (
+      typeof hardwareConcurrency === 'number' &&
+      hardwareConcurrency > 0 &&
+      hardwareConcurrency <= 4
+    ) {
+      particleCount = Math.min(particleCount, 30)
+    }
+
+    particlesRef.current = Array.from({ length: particleCount }, () => ({
       x: Math.random() * canvas.width,
       y: Math.random() * canvas.height,
       vx: (Math.random() - 0.5) * 0.5,
