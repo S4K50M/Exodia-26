@@ -43,14 +43,33 @@ export function NotificationSidebar({ isOpen, onClose }: NotificationSidebarProp
   }, [isOpen]);
 
   useEffect(() => {
+    const reduceMotion =
+      window.matchMedia?.('(prefers-reduced-motion: reduce)').matches ?? false
+
     if (isOpen) {
       unlockScrollRef.current?.();
       unlockScrollRef.current = lockBodyScroll();
 
       // Slide in from right and fade in overlay
+      if (reduceMotion) {
+        gsap.set(sidebarRef.current, { x: 0 });
+        gsap.set(overlayRef.current, { opacity: 1, pointerEvents: 'auto' });
+        return;
+      }
+
       gsap.to(sidebarRef.current, { x: 0, duration: 0.6, ease: 'power3.out' });
       gsap.to(overlayRef.current, { opacity: 1, pointerEvents: 'auto', duration: 0.4 });
     } else {
+      if (reduceMotion) {
+        gsap.set(sidebarRef.current, { x: '100%' });
+        gsap.set(overlayRef.current, { opacity: 0, pointerEvents: 'none' });
+        if (!isOpenRef.current) {
+          unlockScrollRef.current?.();
+          unlockScrollRef.current = null;
+        }
+        return;
+      }
+
       // Slide out to right
       gsap.to(sidebarRef.current, {
         x: '100%',

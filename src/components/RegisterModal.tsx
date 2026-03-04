@@ -160,10 +160,20 @@ export function RegisterModal({ isOpen, onClose }: RegisterModalProps) {
   useEffect(() => {
     if (!overlayRef.current || !contentRef.current) return
 
+    const reduceMotion =
+      window.matchMedia?.('(prefers-reduced-motion: reduce)').matches ?? false
+
     if (isOpen) {
       unlockScrollRef.current?.()
       unlockScrollRef.current = lockBodyScroll()
       gsap.set(overlayRef.current, { display: 'flex' })
+
+      if (reduceMotion) {
+        gsap.set(overlayRef.current, { opacity: 1 })
+        gsap.set(contentRef.current, { y: 0, opacity: 1, scale: 1 })
+        return
+      }
+
       gsap.to(overlayRef.current, { opacity: 1, duration: 0.4, ease: 'power2.out' })
       gsap.fromTo(
         contentRef.current,
@@ -171,6 +181,17 @@ export function RegisterModal({ isOpen, onClose }: RegisterModalProps) {
         { y: 0, opacity: 1, scale: 1, duration: 0.5, ease: 'back.out(1.2)', delay: 0.15 }
       )
     } else {
+      if (reduceMotion) {
+        gsap.set(contentRef.current, { y: 0, opacity: 0, scale: 0.95 })
+        gsap.set(overlayRef.current, { opacity: 0 })
+        if (!isOpenRef.current) {
+          overlayRef.current.style.display = 'none'
+          unlockScrollRef.current?.()
+          unlockScrollRef.current = null
+        }
+        return
+      }
+
       gsap.to(contentRef.current, { y: 30, opacity: 0, scale: 0.95, duration: 0.3, ease: 'power2.in' })
       gsap.to(overlayRef.current, {
         opacity: 0,
@@ -178,8 +199,8 @@ export function RegisterModal({ isOpen, onClose }: RegisterModalProps) {
         delay: 0.1,
         ease: 'power2.in',
         onComplete: () => {
-          if (overlayRef.current) overlayRef.current.style.display = 'none'
           if (!isOpenRef.current) {
+            if (overlayRef.current) overlayRef.current.style.display = 'none'
             unlockScrollRef.current?.()
             unlockScrollRef.current = null
           }
@@ -275,7 +296,7 @@ export function RegisterModal({ isOpen, onClose }: RegisterModalProps) {
       {/* Content */}
       <div ref={contentRef} className="register-content">
         {/* Close button */}
-        <button className="register-close-btn" onClick={onClose} aria-label="Close">
+        <button type="button" className="register-close-btn" onClick={onClose} aria-label="Close">
           &times;
         </button>
 

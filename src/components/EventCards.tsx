@@ -1,6 +1,7 @@
 import { useRef, useEffect, useState, useCallback, useLayoutEffect, useMemo } from 'react'
 import { createPortal } from 'react-dom'
 import gsap from 'gsap'
+import { lockBodyScroll } from '../utils/bodyScrollLock'
 
 export interface Event {
   id: string | number
@@ -93,6 +94,25 @@ export function EventCards({ events }: EventCardsProps) {
   const lastSwipeTime = useRef(0)
   const touchStartX = useRef(0)
   const [openIdx, setOpenIdx] = useState<number | null>(null)
+  const unlockScrollRef = useRef<(() => void) | null>(null)
+
+  useEffect(() => {
+    if (openIdx === null) return
+
+    unlockScrollRef.current?.()
+    unlockScrollRef.current = lockBodyScroll()
+
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setOpenIdx(null)
+    }
+    window.addEventListener('keydown', onKeyDown)
+
+    return () => {
+      window.removeEventListener('keydown', onKeyDown)
+      unlockScrollRef.current?.()
+      unlockScrollRef.current = null
+    }
+  }, [openIdx])
 
   useEffect(() => { currentIndexRef.current = currentIndex }, [currentIndex])
 
@@ -345,8 +365,20 @@ export function EventCards({ events }: EventCardsProps) {
       </div>
       {/* Details overlay — rendered via portal so it escapes GSAP-transformed ancestors */}
       {openIdx !== null && extEvents[openIdx] && createPortal(
-          <div className="event-details-overlay" onClick={() => setOpenIdx(null)}>
-          <div className="event-details-modal" onClick={(e) => e.stopPropagation()}>
+          <div
+            className="event-details-overlay"
+            onClick={() => setOpenIdx(null)}
+            onWheel={(e) => e.stopPropagation()}
+            onTouchMove={(e) => e.stopPropagation()}
+          >
+          <div
+            className="event-details-modal"
+            onClick={(e) => e.stopPropagation()}
+            role="dialog"
+            aria-modal="true"
+            aria-label={String(extEvents[openIdx].title ?? 'Event details')}
+            data-lenis-prevent="true"
+          >
             
             <button
               type="button"
@@ -377,7 +409,7 @@ export function EventCards({ events }: EventCardsProps) {
             <div className="event-modal-actions">
               {extEvents[openIdx].rulebook && (
                 <a href={extEvents[openIdx].rulebook} target="_blank" rel="noopener noreferrer">
-                  <button className="event-modal-btn-primary">
+                  <button type="button" className="event-modal-btn-primary">
                     Open Rulebook
                   </button>
                 </a>

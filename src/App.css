@@ -424,6 +424,20 @@
   cursor: progress;
 }
 
+.modal-fallback {
+  position: fixed;
+  inset: 0;
+  z-index: 95; /* below modals (100+), above navbar (20) */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(5, 8, 25, 0.25);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  pointer-events: auto;
+  cursor: progress;
+}
+
 .route-fallback-inner {
   display: inline-flex;
   align-items: center;
@@ -459,7 +473,8 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .route-fallback {
+  .route-fallback,
+  .modal-fallback {
     backdrop-filter: none;
     -webkit-backdrop-filter: none;
   }

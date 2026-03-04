@@ -1,8 +1,10 @@
 import React, { useEffect, useState, useRef, useCallback, useMemo } from 'react'
 import gsap from 'gsap'
 import supabase from '../utils/supabase'
+import { lockBodyScroll } from '../utils/bodyScrollLock'
 
 import background from '../assets/merchendise/background.png'
+import qr from '../assets/register/qr.png'
 
 // Merch product images
 import hoodieFront from '../assets/merch/final mockup collage front.webp'
@@ -52,6 +54,19 @@ export function MerchModal({ isOpen, onClose }: MerchModalProps) {
   const overlayRef = useRef<HTMLDivElement | null>(null)
   const contentRef = useRef<HTMLDivElement | null>(null)
   const cardsRef = useRef<(HTMLDivElement | null)[]>([])
+  const unlockScrollRef = useRef<(() => void) | null>(null)
+  const isOpenRef = useRef(isOpen)
+
+  useEffect(() => {
+    isOpenRef.current = isOpen
+  }, [isOpen])
+
+  useEffect(() => {
+    return () => {
+      unlockScrollRef.current?.()
+      unlockScrollRef.current = null
+    }
+  }, [])
 
   // Form State
   const [formData, setFormData] = useState({
@@ -143,6 +158,18 @@ export function MerchModal({ isOpen, onClose }: MerchModalProps) {
     return () => window.removeEventListener('keydown', handleKey)
   }, [viewerOpen, viewerProduct])
 
+  useEffect(() => {
+    if (!isOpen) return
+    const handleKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        if (viewerOpen) return
+        onClose()
+      }
+    }
+    window.addEventListener('keydown', handleKey)
+    return () => window.removeEventListener('keydown', handleKey)
+  }, [isOpen, onClose, viewerOpen])
+
   // Calculate dynamic total price
   const totalAmount = useMemo(() => {
     return selectedItems.reduce((total, itemId) => {
@@ -155,24 +182,52 @@ export function MerchModal({ isOpen, onClose }: MerchModalProps) {
   useEffect(() => {
     if (!overlayRef.current || !contentRef.current) return
 
+    const reduceMotion =
+      window.matchMedia?.('(prefers-reduced-motion: reduce)').matches ?? false
+
     if (isOpen) {
-      document.body.style.overflow = 'hidden'
+      unlockScrollRef.current?.()
+      unlockScrollRef.current = lockBodyScroll()
       gsap.set(overlayRef.current, { display: 'flex' })
-      gsap.to(overlayRef.current, { opacity: 1, duration: 0.4, ease: 'power2.out' })
-      gsap.fromTo(
-        contentRef.current,
-        { y: 40, opacity: 0, scale: 0.95 },
-        { y: 0, opacity: 1, scale: 1, duration: 0.5, ease: 'back.out(1.2)', delay: 0.15 }
-      )
-      // Stagger animate each product card
-      const cards = cardsRef.current.filter(Boolean)
-      if (cards.length) {
-        gsap.fromTo(cards,
-          { y: 60, opacity: 0, scale: 0.9 },
-          { y: 0, opacity: 1, scale: 1, duration: 0.6, ease: 'back.out(1.4)', stagger: 0.15, delay: 0.4 }
+
+      if (reduceMotion) {
+        gsap.set(overlayRef.current, { opacity: 1 })
+        gsap.set(contentRef.current, { y: 0, opacity: 1, scale: 1 })
+
+        const cards = cardsRef.current.filter(Boolean)
+        if (cards.length) {
+          gsap.set(cards, { y: 0, opacity: 1, scale: 1 })
+        }
+      } else {
+        gsap.to(overlayRef.current, { opacity: 1, duration: 0.4, ease: 'power2.out' })
+        gsap.fromTo(
+          contentRef.current,
+          { y: 40, opacity: 0, scale: 0.95 },
+          { y: 0, opacity: 1, scale: 1, duration: 0.5, ease: 'back.out(1.2)', delay: 0.15 }
         )
+        // Stagger animate each product card
+        const cards = cardsRef.current.filter(Boolean)
+        if (cards.length) {
+          gsap.fromTo(cards,
+            { y: 60, opacity: 0, scale: 0.9 },
+            { y: 0, opacity: 1, scale: 1, duration: 0.6, ease: 'back.out(1.4)', stagger: 0.15, delay: 0.4 }
+          )
+        }
       }
     } else {
+      if (reduceMotion) {
+        gsap.set(contentRef.current, { y: 0, opacity: 0, scale: 0.95 })
+        gsap.set(overlayRef.current, { opacity: 0 })
+        if (!isOpenRef.current) overlayRef.current.style.display = 'none'
+
+        if (!isOpenRef.current) {
+          unlockScrollRef.current?.()
+          unlockScrollRef.current = null
+        }
+
+        return
+      }
+
       gsap.to(contentRef.current, { y: 30, opacity: 0, scale: 0.95, duration: 0.3, ease: 'power2.in' })
       gsap.to(overlayRef.current, {
         opacity: 0,
@@ -180,8 +235,11 @@ export function MerchModal({ isOpen, onClose }: MerchModalProps) {
         delay: 0.1,
         ease: 'power2.in',
         onComplete: () => {
-          if (overlayRef.current) overlayRef.current.style.display = 'none'
-          document.body.style.overflow = ''
+          if (!isOpenRef.current) {
+            if (overlayRef.current) overlayRef.current.style.display = 'none'
+            unlockScrollRef.current?.()
+            unlockScrollRef.current = null
+          }
         },
       })
     }
@@ -339,14 +397,18 @@ return (
           <div className="merch-viewer-container" onClick={(e) => e.stopPropagation()}
             onTouchStart={handleTouchStart} onTouchMove={handleTouchMove} onTouchEnd={handleTouchEnd}
           >
-            <button className="merch-viewer-close" onClick={closeViewer}>&times;</button>
-            <button className="merch-viewer-arrow merch-viewer-arrow-left" onClick={viewerPrev}>&#8249;</button>
+            <button type="button" className="merch-viewer-close" onClick={closeViewer}>&times;</button>
+            <button type="button" className="merch-viewer-arrow merch-viewer-arrow-left" onClick={viewerPrev}>&#8249;</button>
             
             <div className="merch-viewer-img-wrap">
-              <img src={currentProduct.views[viewerIndex].src} alt={currentProduct.views[viewerIndex].label} />
+              <img
+                src={currentProduct.views[viewerIndex].src}
+                alt={currentProduct.views[viewerIndex].label}
+                decoding="async"
+              />
             </div>
 
-            <button className="merch-viewer-arrow merch-viewer-arrow-right" onClick={viewerNext}>&#8250;</button>
+            <button type="button" className="merch-viewer-arrow merch-viewer-arrow-right" onClick={viewerNext}>&#8250;</button>
 
             <div className="merch-viewer-info">
               <h3>{currentProduct.name} — ₹{currentProduct.price}</h3>
@@ -363,7 +425,7 @@ return (
 
       {/* Content */}
       <div ref={contentRef} className="merch-content" data-lenis-prevent="true">
-        <button className="merch-close-btn" onClick={onClose} aria-label="Close">&times;</button>
+        <button type="button" className="merch-close-btn" onClick={onClose} aria-label="Close">&times;</button>
 
         <h1 className="merch-title">Exodia'26 Merchandise</h1>
         <p className="merch-subtitle">Grab your official fest gear — limited drops, unlimited vibes</p>
@@ -388,22 +450,24 @@ return (
                   src={product.views[activeViews[pIdx]].src} 
                   alt={`${product.name} ${product.views[activeViews[pIdx]].label}`} 
                   className="merch-card-img"
+                  decoding="async"
                 />
                 <span className="merch-card-expand-hint">Click to expand</span>
                 
                 {/* Mini arrows */}
                 {product.views.length > 1 && (
-                  <>
-                    <button className="merch-card-arrow merch-card-arrow-l" onClick={(e) => { e.stopPropagation(); cardPrev(pIdx) }}>&#8249;</button>
-                    <button className="merch-card-arrow merch-card-arrow-r" onClick={(e) => { e.stopPropagation(); cardNext(pIdx) }}>&#8250;</button>
-                  </>
-                )}
+                    <>
+                      <button type="button" className="merch-card-arrow merch-card-arrow-l" onClick={(e) => { e.stopPropagation(); cardPrev(pIdx) }}>&#8249;</button>
+                      <button type="button" className="merch-card-arrow merch-card-arrow-r" onClick={(e) => { e.stopPropagation(); cardNext(pIdx) }}>&#8250;</button>
+                    </>
+                  )}
               </div>
 
               {/* View dots */}
               <div className="merch-card-dots">
                 {product.views.map((v, i) => (
                   <button 
+                    type="button"
                     key={i} 
                     className={`merch-card-dot ${i === activeViews[pIdx] ? 'active' : ''}`}
                     onClick={() => setCardView(pIdx, i)}
@@ -432,9 +496,10 @@ return (
           {/* QR */}
           <div className="merch-qr-section">
             <img
-              src="https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=upi://pay?pa=example@upi&pn=Exodia"
+              src={qr}
               alt="Payment QR Code"
               className="merch-qr-img"
+              decoding="async"
             />
             <div className="merch-qr-details">
               <p className="merch-qr-label">Scan to Pay</p>

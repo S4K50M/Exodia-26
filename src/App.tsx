@@ -12,8 +12,6 @@ import {
   loadNotificationSidebar,
   loadRegisterModal,
   loadTeamPage,
-  prefetchNotifications,
-  prefetchRegisterModal,
   prefetchRoute,
 } from './routes'
 
@@ -55,6 +53,17 @@ function RouteFallback() {
   )
 }
 
+function ModalFallback({ label }: { label: string }) {
+  return (
+    <div className="modal-fallback" role="status" aria-live="polite">
+      <div className="route-fallback-inner">
+        <span className="route-spinner" aria-hidden="true" />
+        <span className="route-fallback-text">{label}</span>
+      </div>
+    </div>
+  )
+}
+
 function App() {
   const [isRegisterOpen, setIsRegisterOpen] = useState(false)
   const [isNotifyOpen, setIsNotifyOpen] = useState(false)
@@ -68,8 +77,6 @@ function App() {
       prefetchRoute('/team')
       prefetchRoute('/merchandise')
       prefetchRoute('/map')
-      prefetchRegisterModal()
-      prefetchNotifications()
     }
 
     const win = window as any
@@ -97,7 +104,7 @@ function App() {
       />
 
       {mountRegisterModal && (
-        <Suspense fallback={null}>
+        <Suspense fallback={<ModalFallback label="Opening Register…" />}>
           <RegisterModal
             isOpen={isRegisterOpen}
             onClose={() => setIsRegisterOpen(false)}
@@ -105,7 +112,7 @@ function App() {
         </Suspense>
       )}
       {mountNotificationSidebar && (
-        <Suspense fallback={null}>
+        <Suspense fallback={<ModalFallback label="Opening Notifications…" />}>
           <NotificationSidebar
             isOpen={isNotifyOpen}
             onClose={() => setIsNotifyOpen(false)}
