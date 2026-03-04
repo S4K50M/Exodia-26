@@ -5,7 +5,6 @@ import bottomRight from '../assets/register/right-bottom.png';
 import background from '../assets/register/background.png';
 import leftSide from '../assets/register/side-left.png';
 import rightSide from '../assets/register/side-right.png';
-import qr from '../assets/register/qr.png'
 
 // Ensure your supabase client is correctly configured in this file
 import supabase from '../utils/supabase';

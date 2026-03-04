@@ -52,7 +52,7 @@ export function Navbar({ shouldAnimate = false, onRegisterClick, onNotifyClick }
       )
       .to(menu,
         { opacity: 0, y: -12, duration: 0.25, ease: 'power2.in',
-          onComplete: () => gsap.set(menu, { display: 'none' })
+          onComplete: () =>{ gsap.set(menu, { display: 'none' })}
         },
         '-=0.1'
       )
