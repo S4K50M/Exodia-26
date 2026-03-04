@@ -5,6 +5,7 @@ import bottomRight from '../assets/register/right-bottom.png';
 import background from '../assets/register/background.png';
 import leftSide from '../assets/register/side-left.png';
 import rightSide from '../assets/register/side-right.png';
+import qr from '../assets/register/qr.png'
 
 // Ensure your supabase client is correctly configured in this file
 import supabase from '../utils/supabase';
@@ -148,7 +149,11 @@ export function RegisterPage() {
           
           {/* Left Side: QR Code & Info */}
           <div className="flex flex-col items-center justify-center w-full lg:w-1/3 p-6 bg-white/5 rounded-xl border border-white/10">
-            <img src="https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=upi://pay?pa=example@upi&pn=Exodia" alt="Payment QR Code" className="w-48 h-48 border-4 border-yellow-500 rounded-lg shadow-lg mb-4" />
+            <img 
+              src="/qr.png" 
+              alt="Payment" 
+              className="w-48 h-48 border-4 border-yellow-500 rounded-lg shadow-lg mb-4" 
+            />
             <p className="text-lg font-bold text-white mb-1">Scan to Pay</p>
             <div className="bg-yellow-500/20 border border-yellow-500/50 text-yellow-200 px-4 py-2 rounded-md mt-4 text-center w-full">
               <p className="text-sm font-semibold">Registration Fee:</p>

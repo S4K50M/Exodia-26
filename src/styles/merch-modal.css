@@ -490,8 +490,8 @@
 }
 
 .merch-qr-img {
-  width: 130px;
-  height: 130px;
+  width: 160px;
+  height: 160px;
   border: 3px solid #c084fc;
   border-radius: 0.625rem;
   flex-shrink: 0;

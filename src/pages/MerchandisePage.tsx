@@ -25,6 +25,7 @@ import '../styles/merch-modal.css'
 
 import { LoadingScreen } from '../components/LoadingScreen'
 import { MerchSVG } from '../assets/loading/MerchSVG'
+import qr from '../assets/register/qr.png'
 
 const MERCH_OPTIONS = [
   { id: 'hoodie', name: 'Oversized Hoodie', price: 669, type: 'single', sizeLabel: 'Size' },
@@ -422,7 +423,7 @@ export function MerchandisePage() {
               <div className="merch-order-section">
                 <div className="merch-qr-section">
                   <img
-                    src="https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=upi://pay?pa=example@upi&pn=Exodia"
+                    src={qr}
                     alt="Payment QR Code" className="merch-qr-img"
                   />
                   <div className="merch-qr-details">

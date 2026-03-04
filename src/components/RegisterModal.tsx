@@ -5,7 +5,7 @@ import supabase from '../utils/supabase'
 import background from '../assets/register/background.png'
 
 import '../styles/register-modal.css'
-
+import qr from '../assets/register/qr.png'
 interface RegisterModalProps {
   isOpen: boolean
   onClose: () => void
@@ -234,7 +234,7 @@ export function RegisterModal({ isOpen, onClose }: RegisterModalProps) {
           {/* QR Section */}
           <div className="register-qr-section">
             <img
-              src="https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=upi://pay?pa=example@upi&pn=Exodia"
+              src={qr}
               alt="Payment QR Code"
               className="register-qr-img"
             />
