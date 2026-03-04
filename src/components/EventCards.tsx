@@ -1,4 +1,4 @@
-import { useRef, useEffect, useState, useCallback } from 'react'
+import { useRef, useEffect, useState, useCallback, useLayoutEffect, useMemo } from 'react'
 import { createPortal } from 'react-dom'
 import gsap from 'gsap'
 
@@ -15,23 +15,36 @@ interface EventCardsProps {
   events: Event[]
 }
 
-const IS_MOBILE = typeof window !== 'undefined' && window.matchMedia('(max-width: 720px)').matches
-
-const CARD_WIDTH = IS_MOBILE ? 160 : 280
-const CARD_HEIGHT = IS_MOBILE ? 90 : 140
-const STEP = CARD_WIDTH + (IS_MOBILE ? 20 : 36)  // horizontal gap between card centres
-const ARC_DIP = IS_MOBILE ? -200 : -350           // px the centre card sits BELOW side cards
-const VISIBLE = 4                                 // rendered slots each side
+const VISIBLE = 4 // rendered slots each side
 const TWEEN_DURATION = 0.62
 const SCROLL_COOLDOWN_MS = 650
+const RENDER_RADIUS = VISIBLE + 2
+
+function useMediaQuery(query: string) {
+  const [matches, setMatches] = useState(() => {
+    if (typeof window === 'undefined' || !window.matchMedia) return false
+    return window.matchMedia(query).matches
+  })
+
+  useEffect(() => {
+    if (typeof window === 'undefined' || !window.matchMedia) return
+    const mql = window.matchMedia(query)
+    const onChange = (e: MediaQueryListEvent) => setMatches(e.matches)
+
+    if (mql.addEventListener) mql.addEventListener('change', onChange)
+    else mql.addListener(onChange)
+
+    return () => {
+      if (mql.removeEventListener) mql.removeEventListener('change', onChange)
+      else mql.removeListener(onChange)
+    }
+  }, [query])
+
+  return matches
+}
 
 // --- arc helpers ---------------------------------------------------------------
-// offset=0 → y=0 (bottom), offset=±VISIBLE → y=-ARC_DIP (top)
-function arcY(offset: number): number {
-  const t = Math.min(Math.abs(offset), VISIBLE) / VISIBLE
-  return -ARC_DIP * Math.sin(t * (Math.PI / 2))
-}
-function arcX(offset: number): number { return offset * STEP }
+// offset=0 → y=0 (centre), offset=±VISIBLE → y=max (outer)
 function arcScale(offset: number): number {
   const a = Math.abs(offset)
   if (a === 0) return 1.45
@@ -59,12 +72,21 @@ function arcBlur(offset: number): number {
 
 export function EventCards({ events }: EventCardsProps) {
   const n = events.length
+  const isMobile = useMediaQuery('(max-width: 720px)')
+  const reduceMotion = useMediaQuery('(prefers-reduced-motion: reduce)')
+
+  const cardWidth = isMobile ? 160 : 280
+  const cardHeight = isMobile ? 90 : 140
+  const step = cardWidth + (isMobile ? 20 : 36) // horizontal gap between card centres
+  const arcDip = isMobile ? 200 : 350 // px the outer cards sit BELOW centre
+  const tweenDuration = reduceMotion ? 0 : TWEEN_DURATION
+
   // triple the array for seamless infinite buffering
-  const extEvents = [...events, ...events, ...events]
+  const extEvents = useMemo(() => [...events, ...events, ...events], [events])
 
   const [currentIndex, setCurrentIndex] = useState(n)   // start in middle copy
   const currentIndexRef = useRef(n)
-  const cardRefs = useRef<(HTMLDivElement | null)[]>([])
+  const cardRefs = useRef(new Map<number, HTMLDivElement>())
   const viewportRef = useRef<HTMLDivElement | null>(null)
   const lastWheelTime = useRef(0)
   const lastSwipeTime = useRef(0)
@@ -73,10 +95,18 @@ export function EventCards({ events }: EventCardsProps) {
 
   useEffect(() => { currentIndexRef.current = currentIndex }, [currentIndex])
 
+  const arcX = useCallback((offset: number): number => offset * step, [step])
+  const arcY = useCallback(
+    (offset: number): number => {
+      const t = Math.min(Math.abs(offset), VISIBLE) / VISIBLE
+      return arcDip * Math.sin(t * (Math.PI / 2))
+    },
+    [arcDip]
+  )
+
   // helper: snap all card transforms instantly (no tween) for a given centreIdx
   const snapAll = useCallback((centreIdx: number) => {
-    cardRefs.current.forEach((el, i) => {
-      if (!el) return
+    for (const [i, el] of cardRefs.current) {
       const offset = i - centreIdx
       const abs = Math.abs(offset)
       gsap.set(el, {
@@ -88,33 +118,68 @@ export function EventCards({ events }: EventCardsProps) {
         filter: `blur(${arcBlur(offset)}px)`,
         zIndex: 20 - abs,
       })
-    })
-  }, [])
+    }
+  }, [arcX, arcY])
+
+  const setCardRef = useCallback(
+    (index: number, el: HTMLDivElement | null) => {
+      if (!el) {
+        cardRefs.current.delete(index)
+        return
+      }
+      cardRefs.current.set(index, el)
+      const offset = index - currentIndexRef.current
+      const abs = Math.abs(offset)
+      gsap.set(el, {
+        display: abs <= VISIBLE + 1 ? 'block' : 'none',
+        x: arcX(offset),
+        y: arcY(offset),
+        scale: arcScale(offset),
+        opacity: arcOpacity(offset),
+        filter: `blur(${arcBlur(offset)}px)`,
+        zIndex: 20 - abs,
+      })
+    },
+    [arcX, arcY]
+  )
 
   // set initial positions instantly on mount
-  useEffect(() => { snapAll(currentIndex) }, []) // eslint-disable-line react-hooks/exhaustive-deps
+  useLayoutEffect(() => {
+    snapAll(currentIndexRef.current)
+  }, [snapAll])
 
   // tween all cards to their new arc positions when index changes
   useEffect(() => {
-    cardRefs.current.forEach((el, i) => {
-      if (!el) return
+    for (const [i, el] of cardRefs.current) {
       const offset = i - currentIndex
       const abs = Math.abs(offset)
       const visible = abs <= VISIBLE + 1
       gsap.set(el, { display: visible ? 'block' : 'none', zIndex: 20 - abs })
-      if (!visible) return
+      if (!visible) continue
+
+      if (reduceMotion) {
+        gsap.set(el, {
+          x: arcX(offset),
+          y: arcY(offset),
+          scale: arcScale(offset),
+          opacity: arcOpacity(offset),
+          filter: `blur(${arcBlur(offset)}px)`,
+        })
+        continue
+      }
+
       gsap.to(el, {
         x: arcX(offset),
         y: arcY(offset),
         scale: arcScale(offset),
         opacity: arcOpacity(offset),
         filter: `blur(${arcBlur(offset)}px)`,
-        duration: TWEEN_DURATION,
+        duration: tweenDuration,
         ease: 'power2.inOut',
         overwrite: 'auto',
       })
-    })
-  }, [currentIndex])
+    }
+  }, [arcX, arcY, currentIndex, reduceMotion, tweenDuration])
 
   // infinite-loop: silently jump back to middle copy after tween finishes
   useEffect(() => {
@@ -123,8 +188,7 @@ export function EventCards({ events }: EventCardsProps) {
         const next = currentIndex + n
         currentIndexRef.current = next
         setCurrentIndex(next)
-        snapAll(next)
-      }, TWEEN_DURATION * 1000 + 60)
+      }, tweenDuration * 1000 + 60)
       return () => clearTimeout(t)
     }
     if (currentIndex >= n * 2) {
@@ -132,18 +196,30 @@ export function EventCards({ events }: EventCardsProps) {
         const next = currentIndex - n
         currentIndexRef.current = next
         setCurrentIndex(next)
-        snapAll(next)
-      }, TWEEN_DURATION * 1000 + 60)
+      }, tweenDuration * 1000 + 60)
       return () => clearTimeout(t)
     }
-  }, [currentIndex, n, snapAll])
+  }, [currentIndex, n, tweenDuration])
 
-  const goNext = useCallback(() => setCurrentIndex((i) => i + 1), [])
-  const goPrev = useCallback(() => setCurrentIndex((i) => i - 1), [])
+  const goNext = useCallback(() => {
+    setCurrentIndex((i) => {
+      const next = i + 1
+      currentIndexRef.current = next
+      return next
+    })
+  }, [])
+  const goPrev = useCallback(() => {
+    setCurrentIndex((i) => {
+      const next = i - 1
+      currentIndexRef.current = next
+      return next
+    })
+  }, [])
 
   useEffect(() => {
     // Pause auto-scroll if the details modal is open
     if (openIdx !== null) return
+    if (reduceMotion) return
 
     const autoPlay = setInterval(() => {
       goNext()
@@ -151,7 +227,7 @@ export function EventCards({ events }: EventCardsProps) {
 
     // Cleanup interval on unmount or when modal opens
     return () => clearInterval(autoPlay)
-  }, [goNext, openIdx])
+  }, [goNext, openIdx, reduceMotion])
   
   // scroll down → next card
   useEffect(() => {
@@ -182,7 +258,8 @@ export function EventCards({ events }: EventCardsProps) {
       const now = Date.now()
       if (now - lastSwipeTime.current < SCROLL_COOLDOWN_MS) return
       lastSwipeTime.current = now
-      delta > 0 ? goNext() : goPrev()
+      if (delta > 0) goNext()
+      else goPrev()
     }
     el.addEventListener('touchstart', onTouchStart, { passive: true })
     el.addEventListener('touchend', onTouchEnd, { passive: true })
@@ -201,6 +278,23 @@ export function EventCards({ events }: EventCardsProps) {
     return () => window.removeEventListener('keydown', onKey)
   }, [])
 
+  const indicesToRender = useMemo(() => {
+    const total = extEvents.length
+    const enableVirtual = n > RENDER_RADIUS * 2 + 1
+
+    if (!enableVirtual) {
+      const all: number[] = []
+      for (let i = 0; i < total; i++) all.push(i)
+      return all
+    }
+
+    const start = Math.max(0, currentIndex - RENDER_RADIUS)
+    const end = Math.min(total - 1, currentIndex + RENDER_RADIUS)
+    const windowed: number[] = []
+    for (let i = start; i <= end; i++) windowed.push(i)
+    return windowed
+  }, [currentIndex, extEvents.length, n])
+
   return (
     <div className="events-carousel">
       <button type="button" className="events-carousel-btn events-carousel-btn-left" onClick={goPrev} aria-label="Previous event" />
@@ -209,28 +303,42 @@ export function EventCards({ events }: EventCardsProps) {
       <div ref={viewportRef} className="events-carousel-viewport">
         {/* arc-stage: cards are absolutely centred here; GSAP moves them */}
         <div className="events-carousel-arc-stage">
-          {extEvents.map((event, index) => (
-            <div
-              key={`${event.id}-${index}`}
-              ref={(el) => { cardRefs.current[index] = el }}
-              className="event-card events-carousel-card"
-              data-offset={index - currentIndex}
-              style={{
-                width: CARD_WIDTH,
-                height: CARD_HEIGHT,
-                position: 'absolute',
-                top: '50%',
-                left: '50%',
-                marginLeft: -(CARD_WIDTH / 2),
-                marginTop: -(CARD_HEIGHT / 2),
-              }}
-              onClick={() => setOpenIdx(index)}
-            >
-              <div className="event-card-inner" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%' }}>
-                <h3 style={{ textAlign: 'center', padding: '0 1rem' }}>{event.title}</h3>
+          {indicesToRender.map((index) => {
+            const event = extEvents[index]
+            if (!event) return null
+            return (
+              <div
+                key={`${event.id}-${index}`}
+                ref={(el) => setCardRef(index, el)}
+                className="event-card events-carousel-card"
+                data-offset={index - currentIndex}
+                style={{
+                  width: cardWidth,
+                  height: cardHeight,
+                  position: 'absolute',
+                  top: '50%',
+                  left: '50%',
+                  marginLeft: -(cardWidth / 2),
+                  marginTop: -(cardHeight / 2),
+                }}
+                onClick={() => setOpenIdx(index)}
+              >
+                <div
+                  className="event-card-inner"
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    height: '100%',
+                  }}
+                >
+                  <h3 style={{ textAlign: 'center', padding: '0 1rem' }}>
+                    {event.title}
+                  </h3>
+                </div>
               </div>
-            </div>
-          ))}
+            )
+          })}
         </div>
       </div>
       {/* Details overlay — rendered via portal so it escapes GSAP-transformed ancestors */}

@@ -180,6 +180,7 @@
     inset 0 1px 0 rgba(180, 230, 255, 0.2),
     inset 0 -1px 0 rgba(0, 80, 160, 0.2);
   transition: box-shadow 0.3s ease, border-color 0.3s ease; 
+  will-change: transform, opacity, filter;
 }
 
 /* GSAP handles scale inline, so we rely on box-shadow and border for hover */

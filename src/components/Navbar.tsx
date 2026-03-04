@@ -2,6 +2,7 @@ import { Link, useLocation } from 'react-router-dom'
 import { useEffect, useRef, useState, useCallback } from 'react'
 import gsap from 'gsap'
 import { Bell } from 'lucide-react';
+import { prefetchNotifications, prefetchRegisterModal, prefetchRoute } from '../routes'
 
 interface NavbarProps {
   shouldAnimate?: boolean
@@ -120,21 +121,28 @@ export function Navbar({ shouldAnimate = false, onRegisterClick, onNotifyClick }
         </button>
         
         {/* Desktop links */}
-        <ul ref={linksRef} className="navbar-links flex items-center gap-6">
-          {navLinks.map(({ to, label }) => (
-            <li key={to}>
-              <Link to={to} className={location.pathname === to ? 'active' : ''}>
-                {label}
+          <ul ref={linksRef} className="navbar-links flex items-center gap-6">
+            {navLinks.map(({ to, label }) => (
+              <li key={to}>
+              <Link
+                to={to}
+                className={location.pathname === to ? 'active' : ''}
+                onMouseEnter={() => prefetchRoute(to)}
+                onFocus={() => prefetchRoute(to)}
+              >
+                 {label}
               </Link>
             </li>
           ))}
           
           {/* --- NOTIFICATION BUTTON --- */}
           <li>
-            <button
-              onClick={onNotifyClick}
-              className="group relative flex items-center gap-2 px-3 py-2 text-gray-300 hover:text-yellow-400 transition-all duration-300 font-medium cursor-pointer bg-transparent border-none"
-            >
+             <button
+               onClick={onNotifyClick}
+               onMouseEnter={prefetchNotifications}
+               onFocus={prefetchNotifications}
+               className="group relative flex items-center gap-2 px-3 py-2 text-gray-300 hover:text-yellow-400 transition-all duration-300 font-medium cursor-pointer bg-transparent border-none"
+             >
               <Bell 
                 size={20} 
                 className="group-hover:rotate-[15deg] transition-transform duration-300 text-yellow-500/80 group-hover:text-yellow-400" 
@@ -145,11 +153,13 @@ export function Navbar({ shouldAnimate = false, onRegisterClick, onNotifyClick }
 
           {/* --- REGISTER BUTTON --- */}
           <li>
-            <button
-              onClick={onRegisterClick}
-              className={`
-                inline-block px-5 py-2 font-bold text-black rounded-lg
-                bg-gradient-to-r from-yellow-500 to-yellow-400 
+             <button
+               onClick={onRegisterClick}
+               onMouseEnter={prefetchRegisterModal}
+               onFocus={prefetchRegisterModal}
+               className={`
+                 inline-block px-5 py-2 font-bold text-black rounded-lg
+                 bg-gradient-to-r from-yellow-500 to-yellow-400 
                 shadow-[0_0_10px_rgba(234,179,8,0.4)]
                 transition-all duration-300 transform cursor-pointer border-none
                 hover:-translate-y-1 hover:shadow-[0_0_20px_rgba(234,179,8,0.8)] hover:from-yellow-400 hover:to-yellow-300
@@ -162,17 +172,19 @@ export function Navbar({ shouldAnimate = false, onRegisterClick, onNotifyClick }
       </nav>
 
       {/* Mobile slide-down menu */}
-      <div ref={mobileMenuRef} className="navbar-mobile-menu" style={{ display: 'none' }}>
-        {navLinks.map(({ to, label }) => (
-          <Link
-            key={to}
-            to={to}
-            className={`mobile-nav-item ${location.pathname === to ? 'active' : ''}`}
-            onClick={handleMobileLinkClick}
-          >
-            {label}
-          </Link>
-        ))}
+       <div ref={mobileMenuRef} className="navbar-mobile-menu" style={{ display: 'none' }}>
+         {navLinks.map(({ to, label }) => (
+           <Link
+             key={to}
+             to={to}
+             className={`mobile-nav-item ${location.pathname === to ? 'active' : ''}`}
+             onClick={handleMobileLinkClick}
+             onMouseEnter={() => prefetchRoute(to)}
+             onFocus={() => prefetchRoute(to)}
+           >
+             {label}
+           </Link>
+         ))}
 
         <button
           className="mobile-nav-item mobile-notify-btn"

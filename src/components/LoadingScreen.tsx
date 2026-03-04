@@ -63,6 +63,12 @@ export function LoadingScreen({
   const [showLoader, setShowLoader] = useState(shouldShow)
   const [fadeOut, setFadeOut] = useState(false)
   const hideTimerRef = useRef<number | null>(null)
+  const assetsRef = useRef<string[]>(assets)
+  const assetsKey = assets.join('|')
+
+  useEffect(() => {
+    assetsRef.current = assets
+  }, [assetsKey])
 
   useEffect(() => {
     if (!showLoader) return
@@ -71,10 +77,16 @@ export function LoadingScreen({
       window.matchMedia?.('(prefers-reduced-motion: reduce)').matches ?? false
     const duration = reduceMotion ? 0 : minDuration
 
+    const connection = (navigator as any).connection
+    const saveData = connection?.saveData === true
+    const effectiveType = String(connection?.effectiveType ?? '')
+    const slowNetwork = /(^|-)2g$/.test(effectiveType) || effectiveType === 'slow-2g'
+    const shouldPreload = !saveData && !slowNetwork
+
     let cancelled = false
 
     const start = Date.now()
-    const waitForAssets = preloadImages(assets)
+    const waitForAssets = shouldPreload ? preloadImages(assetsRef.current) : Promise.resolve()
     const waitForMin = new Promise<void>((resolve) => {
       const remaining = Math.max(0, duration - (Date.now() - start))
       window.setTimeout(resolve, remaining)
@@ -97,7 +109,7 @@ export function LoadingScreen({
         hideTimerRef.current = null
       }
     }
-  }, [assets, minDuration, showLoader, showOnce])
+  }, [assetsKey, minDuration, showLoader, showOnce])
 
   return (
     <>
@@ -110,4 +122,3 @@ export function LoadingScreen({
     </>
   )
 }
-

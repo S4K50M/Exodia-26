@@ -2,36 +2,35 @@ import { Routes, Route, useLocation } from 'react-router-dom'
 import { Suspense, lazy, useEffect, useState } from 'react'
 
 import { Navbar } from './components/Navbar'
+import {
+  loadAdminPage,
+  loadEventsPage,
+  loadHomePage,
+  loadMapPage,
+  loadMerchandisePage,
+  loadNotFoundPage,
+  loadNotificationSidebar,
+  loadRegisterModal,
+  loadTeamPage,
+} from './routes'
 
 import './App.css'
 
-const HomePage = lazy(() =>
-  import('./pages/HomePage').then((m) => ({ default: m.HomePage }))
-)
-const EventsPage = lazy(() =>
-  import('./pages/EventsPage').then((m) => ({ default: m.EventsPage }))
-)
-const TeamPage = lazy(() =>
-  import('./pages/TeamPage').then((m) => ({ default: m.TeamPage }))
-)
+const HomePage = lazy(() => loadHomePage().then((m) => ({ default: m.HomePage })))
+const EventsPage = lazy(() => loadEventsPage().then((m) => ({ default: m.EventsPage })))
+const TeamPage = lazy(() => loadTeamPage().then((m) => ({ default: m.TeamPage })))
 const MerchandisePage = lazy(() =>
-  import('./pages/MerchandisePage').then((m) => ({ default: m.MerchandisePage }))
+  loadMerchandisePage().then((m) => ({ default: m.MerchandisePage }))
 )
-const MapPage = lazy(() =>
-  import('./pages/MapPage').then((m) => ({ default: m.MapPage }))
-)
-const AdminPage = lazy(() =>
-  import('./pages/AdminPage').then((m) => ({ default: m.AdminPage }))
-)
-const NotFoundPage = lazy(() =>
-  import('./pages/NotFoundPage').then((m) => ({ default: m.NotFoundPage }))
-)
+const MapPage = lazy(() => loadMapPage().then((m) => ({ default: m.MapPage })))
+const AdminPage = lazy(() => loadAdminPage().then((m) => ({ default: m.AdminPage })))
+const NotFoundPage = lazy(() => loadNotFoundPage().then((m) => ({ default: m.NotFoundPage })))
 
 const RegisterModal = lazy(() =>
-  import('./components/RegisterModal').then((m) => ({ default: m.RegisterModal }))
+  loadRegisterModal().then((m) => ({ default: m.RegisterModal }))
 )
 const NotificationSidebar = lazy(() =>
-  import('./components/NotifBar').then((m) => ({ default: m.NotificationSidebar }))
+  loadNotificationSidebar().then((m) => ({ default: m.NotificationSidebar }))
 )
 
 function ScrollToTop() {
