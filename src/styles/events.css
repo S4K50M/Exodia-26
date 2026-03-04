@@ -297,8 +297,8 @@
   }
 
   .events-dragon img {
-    max-height: 55vh;
-    max-width: 48vw;
+    max-height: 54vh;
+    max-width: 52vw;
   }
 
   /* Swords: sit right on top of the dragons */
@@ -603,6 +603,17 @@
 
   .events-filter-wrap {
     flex-shrink: 0;
+  }
+
+  /* Event details modal — font sizes reduced by 2% on mobile */
+  .event-details-modal h2 {
+    font-size: clamp(1.45rem, 5.88vw, 4.41rem) !important;
+  }
+  .event-details-modal > p {
+    font-size: 1.225rem !important;
+  }
+  .event-details-modal div p {
+    font-size: 1.0rem !important;
   }
 }
 
