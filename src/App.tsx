@@ -1,21 +1,38 @@
 import { Routes, Route, useLocation } from 'react-router-dom'
-import { useRef, useEffect, useState } from 'react';
-import Lenis from 'lenis';
-import gsap from 'gsap';
-import { ScrollTrigger } from 'gsap/ScrollTrigger';
+import { Suspense, lazy, useEffect, useState } from 'react'
 
 import { Navbar } from './components/Navbar'
-import { NotificationSidebar } from './components/NotifBar';
-import { HomePage } from './pages/HomePage'
-import { EventsPage } from './pages/EventsPage'
-import { TeamPage } from './pages/TeamPage'
-import { MerchandisePage } from './pages/MerchandisePage'
-import { RegisterModal } from './components/RegisterModal'
-import {AdminPage} from './pages/AdminPage';
-import { NotFoundPage} from './pages/NotFoundPage';
-import { MapPage } from './pages/MapPage';
 
 import './App.css'
+
+const HomePage = lazy(() =>
+  import('./pages/HomePage').then((m) => ({ default: m.HomePage }))
+)
+const EventsPage = lazy(() =>
+  import('./pages/EventsPage').then((m) => ({ default: m.EventsPage }))
+)
+const TeamPage = lazy(() =>
+  import('./pages/TeamPage').then((m) => ({ default: m.TeamPage }))
+)
+const MerchandisePage = lazy(() =>
+  import('./pages/MerchandisePage').then((m) => ({ default: m.MerchandisePage }))
+)
+const MapPage = lazy(() =>
+  import('./pages/MapPage').then((m) => ({ default: m.MapPage }))
+)
+const AdminPage = lazy(() =>
+  import('./pages/AdminPage').then((m) => ({ default: m.AdminPage }))
+)
+const NotFoundPage = lazy(() =>
+  import('./pages/NotFoundPage').then((m) => ({ default: m.NotFoundPage }))
+)
+
+const RegisterModal = lazy(() =>
+  import('./components/RegisterModal').then((m) => ({ default: m.RegisterModal }))
+)
+const NotificationSidebar = lazy(() =>
+  import('./components/NotifBar').then((m) => ({ default: m.NotificationSidebar }))
+)
 
 function ScrollToTop() {
   const { pathname } = useLocation()
@@ -27,156 +44,53 @@ function ScrollToTop() {
 
 function App() {
   const [isRegisterOpen, setIsRegisterOpen] = useState(false)
-  const containerRef = useRef<HTMLDivElement | null>(null)
-  const scrollTriggerRef = useRef<HTMLDivElement | null>(null)
-  const bgRef = useRef<HTMLDivElement | null>(null)
-  const exodiaRef = useRef<HTMLImageElement | null>(null)
-  const hutRef = useRef<HTMLImageElement | null>(null)
-  const leftMountRef = useRef<HTMLImageElement | null>(null)
-  const rightMountRef = useRef<HTMLImageElement | null>(null)
-  const [isNotifyOpen,setIsNotifyOpen] = useState(false)
+  const [isNotifyOpen, setIsNotifyOpen] = useState(false)
 
-  useEffect(() => {
-    const lenis = new Lenis({
-      smoothWheel: true,
-      lerp: 0.1,
-    })
-
-    lenis.on('scroll', () => ScrollTrigger.update())
-
-    let frameId: number
-    const raf = (time: number) => {
-      lenis.raf(time)
-      frameId = requestAnimationFrame(raf)
-    }
-    frameId = requestAnimationFrame(raf)
-
-    return () => {
-      lenis.destroy()
-      cancelAnimationFrame(frameId)
-    }
-  }, [])
-
-  useEffect(() => {
-    const trigger = scrollTriggerRef.current
-    if (!trigger) return
-
-    const isMobile = window.matchMedia('(max-width: 720px)').matches
-
-    const ctx = gsap.context(() => {
-      // bg: zoom in, move slow, offset to right
-      if (bgRef.current) {
-        gsap.fromTo(
-          bgRef.current,
-          { y: 0, scale: 1, x: 0 },
-          {
-            y: '-35vh',
-            scale: 1.25,
-            x: '-4%',
-            ease: 'none',
-            scrollTrigger: {
-              trigger,
-              start: 'top top',
-              end: 'bottom bottom',
-              scrub: 3,
-            },
-          }
-        )
-      }
-
-      // mountains: bigger by default, zoom in more and more on scroll
-      if (leftMountRef.current) {
-        gsap.fromTo(
-          leftMountRef.current,
-          { yPercent: isMobile ? 0 : 28, scale: isMobile ? 1.5 : 1 },
-          {
-            yPercent: 0,
-            scale: 2.5,
-            ease: 'none',
-            scrollTrigger: {
-              trigger,
-              start: 'top top',
-              end: 'bottom bottom',
-              scrub: 1.5,
-            },
-          }
-        )
-      }
-      if (rightMountRef.current) {
-        gsap.fromTo(
-          rightMountRef.current,
-          { yPercent: isMobile ? 0 : 28, scale: isMobile ? 1.5 :1 },
-          {
-            yPercent: 0,
-            scale: 2.1,
-            ease: 'none',
-            scrollTrigger: {
-              trigger,
-              start: 'top top',
-              end: 'bottom bottom',
-              scrub: 1.5,
-            },
-          }
-        )
-      }
-
-      // exodia: moves further up and out of screen as camera moves down
-      if (exodiaRef.current) {
-        gsap.fromTo(
-          exodiaRef.current,
-          { yPercent: 0, scale: 1.2 },
-          {
-            yPercent: -180,
-            scale: 0.9,
-            ease: 'none',
-            scrollTrigger: {
-              trigger,
-              start: 'top top',
-              end: 'bottom bottom',
-              scrub: 1,
-            },
-          }
-        )
-      }
-
-      // hut: moves down and out of screen as camera moves down
-      if (hutRef.current) {
-        gsap.fromTo(
-          hutRef.current,
-          { yPercent: 0, scale: 1 },
-          {
-            yPercent: 120,
-            scale: 0.9,
-            ease: 'none',
-            scrollTrigger: {
-              trigger,
-              start: 'top top',
-              end: 'bottom bottom',
-              scrub: 1,
-            },
-          }
-        )
-      }
-    }, containerRef)
-
-    return () => ctx.revert()
-  }, [])
+  const [mountRegisterModal, setMountRegisterModal] = useState(false)
+  const [mountNotificationSidebar, setMountNotificationSidebar] = useState(false)
 
   return (
     <>
       <ScrollToTop />
-      <Navbar onRegisterClick={() => setIsRegisterOpen(true)} onNotifyClick={() => setIsNotifyOpen(true)} />
-      <RegisterModal isOpen={isRegisterOpen} onClose={() => setIsRegisterOpen(false)} />
-      <NotificationSidebar isOpen={isNotifyOpen} onClose={()=> setIsNotifyOpen(false)} />
-      <Routes>
-        <Route path="/" element={<HomePage />} />
-        <Route path="/events" element={<EventsPage />} />
-        <Route path="/team" element={<TeamPage />} />
-        <Route path="/merchandise" element={<MerchandisePage />} />
-        <Route path="/map" element={<MapPage />} />
-        <Route path="/admin" element={<AdminPage />}/>
-        <Route path="*" element={<NotFoundPage />} />
-      </Routes>
+      <Navbar
+        onRegisterClick={() => {
+          setMountRegisterModal(true)
+          setIsRegisterOpen(true)
+        }}
+        onNotifyClick={() => {
+          setMountNotificationSidebar(true)
+          setIsNotifyOpen(true)
+        }}
+      />
+
+      {mountRegisterModal && (
+        <Suspense fallback={null}>
+          <RegisterModal
+            isOpen={isRegisterOpen}
+            onClose={() => setIsRegisterOpen(false)}
+          />
+        </Suspense>
+      )}
+      {mountNotificationSidebar && (
+        <Suspense fallback={null}>
+          <NotificationSidebar
+            isOpen={isNotifyOpen}
+            onClose={() => setIsNotifyOpen(false)}
+          />
+        </Suspense>
+      )}
+
+      <Suspense fallback={null}>
+        <Routes>
+          <Route path="/" element={<HomePage />} />
+          <Route path="/events" element={<EventsPage />} />
+          <Route path="/team" element={<TeamPage />} />
+          <Route path="/merchandise" element={<MerchandisePage />} />
+          <Route path="/map" element={<MapPage />} />
+          <Route path="/admin" element={<AdminPage />} />
+          <Route path="*" element={<NotFoundPage />} />
+        </Routes>
+      </Suspense>
     </>
   )
 }

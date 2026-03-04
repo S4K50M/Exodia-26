@@ -13,6 +13,8 @@ export function NotificationSidebar({ isOpen, onClose }: NotificationSidebarProp
   const overlayRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
+    if (!isOpen) return
+
     // Fetch live notifications from Supabase
     const fetchNotifications = async () => {
       const { data } = await supabase

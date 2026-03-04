@@ -1,5 +1,4 @@
 import { useEffect, useRef, useState, useMemo } from 'react'
-import Lenis from 'lenis'
 import gsap from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
 import { Search, Filter, X } from 'lucide-react'
@@ -16,6 +15,7 @@ import '../styles/events.css'
 
 import { LoadingScreen } from '../components/LoadingScreen'
 import { EventsSVG } from '../assets/loading/EventsSVG'
+import { useLenisScroll } from '../utils/useLenisScroll'
 
 gsap.registerPlugin(ScrollTrigger)
 
@@ -30,6 +30,8 @@ export function EventsPage() {
   const headingRef = useRef<HTMLDivElement | null>(null)
 
   const controlsRef = useRef<HTMLDivElement | null>(null)
+
+  useLenisScroll({ smoothWheel: true, lerp: 0.1 })
 
   // 1. Filter & Search State
   const [searchTerm, setSearchTerm] = useState('')
@@ -74,17 +76,6 @@ export function EventsPage() {
 
 
   useEffect(() => {
-    const lenis = new Lenis({ smoothWheel: true, lerp: 0.1 })
-    lenis.on('scroll', () => ScrollTrigger.update())
-    const raf = (time: number) => {
-      lenis.raf(time)
-      requestAnimationFrame(raf)
-    }
-    requestAnimationFrame(raf)
-    return () => lenis.destroy()
-  }, [])
-
-  useEffect(() => {
     const trigger = scrollTriggerRef.current
     if (!trigger) return
 
@@ -124,7 +115,10 @@ export function EventsPage() {
   }, [])
 
   return (
-    <LoadingScreen svg={<EventsSVG />}>
+    <LoadingScreen
+      svg={<EventsSVG />}
+      assets={[bg, leftDragon, rightDragon, leftSword, rightSword]}
+    >
       <div className="events-page" ref={containerRef}>
         <div className="events-scroll-trigger" ref={scrollTriggerRef}>
           <div className="events-stage">

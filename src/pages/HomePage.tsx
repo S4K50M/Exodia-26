@@ -1,5 +1,4 @@
 import { useEffect, useRef, useState } from 'react'
-import Lenis from 'lenis'
 import gsap from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
 
@@ -13,6 +12,7 @@ import '../styles/home.css'
 
 import { LoadingScreen } from '../components/LoadingScreen'
 import { HomeSVG } from '../assets/loading/HomeSVG'
+import { useLenisScroll } from '../utils/useLenisScroll'
 
 gsap.registerPlugin(ScrollTrigger)
 
@@ -27,7 +27,7 @@ export function HomePage() {
   const hutRef = useRef<HTMLImageElement | null>(null)
   const leftMountRef = useRef<HTMLImageElement | null>(null)
   const rightMountRef = useRef<HTMLImageElement | null>(null)
-  const lenisRef = useRef<Lenis | null>(null)
+  const lenisRef = useLenisScroll({ smoothWheel: true, lerp: 0.1 })
   const aboutRef = useRef<HTMLDivElement | null>(null)
   
   const hasIntroPlayed = useRef(false)
@@ -43,17 +43,6 @@ export function HomePage() {
   }, [])
 
   // ── Lenis smooth scroll ──────────────────────────────────────────────────────
-  useEffect(() => {
-    const lenis = new Lenis({ smoothWheel: true, lerp: 0.1 })
-    lenisRef.current = lenis
-    lenis.on('scroll', () => ScrollTrigger.update())
-
-    let frameId: number
-    const raf = (time: number) => { lenis.raf(time); frameId = requestAnimationFrame(raf) }
-    frameId = requestAnimationFrame(raf)
-
-    return () => { lenis.destroy(); cancelAnimationFrame(frameId) }
-  }, [])
 
   // ── Intro + scroll parallax ──────────────────────────────────────────────────
   useEffect(() => {
@@ -206,7 +195,10 @@ export function HomePage() {
   }, [])
 
   return (
-    <LoadingScreen svg={<HomeSVG />}>
+    <LoadingScreen
+      svg={<HomeSVG />}
+      assets={[bg, exodia, hut, leftMountain, rightMountain]}
+    >
     <div className="app" ref={containerRef}>
       <main className="parallax-page">
         <div className="scroll-trigger" ref={scrollTriggerRef}>

@@ -1,5 +1,4 @@
 import { useEffect, useRef, useState } from 'react' 
-import Lenis from 'lenis'
 import gsap from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
 
@@ -14,6 +13,7 @@ import '../styles/team.css'
 
 import { LoadingScreen } from '../components/LoadingScreen'
 import { TeamSVG } from '../assets/loading/TeamSVG'
+import { useLenisScroll } from '../utils/useLenisScroll'
 
 gsap.registerPlugin(ScrollTrigger)
 
@@ -41,17 +41,9 @@ export function TeamPage() {
   const cloudBRRef = useRef<HTMLDivElement | null>(null)
   const sectionsRef = useRef<HTMLDivElement | null>(null)
 
+  useLenisScroll({ smoothWheel: true, lerp: 0.1 })
+
   // ── Lenis smooth scroll ────────────────────────────────────────────────────
-  useEffect(() => {
-    const lenis = new Lenis({ smoothWheel: true, lerp: 0.1 })
-    lenis.on('scroll', () => ScrollTrigger.update())
-
-    let frameId: number
-    const raf = (time: number) => { lenis.raf(time); frameId = requestAnimationFrame(raf) }
-    frameId = requestAnimationFrame(raf)
-
-    return () => { lenis.destroy(); cancelAnimationFrame(frameId) }
-  }, [])
 
   // ── Animations ─────────────────────────────────────────────────────────────
   useEffect(() => {
@@ -97,7 +89,10 @@ export function TeamPage() {
   }, [])
 
   return (
-    <LoadingScreen svg={<TeamSVG />}>
+    <LoadingScreen
+      svg={<TeamSVG />}
+      assets={[bgLeft, bgRight, cloudLeft, cloudRight, cloudBLeft, cloudBRight]}
+    >
     <div className="team-page" ref={containerRef}>
       <div className="team-scroll-trigger" ref={scrollTriggerRef}>
         {/* ── Sticky hero with background & clouds ── */}
@@ -177,7 +172,11 @@ export function TeamPage() {
               
               <div className="team-modal-avatar">
                 {selectedMember.image ? (
-                  <img src={selectedMember.image} alt={selectedMember.name} />
+                  <img
+                    src={selectedMember.image}
+                    alt={selectedMember.name}
+                    decoding="async"
+                  />
                 ) : (
                   <div className="team-member-avatar-placeholder">
                     {selectedMember.name.split(' ').map((n) => n[0]).join('')}

@@ -311,7 +311,10 @@ export function MerchandisePage() {
 
   /* ── JSX ────────────────────────────────────────────────────────────── */
   return (
-    <LoadingScreen svg={<MerchSVG />}>
+    <LoadingScreen
+      svg={<MerchSVG />}
+      assets={[bg, leftBg, rightBg, left, right]}
+    >
       <div className="merchandise-page" ref={containerRef}>
         {/* Toast */}
         {toast && <div className={`merch-toast merch-toast-${toast.type}`}>{toast.msg}</div>}
@@ -324,7 +327,11 @@ export function MerchandisePage() {
               <button className="merch-viewer-close" onClick={closeViewer}>&times;</button>
               <button className="merch-viewer-arrow merch-viewer-arrow-left" onClick={viewerPrev}>&#8249;</button>
               <div className="merch-viewer-img-wrap">
-                <img src={currentProduct.views[viewerIndex].src} alt={currentProduct.views[viewerIndex].label} />
+                <img
+                  src={currentProduct.views[viewerIndex].src}
+                  alt={currentProduct.views[viewerIndex].label}
+                  decoding="async"
+                />
               </div>
               <button className="merch-viewer-arrow merch-viewer-arrow-right" onClick={viewerNext}>&#8250;</button>
               <div className="merch-viewer-info">
@@ -374,6 +381,9 @@ export function MerchandisePage() {
                       src={product.views[activeViews[pIdx]].src}
                       alt={`${product.name} ${product.views[activeViews[pIdx]].label}`}
                       className="merch-card-img"
+                      loading="lazy"
+                      decoding="async"
+                      fetchPriority="low"
                     />
                     <span className="merch-card-expand-hint">Click to expand</span>
                     {product.views.length > 1 && (

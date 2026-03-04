@@ -178,7 +178,7 @@ export function MapPage() {
       : ''
 
   return (
-    <LoadingScreen svg={<MapSVG />}>
+    <LoadingScreen svg={<MapSVG />} assets={[mapImg]}>
     <div className="map-page">
       {/* ── Controls ─────────────────────────────────────────────────────── */}
       <div className="map-controls">
@@ -237,6 +237,8 @@ export function MapPage() {
             src={mapImg}
             alt="Campus Map"
             className="map-image"
+            decoding="async"
+            fetchPriority="high"
             onLoad={onImgLoad}
             draggable={false}
           />
