@@ -12,6 +12,9 @@ import {
   loadNotificationSidebar,
   loadRegisterModal,
   loadTeamPage,
+  prefetchNotifications,
+  prefetchRegisterModal,
+  prefetchRoute,
 } from './routes'
 
 import './App.css'
@@ -41,12 +44,43 @@ function ScrollToTop() {
   return null
 }
 
+function RouteFallback() {
+  return (
+    <div className="route-fallback" role="status" aria-live="polite">
+      <div className="route-fallback-inner">
+        <span className="route-spinner" aria-hidden="true" />
+        <span className="route-fallback-text">Loading…</span>
+      </div>
+    </div>
+  )
+}
+
 function App() {
   const [isRegisterOpen, setIsRegisterOpen] = useState(false)
   const [isNotifyOpen, setIsNotifyOpen] = useState(false)
 
   const [mountRegisterModal, setMountRegisterModal] = useState(false)
   const [mountNotificationSidebar, setMountNotificationSidebar] = useState(false)
+
+  useEffect(() => {
+    const warm = () => {
+      prefetchRoute('/events')
+      prefetchRoute('/team')
+      prefetchRoute('/merchandise')
+      prefetchRoute('/map')
+      prefetchRegisterModal()
+      prefetchNotifications()
+    }
+
+    const win = window as any
+    if (typeof win.requestIdleCallback === 'function') {
+      const id = win.requestIdleCallback(warm, { timeout: 2500 })
+      return () => win.cancelIdleCallback?.(id)
+    }
+
+    const t = window.setTimeout(warm, 1200)
+    return () => window.clearTimeout(t)
+  }, [])
 
   return (
     <>
@@ -79,7 +113,7 @@ function App() {
         </Suspense>
       )}
 
-      <Suspense fallback={null}>
+      <Suspense fallback={<RouteFallback />}>
         <Routes>
           <Route path="/" element={<HomePage />} />
           <Route path="/events" element={<EventsPage />} />
