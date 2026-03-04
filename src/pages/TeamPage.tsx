@@ -129,7 +129,7 @@ export function TeamPage() {
                   <div key={member.id} className="team-member-card" onClick={() => setSelectedMember(member)}>
                     <div className="team-member-avatar">
                       {member.image ? (
-                        <img src={member.image} alt={member.name} />
+                        <img src={member.image} alt={member.name} loading='lazy'/>
                       ) : (
                         <div className="team-member-avatar-placeholder">
                           {member.name.split(' ').map((n) => n[0]).join('')}
