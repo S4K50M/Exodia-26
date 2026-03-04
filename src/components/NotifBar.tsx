@@ -90,7 +90,7 @@ export function NotificationSidebar({ isOpen, onClose }: NotificationSidebarProp
         ref={sidebarRef}
         className="fixed top-0 right-0 h-full w-full max-w-sm bg-zinc-950/80 backdrop-blur-2xl border-l border-white/10 z-[101] translate-x-full shadow-[-10px_0_30px_rgba(0,0,0,0.5)] flex flex-col"
       >
-        <div className="p-6 border-b border-white/10 flex justify-between items-center">
+        <div className="px-6 pb-6 pt-[calc(1.5rem+env(safe-area-inset-top,0px))] border-b border-white/10 flex justify-between items-center">
           <h2 className="text-2xl font-black text-transparent bg-clip-text bg-gradient-to-r from-yellow-300 to-yellow-600 uppercase tracking-tighter">
             Announcements
           </h2>
@@ -121,7 +121,7 @@ export function NotificationSidebar({ isOpen, onClose }: NotificationSidebarProp
           )}
         </div>
 
-        <div className="p-6 border-t border-white/10 bg-black/20 text-[10px] text-center text-gray-500 uppercase tracking-widest">
+        <div className="px-6 pb-[calc(1.5rem+env(safe-area-inset-bottom,0px))] pt-6 border-t border-white/10 bg-black/20 text-[10px] text-center text-gray-500 uppercase tracking-widest">
           Exodia 2026 • IIT Mandi
         </div>
       </div>

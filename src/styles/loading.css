@@ -6,7 +6,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  background: #0a0a1a;
+  background: var(--exodia-bg-deep);
   transition: opacity 0.45s ease, visibility 0.45s ease;
 }
 

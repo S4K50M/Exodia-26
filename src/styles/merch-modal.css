@@ -14,11 +14,11 @@
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
   overflow-y: auto; /* 👈 Make the overlay itself scrollable */
-  padding: 2rem 1rem; /* 👈 Adds spacing at the top/bottom so it doesn't hit edges */
+  padding: calc(2rem + var(--safe-area-top)) 1rem calc(2rem + var(--safe-area-bottom)); /* 👈 Adds spacing at the top/bottom so it doesn't hit edges */
   scroll-behavior: smooth;
   -webkit-overflow-scrolling: touch; /* Enables buttery momentum scrolling on iOS/mobile */
   scrollbar-width: thin; /* Firefox */
-  scrollbar-color: rgba(192, 132, 252, 0.5) transparent; /* Firefox: thumb color | track color */
+  scrollbar-color: rgba(234, 179, 8, 0.5) transparent; /* Firefox: thumb color | track color */
 }
 
 /* ── Overlay Scrollbar (WebKit) ──────────────────────────────────────────── */
@@ -33,13 +33,13 @@
 }
 
 .merch-overlay::-webkit-scrollbar-thumb {
-  background: rgba(192, 132, 252, 0.4); /* Your theme's purple with some transparency */
+  background: rgba(234, 179, 8, 0.4);
   border-radius: 10px;
 }
 
 /* Make it glow a bit brighter when the user hovers over it */
 .merch-overlay::-webkit-scrollbar-thumb:hover {
-  background: rgba(192, 132, 252, 0.8);
+  background: rgba(234, 179, 8, 0.8);
 }
 
 .merch-bg-layer {
@@ -76,7 +76,7 @@
 
 .merch-content::-webkit-scrollbar { width: 5px; }
 .merch-content::-webkit-scrollbar-track { background: transparent; }
-.merch-content::-webkit-scrollbar-thumb { background: rgba(192, 132, 252, 0.25); border-radius: 3px; }
+.merch-content::-webkit-scrollbar-thumb { background: rgba(234, 179, 8, 0.25); border-radius: 3px; }
 
 /* ── Close ───────────────────────────────────────────────────────────────── */
 .merch-close-btn {
@@ -106,7 +106,7 @@
   font-weight: 900;
   text-align: center;
   margin: 0 0 0.25rem;
-  background: linear-gradient(135deg, #c084fc 0%, #a78bfa 50%, #8b5cf6 100%);
+  background: linear-gradient(135deg, var(--exodia-accent) 0%, var(--exodia-accent-strong) 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
@@ -147,8 +147,8 @@
 
 .merch-product-card:hover {
   transform: translateY(-6px);
-  border-color: rgba(192, 132, 252, 0.35);
-  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.4), 0 0 20px rgba(192, 132, 252, 0.12);
+  border-color: rgba(234, 179, 8, 0.4);
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.4), 0 0 20px rgba(234, 179, 8, 0.14);
 }
 
 /* ── Image Area ──────────────────────────────────────────────────────────── */
@@ -227,7 +227,7 @@
 }
 
 .merch-card-arrow:hover {
-  background: rgba(192, 132, 252, 0.7);
+  background: rgba(234, 179, 8, 0.35);
   opacity: 1 !important;
   transform: translateY(-50%) scale(1.1);
 }
@@ -259,9 +259,9 @@
 }
 
 .merch-card-dot.active {
-  background: rgba(192, 132, 252, 0.2);
-  border-color: rgba(192, 132, 252, 0.5);
-  color: #d8b4fe;
+  background: rgba(234, 179, 8, 0.16);
+  border-color: rgba(234, 179, 8, 0.5);
+  color: #fde68a;
 }
 
 .merch-card-dot:hover:not(.active) {
@@ -288,7 +288,7 @@
 .merch-card-price {
   font-size: 1.1rem;
   font-weight: 900;
-  color: #c084fc;
+  color: var(--exodia-accent);
   white-space: nowrap;
 }
 
@@ -363,8 +363,8 @@
   line-height: 1;
 }
 .merch-viewer-arrow:hover {
-  background: rgba(192, 132, 252, 0.35);
-  border-color: rgba(192, 132, 252, 0.6);
+  background: rgba(234, 179, 8, 0.22);
+  border-color: rgba(234, 179, 8, 0.55);
 }
 .merch-viewer-arrow-left { left: 0; }
 .merch-viewer-arrow-right { right: 0; }
@@ -379,7 +379,7 @@
   border-radius: 1.25rem;
   background: linear-gradient(160deg, #ece4d8 0%, #ddd4c6 40%, #cfc5b5 100%);
   margin: 0 0.75rem;
-  box-shadow: 0 0 60px rgba(192, 132, 252, 0.08);
+  box-shadow: 0 0 60px rgba(234, 179, 8, 0.08);
 }
 
 .merch-viewer-img-wrap img {
@@ -420,7 +420,7 @@
 .merch-viewer-view-label {
   font-size: 0.75rem;
   font-weight: 600;
-  color: #d8b4fe;
+  color: rgba(251, 191, 36, 0.85);
   text-transform: uppercase;
   letter-spacing: 0.1em;
 }
@@ -439,7 +439,7 @@
   cursor: pointer;
   transition: background 200ms, transform 200ms;
 }
-.merch-viewer-dot.active { background: #c084fc; transform: scale(1.4); }
+.merch-viewer-dot.active { background: var(--exodia-accent); transform: scale(1.4); }
 .merch-viewer-dot:hover:not(.active) { background: rgba(255, 255, 255, 0.55); }
 
 /* ══════════════════════════════════════════════════════════════════════════
@@ -457,7 +457,7 @@
   content: '';
   flex: 1;
   height: 1px;
-  background: linear-gradient(90deg, transparent, rgba(192, 132, 252, 0.3), transparent);
+  background: linear-gradient(90deg, transparent, rgba(234, 179, 8, 0.32), transparent);
 }
 
 .merch-divider span {
@@ -465,7 +465,7 @@
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.12em;
-  color: rgba(192, 132, 252, 0.6);
+  color: rgba(251, 191, 36, 0.7);
   white-space: nowrap;
 }
 
@@ -492,7 +492,7 @@
 .merch-qr-img {
   width: 160px;
   height: 160px;
-  border: 3px solid #c084fc;
+  border: 3px solid var(--exodia-accent-strong);
   border-radius: 0.625rem;
   flex-shrink: 0;
 }
@@ -511,9 +511,9 @@
 }
 
 .merch-fee-box {
-  background: rgba(192, 132, 252, 0.1);
-  border: 1px solid rgba(192, 132, 252, 0.3);
-  color: #e9d5ff;
+  background: rgba(234, 179, 8, 0.12);
+  border: 1px solid rgba(234, 179, 8, 0.35);
+  color: #fde68a;
   padding: 0.6rem 1rem;
   border-radius: 0.5rem;
   display: flex;
@@ -588,9 +588,9 @@
 }
 .merch-field input::placeholder { color: rgba(255, 255, 255, 0.25); }
 .merch-field input:focus {
-  border-color: #c084fc;
+  border-color: rgba(234, 179, 8, 0.6);
   background: rgba(255, 255, 255, 0.07);
-  box-shadow: 0 0 0 3px rgba(192, 132, 252, 0.15);
+  box-shadow: 0 0 0 3px rgba(234, 179, 8, 0.15);
 }
 
 /* ── Merch Selection ─────────────────────────────────────────────────────── */
@@ -627,7 +627,7 @@
   width: 1.05rem;
   height: 1.05rem;
   cursor: pointer;
-  accent-color: #c084fc;
+  accent-color: var(--exodia-accent-strong);
 }
 
 .merch-item-name {
@@ -638,7 +638,7 @@
 
 .merch-item-price {
   font-weight: 700;
-  color: #e9d5ff;
+  color: #fde68a;
   font-size: 0.9rem;
   white-space: nowrap;
 }
@@ -654,7 +654,7 @@
   cursor: pointer;
   transition: border-color 200ms;
 }
-.merch-size-select:focus { border-color: #c084fc; }
+.merch-size-select:focus { border-color: rgba(234, 179, 8, 0.65); }
 .merch-size-select option { background: #1e1e2f; color: #fff; }
 
 /* ── File Input ──────────────────────────────────────────────────────────── */
@@ -666,12 +666,12 @@
   border-radius: 0.375rem;
   font-size: 0.78rem;
   font-weight: 600;
-  background: #c084fc;
-  color: #000;
+  background: var(--exodia-accent);
+  color: #111;
   cursor: pointer;
   transition: background 150ms;
 }
-.merch-file-input::file-selector-button:hover { background: #d8b4fe; }
+.merch-file-input::file-selector-button:hover { background: #fde68a; }
 
 /* ── Submit ──────────────────────────────────────────────────────────────── */
 .merch-submit-btn {
@@ -682,15 +682,15 @@
   font-size: 1rem;
   font-weight: 800;
   color: #000;
-  background: linear-gradient(135deg, #c084fc, #a78bfa, #8b5cf6);
+  background: linear-gradient(135deg, var(--exodia-accent-strong), var(--exodia-accent));
   cursor: pointer;
   transition: transform 200ms, box-shadow 200ms;
-  box-shadow: 0 0 18px rgba(192, 132, 252, 0.3);
+  box-shadow: 0 0 18px rgba(234, 179, 8, 0.28);
   margin-top: 0.25rem;
 }
 .merch-submit-btn:hover:not(.disabled) {
   transform: translateY(-2px);
-  box-shadow: 0 4px 30px rgba(192, 132, 252, 0.5);
+  box-shadow: 0 4px 30px rgba(234, 179, 8, 0.45);
 }
 .merch-submit-btn.disabled {
   background: rgba(120, 120, 120, 0.4);
@@ -702,7 +702,7 @@
 /* ── Toast ────────────────────────────────────────────────────────────────── */
 .merch-toast {
   position: fixed;
-  top: 2rem;
+  top: calc(2rem + var(--safe-area-top));
   left: 50%;
   transform: translateX(-50%);
   z-index: 300;

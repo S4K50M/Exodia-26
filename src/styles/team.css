@@ -333,7 +333,7 @@
   background: rgba(0, 0, 0, 0.7);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
-  padding: 1rem;
+  padding: calc(1rem + var(--safe-area-top)) 1rem calc(1rem + var(--safe-area-bottom));
   animation: teamFadeIn 0.3s ease forwards;
 }
 

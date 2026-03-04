@@ -94,7 +94,7 @@
   font-size: clamp(1.4rem, 4vw, 2.4rem);
   font-weight: 900;
   margin: 0 0 0.25rem;
-  background: linear-gradient(135deg, #c084fc 0%, #a78bfa 50%, #8b5cf6 100%);
+  background: linear-gradient(135deg, var(--exodia-accent) 0%, var(--exodia-accent-strong) 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
@@ -150,9 +150,9 @@
 
 .merch-hscroll-card:hover {
   transform: translateY(-6px) scale(1.02);
-  border-color: rgba(192, 132, 252, 0.4);
+  border-color: rgba(234, 179, 8, 0.45);
   box-shadow:
-    0 0 40px rgba(192, 132, 252, 0.15),
+    0 0 40px rgba(234, 179, 8, 0.16),
     0 20px 60px rgba(0, 0, 0, 0.5);
 }
 
@@ -169,18 +169,18 @@
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.1em;
-  color: #fff;
-  background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
+  color: #111;
+  background: linear-gradient(135deg, var(--exodia-accent-strong) 0%, var(--exodia-accent) 100%);
   border: none;
   border-radius: 9999px;
   cursor: pointer;
   transition: transform 0.25s ease, box-shadow 0.25s ease;
-  box-shadow: 0 4px 20px rgba(139, 92, 246, 0.4);
+  box-shadow: 0 4px 20px rgba(234, 179, 8, 0.35);
 }
 
 .merch-buy-btn:hover {
   transform: translateY(-2px) scale(1.04);
-  box-shadow: 0 8px 30px rgba(139, 92, 246, 0.55);
+  box-shadow: 0 8px 30px rgba(234, 179, 8, 0.5);
 }
 
 /* ══════════════════════════════════════════════════════════════════════════

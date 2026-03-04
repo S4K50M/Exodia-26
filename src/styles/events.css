@@ -454,7 +454,7 @@
 
 .events-controls {
   position: absolute;
-  top: 15%; 
+  top: calc(var(--safe-area-top) + clamp(84px, 14vh, 160px));
   left: 0;             /* Start from the left edge */
   width: 100%;         /* Span the full width of the parent */
   z-index: 1000 !important; 
@@ -582,7 +582,7 @@
 /* Responsive adjustments for controls */
 @media (max-width: 720px) {
   .events-controls {
-    top: 8%;
+    top: calc(var(--safe-area-top) + 76px);
     flex-direction: row;
     gap: 0.6rem;
     width: 92%;
@@ -615,7 +615,7 @@
 /* The big "X" close icon in the top right */
 .event-modal-close {
   position: absolute;
-  top: 3rem;
+  top: calc(3rem + var(--safe-area-top));
   right: 3rem;
   background: transparent;
   border: none;
@@ -678,7 +678,7 @@
 /* Make sure the close button stays visible on small mobile screens */
 @media (max-width: 720px) {
   .event-modal-close {
-    top: 1.5rem;
+    top: calc(1.5rem + var(--safe-area-top));
     right: 1.5rem;
     font-size: 2rem;
   }

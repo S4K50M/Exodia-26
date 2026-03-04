@@ -1,13 +1,28 @@
 @import "tailwindcss";
 
 :root {
+  --safe-area-top: env(safe-area-inset-top, 0px);
+  --safe-area-bottom: env(safe-area-inset-bottom, 0px);
+
+  --exodia-bg: #050819;
+  --exodia-bg-deep: #0a0a1a;
+  --exodia-text: #f5f5f7;
+  --exodia-text-muted: rgba(220, 222, 230, 0.85);
+  --exodia-accent: #fbbf24;
+  --exodia-accent-strong: #eab308;
+  --exodia-sand: #e4d5b7;
+  --exodia-border: rgba(255, 255, 255, 0.12);
+  --exodia-border-strong: rgba(255, 255, 255, 0.25);
+  --exodia-glass: rgba(15, 15, 30, 0.6);
+  --exodia-glass-strong: rgba(12, 12, 28, 0.88);
+
   font-family: system-ui, -apple-system, BlinkMacSystemFont, 'SF Pro Text',
     system-ui, sans-serif;
   line-height: 1.5;
   font-weight: 400;
 
-  color: #f5f5f7;
-  background: #050819;
+  color: var(--exodia-text);
+  background: var(--exodia-bg);
 
   font-synthesis: none;
   text-rendering: optimizeLegibility;
