@@ -239,6 +239,8 @@ export function MapPage() {
             className="map-image"
             onLoad={onImgLoad}
             draggable={false}
+            loading="eager"
+            decoding="async"
           />
 
           {imgSize.w > 0 && (

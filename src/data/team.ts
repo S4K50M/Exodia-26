@@ -1,3 +1,5 @@
+import adityaTayal from '../assets/team/dp/AdityaTayal.jpg'
+
 interface TeamMember {
   id: number
   name: string
@@ -59,6 +61,7 @@ export const TEAM_SECTIONS: TeamSection[] = [
     members: [
       { id: 13, name: 'Saksham Setia', role: 'Head', bio: '', image: gdrive('1vvHFneyIx_gkvkdwYsnbhiO11-SMfDLG'), instagram: 'https://www.instagram.com/setiasaksham13', linkedin: 'https://www.linkedin.com/in/saksham-setia-187281310' },
       { id: 14, name: 'Kumar Saurav', role: 'Head', bio: '', image: gdrive('1qkN_U41gz4kvL6G6wys_UiPF4Qz3cXU5'), instagram: 'https://www.instagram.com/saurav10101010', linkedin: 'https://www.linkedin.com/in/kumar-saurav-417508323' },
+      { id: 36, name: 'Aditya Tayal', role: 'Head', bio: '', image: adityaTayal, instagram: 'https://instagram.com/adityatayal1', linkedin: 'https://www.linkedin.com/in/tayal-aditya' },
     ],
   },
   {

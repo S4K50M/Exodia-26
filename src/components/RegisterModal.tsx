@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useRef, useCallback } from 'react'
-import gsap from 'gsap'
 import supabase from '../utils/supabase'
+import { loadGsap } from '../utils/lazyAnimations'
 
 import background from '../assets/register/background.png'
 
@@ -116,27 +116,55 @@ export function RegisterModal({ isOpen, onClose }: RegisterModalProps) {
   useEffect(() => {
     if (!overlayRef.current || !contentRef.current) return
 
+    const overlay = overlayRef.current
+    const content = contentRef.current
+
+    // Immediate fallback (in case GSAP isn't loaded yet)
     if (isOpen) {
       document.body.style.overflow = 'hidden'
-      gsap.set(overlayRef.current, { display: 'flex' })
-      gsap.to(overlayRef.current, { opacity: 1, duration: 0.4, ease: 'power2.out' })
-      gsap.fromTo(
-        contentRef.current,
-        { y: 40, opacity: 0, scale: 0.95 },
-        { y: 0, opacity: 1, scale: 1, duration: 0.5, ease: 'back.out(1.2)', delay: 0.15 }
-      )
+      overlay.style.display = 'flex'
+      overlay.style.opacity = '1'
     } else {
-      gsap.to(contentRef.current, { y: 30, opacity: 0, scale: 0.95, duration: 0.3, ease: 'power2.in' })
-      gsap.to(overlayRef.current, {
+      overlay.style.opacity = '0'
+      overlay.style.display = 'none'
+      document.body.style.overflow = ''
+    }
+
+    let isCancelled = false
+
+    ;(async () => {
+      const { gsap } = await loadGsap()
+      if (isCancelled) return
+
+      gsap.killTweensOf([overlay, content])
+
+      if (isOpen) {
+        document.body.style.overflow = 'hidden'
+        gsap.set(overlay, { display: 'flex' })
+        gsap.to(overlay, { opacity: 1, duration: 0.4, ease: 'power2.out' })
+        gsap.fromTo(
+          content,
+          { y: 40, opacity: 0, scale: 0.95 },
+          { y: 0, opacity: 1, scale: 1, duration: 0.5, ease: 'back.out(1.2)', delay: 0.15 }
+        )
+        return
+      }
+
+      gsap.to(content, { y: 30, opacity: 0, scale: 0.95, duration: 0.3, ease: 'power2.in' })
+      gsap.to(overlay, {
         opacity: 0,
         duration: 0.35,
         delay: 0.1,
         ease: 'power2.in',
         onComplete: () => {
-          if (overlayRef.current) overlayRef.current.style.display = 'none'
+          overlay.style.display = 'none'
           document.body.style.overflow = ''
         },
       })
+    })()
+
+    return () => {
+      isCancelled = true
     }
   }, [isOpen])
 
@@ -237,6 +265,8 @@ export function RegisterModal({ isOpen, onClose }: RegisterModalProps) {
               src={qr}
               alt="Payment QR Code"
               className="register-qr-img"
+              loading="lazy"
+              decoding="async"
             />
             <p className="register-qr-label">Scan to Pay</p>
             <div className="register-fee-box">
