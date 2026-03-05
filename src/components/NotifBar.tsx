@@ -1,6 +1,6 @@
 import { useEffect, useState, useRef } from 'react';
 import supabase from '../utils/supabase';
-import gsap from 'gsap';
+import { loadGsap } from '../utils/lazyAnimations'
 
 interface NotificationSidebarProps {
   isOpen: boolean;
@@ -26,14 +26,37 @@ export function NotificationSidebar({ isOpen, onClose }: NotificationSidebarProp
   }, [isOpen]);
 
   useEffect(() => {
-    if (isOpen) {
-      // Slide in from right and fade in overlay
-      gsap.to(sidebarRef.current, { x: 0, duration: 0.6, ease: 'power3.out' });
-      gsap.to(overlayRef.current, { opacity: 1, pointerEvents: 'auto', duration: 0.4 });
-    } else {
+    const sidebar = sidebarRef.current
+    const overlay = overlayRef.current
+    if (!sidebar || !overlay) return
+
+    // Immediate fallback (in case GSAP isn't loaded yet)
+    overlay.style.pointerEvents = isOpen ? 'auto' : 'none'
+    overlay.style.opacity = isOpen ? '1' : '0'
+    sidebar.style.transform = isOpen ? 'translateX(0)' : 'translateX(100%)'
+
+    let isCancelled = false
+
+    ;(async () => {
+      const { gsap } = await loadGsap()
+      if (isCancelled) return
+
+      gsap.killTweensOf([sidebar, overlay])
+
+      if (isOpen) {
+        // Slide in from right and fade in overlay
+        gsap.to(sidebar, { x: 0, duration: 0.6, ease: 'power3.out' })
+        gsap.to(overlay, { opacity: 1, pointerEvents: 'auto', duration: 0.4 })
+        return
+      }
+
       // Slide out to right
-      gsap.to(sidebarRef.current, { x: '100%', duration: 0.5, ease: 'power3.in' });
-      gsap.to(overlayRef.current, { opacity: 0, pointerEvents: 'none', duration: 0.4 });
+      gsap.to(sidebar, { x: '100%', duration: 0.5, ease: 'power3.in' })
+      gsap.to(overlay, { opacity: 0, pointerEvents: 'none', duration: 0.4 })
+    })()
+
+    return () => {
+      isCancelled = true
     }
   }, [isOpen]);
 

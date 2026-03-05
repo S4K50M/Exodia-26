@@ -1,7 +1,5 @@
 import { useEffect, useRef, useState, useMemo } from 'react'
-import Lenis from 'lenis'
-import gsap from 'gsap'
-import { ScrollTrigger } from 'gsap/ScrollTrigger'
+import type Lenis from 'lenis'
 import { Search, Filter, X } from 'lucide-react'
 
 import bg from '../assets/events/bg.png'
@@ -16,8 +14,7 @@ import '../styles/events.css'
 
 import { LoadingScreen } from '../components/LoadingScreen'
 import { EventsSVG } from '../assets/loading/EventsSVG'
-
-gsap.registerPlugin(ScrollTrigger)
+import { loadGsap, loadLenis } from '../utils/lazyAnimations'
 
 export function EventsPage() {
   const containerRef = useRef<HTMLDivElement | null>(null)
@@ -74,53 +71,82 @@ export function EventsPage() {
 
 
   useEffect(() => {
-    const lenis = new Lenis({ smoothWheel: true, lerp: 0.1 })
-    lenis.on('scroll', () => ScrollTrigger.update())
-    const raf = (time: number) => {
-      lenis.raf(time)
-      requestAnimationFrame(raf)
+    let isCancelled = false
+    let frameId: number | null = null
+    let lenis: Lenis | null = null
+
+    ;(async () => {
+      const [{ ScrollTrigger }, LenisCtor] = await Promise.all([loadGsap(), loadLenis()])
+      if (isCancelled) return
+
+      lenis = new LenisCtor({ smoothWheel: true, lerp: 0.1 })
+      lenis.on('scroll', () => ScrollTrigger.update())
+
+      const raf = (time: number) => {
+        lenis?.raf(time)
+        frameId = requestAnimationFrame(raf)
+      }
+      frameId = requestAnimationFrame(raf)
+    })()
+
+    return () => {
+      isCancelled = true
+      if (frameId) cancelAnimationFrame(frameId)
+      lenis?.destroy()
     }
-    requestAnimationFrame(raf)
-    return () => lenis.destroy()
   }, [])
 
   useEffect(() => {
     const trigger = scrollTriggerRef.current
     if (!trigger) return
 
-    const ctx = gsap.context(() => {
-      if (headingRef.current) {
-        gsap.fromTo(headingRef.current,
-          { opacity: 1, y: 0 },
-          { opacity: 0, y: -100, ease: 'power1.inOut', scrollTrigger: { trigger, start: 'top top', end: '20% top', scrub: 1 } }
-        )
-      }
-      gsap.to(leftSwordRef.current, { x: '-100%', opacity: 0, scrollTrigger: { trigger, start: 'top top', end: '30% top', scrub: 2 } })
-      gsap.to(rightSwordRef.current, { x: '100%', opacity: 0, scrollTrigger: { trigger, start: 'top top', end: '30% top', scrub: 2 } })
+    let isCancelled = false
+    let ctx: { revert: () => void } | null = null
 
-      if (leftDragonRef.current) {
-        gsap.to(leftDragonRef.current, { x: '-20%', y: '50%', rotate: -10, scrollTrigger: { trigger, start: 'top top', end: '50% top', scrub: 1.5 } })
-      }
-      if (rightDragonRef.current) {
-        gsap.to(rightDragonRef.current, { x: '20%', y: '50%', rotate: 10, scrollTrigger: { trigger, start: 'top top', end: '50% top', scrub: 1.5 } })
-      }
+    ;(async () => {
+      const { gsap } = await loadGsap()
+      if (isCancelled) return
 
-      if (controlsRef.current) {
-        gsap.fromTo(controlsRef.current,
-          { y: 50, opacity: 0 },
-          { y: 0, opacity: 1, ease: 'none', scrollTrigger: { trigger, start: '15% top', end: '40% top', scrub: 1 } }
-        )
-      }
+      ctx = gsap.context(() => {
+        if (headingRef.current) {
+          gsap.fromTo(
+            headingRef.current,
+            { opacity: 1, y: 0 },
+            { opacity: 0, y: -100, ease: 'power1.inOut', scrollTrigger: { trigger, start: 'top top', end: '20% top', scrub: 1 } }
+          )
+        }
+        gsap.to(leftSwordRef.current, { x: '-100%', opacity: 0, scrollTrigger: { trigger, start: 'top top', end: '30% top', scrub: 2 } })
+        gsap.to(rightSwordRef.current, { x: '100%', opacity: 0, scrollTrigger: { trigger, start: 'top top', end: '30% top', scrub: 2 } })
 
-      if (cardsWrapRef.current) {
-        gsap.fromTo(cardsWrapRef.current,
-          { yPercent: 100, opacity: 0, scale: 0.9 },
-          { yPercent: 0, opacity: 1, scale: 1, ease: 'none', scrollTrigger: { trigger, start: '15% top', end: '40% top', scrub: 1 } }
-        )
-      }
-    }, containerRef)
+        if (leftDragonRef.current) {
+          gsap.to(leftDragonRef.current, { x: '-20%', y: '50%', rotate: -10, scrollTrigger: { trigger, start: 'top top', end: '50% top', scrub: 1.5 } })
+        }
+        if (rightDragonRef.current) {
+          gsap.to(rightDragonRef.current, { x: '20%', y: '50%', rotate: 10, scrollTrigger: { trigger, start: 'top top', end: '50% top', scrub: 1.5 } })
+        }
 
-    return () => ctx.revert()
+        if (controlsRef.current) {
+          gsap.fromTo(
+            controlsRef.current,
+            { y: 50, opacity: 0 },
+            { y: 0, opacity: 1, ease: 'none', scrollTrigger: { trigger, start: '15% top', end: '40% top', scrub: 1 } }
+          )
+        }
+
+        if (cardsWrapRef.current) {
+          gsap.fromTo(
+            cardsWrapRef.current,
+            { yPercent: 100, opacity: 0, scale: 0.9 },
+            { yPercent: 0, opacity: 1, scale: 1, ease: 'none', scrollTrigger: { trigger, start: '15% top', end: '40% top', scrub: 1 } }
+          )
+        }
+      }, containerRef)
+    })()
+
+    return () => {
+      isCancelled = true
+      ctx?.revert()
+    }
   }, [])
 
   return (
@@ -129,7 +155,7 @@ export function EventsPage() {
         <div className="events-scroll-trigger" ref={scrollTriggerRef}>
           <div className="events-stage">
             <div className="events-bg">
-              <img src={bg} alt="" />
+              <img src={bg} alt="" loading="eager" decoding="async" />
             </div>
 
             {/* --- NEW: Search & Filter Controls --- */}
@@ -202,14 +228,14 @@ export function EventsPage() {
               </h1>
             </div>
 
-            <img ref={leftSwordRef} src={leftSword} className="event-asset sword-left" alt="" />
-            <img ref={rightSwordRef} src={rightSword} className="event-asset sword-right" alt="" />
+            <img ref={leftSwordRef} src={leftSword} className="event-asset sword-left" alt="" loading="eager" decoding="async" />
+            <img ref={rightSwordRef} src={rightSword} className="event-asset sword-right" alt="" loading="eager" decoding="async" />
 
             <div className="events-dragon events-dragon-left">
-              <img ref={leftDragonRef} src={leftDragon} alt="" />
+              <img ref={leftDragonRef} src={leftDragon} alt="" loading="eager" decoding="async" />
             </div>
             <div className="events-dragon events-dragon-right">
-              <img ref={rightDragonRef} src={rightDragon} alt="" />
+              <img ref={rightDragonRef} src={rightDragon} alt="" loading="eager" decoding="async" />
             </div>
 
             {/* Cards Wrap */}

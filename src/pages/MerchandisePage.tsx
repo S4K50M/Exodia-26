@@ -1,9 +1,6 @@
 import React, { useEffect, useRef, useState, useMemo } from 'react'
-import gsap from 'gsap'
-import { ScrollTrigger } from 'gsap/ScrollTrigger'
 import supabase from '../utils/supabase'
-
-gsap.registerPlugin(ScrollTrigger)
+import { loadGsap } from '../utils/lazyAnimations'
 
 import bg from '../assets/merchendise/bg.png'
 import left from '../assets/merchendise/left.png'
@@ -101,7 +98,14 @@ export function MerchandisePage() {
 
   /* ── GSAP entrance + scroll-triggered animation ─────────────────────── */
   useEffect(() => {
-    const ctx = gsap.context(() => {
+    let isCancelled = false
+    let ctx: { revert: () => void } | null = null
+
+    ;(async () => {
+      const { gsap } = await loadGsap()
+      if (isCancelled) return
+
+      ctx = gsap.context(() => {
       /* Parallax BG entrance */
       if (bgRef.current) {
         gsap.fromTo(bgRef.current, { scale: 1.15 }, { scale: 1.05, duration: 2, ease: 'power2.out' })
@@ -159,8 +163,12 @@ export function MerchandisePage() {
         )
       }
     }, containerRef)
+    })()
 
-    return () => ctx.revert()
+    return () => {
+      isCancelled = true
+      ctx?.revert()
+    }
   }, [])
 
   /* ── Card view helpers ────────────────────────────────────────────── */
@@ -324,7 +332,7 @@ export function MerchandisePage() {
               <button className="merch-viewer-close" onClick={closeViewer}>&times;</button>
               <button className="merch-viewer-arrow merch-viewer-arrow-left" onClick={viewerPrev}>&#8249;</button>
               <div className="merch-viewer-img-wrap">
-                <img src={currentProduct.views[viewerIndex].src} alt={currentProduct.views[viewerIndex].label} />
+                <img src={currentProduct.views[viewerIndex].src} alt={currentProduct.views[viewerIndex].label} loading="eager" decoding="async" />
               </div>
               <button className="merch-viewer-arrow merch-viewer-arrow-right" onClick={viewerNext}>&#8250;</button>
               <div className="merch-viewer-info">
@@ -341,11 +349,11 @@ export function MerchandisePage() {
         )}
 
         {/* ═══ Fixed Parallax Background — covers entire page ═══ */}
-        <div className="merch-bg-fixed" ref={bgRef}><img src={bg} alt="" /></div>
-        <div className="merch-side-fixed merch-side-left-bg" ref={leftBgRef}><img src={leftBg} alt="" /></div>
-        <div className="merch-side-fixed merch-side-right-bg" ref={rightBgRef}><img src={rightBg} alt="" /></div>
-        <div className="merch-side-fixed merch-side-left-fg" ref={leftRef}><img src={left} alt="" /></div>
-        <div className="merch-side-fixed merch-side-right-fg" ref={rightRef}><img src={right} alt="" /></div>
+        <div className="merch-bg-fixed" ref={bgRef}><img src={bg} alt="" loading="eager" decoding="async" /></div>
+        <div className="merch-side-fixed merch-side-left-bg" ref={leftBgRef}><img src={leftBg} alt="" loading="eager" decoding="async" /></div>
+        <div className="merch-side-fixed merch-side-right-bg" ref={rightBgRef}><img src={rightBg} alt="" loading="eager" decoding="async" /></div>
+        <div className="merch-side-fixed merch-side-left-fg" ref={leftRef}><img src={left} alt="" loading="eager" decoding="async" /></div>
+        <div className="merch-side-fixed merch-side-right-fg" ref={rightRef}><img src={right} alt="" loading="eager" decoding="async" /></div>
 
         {/* ═══ Hero Section — centered buy button ═══ */}
         <section className="merch-hero" ref={heroRef}>
@@ -374,6 +382,8 @@ export function MerchandisePage() {
                       src={product.views[activeViews[pIdx]].src}
                       alt={`${product.name} ${product.views[activeViews[pIdx]].label}`}
                       className="merch-card-img"
+                      loading={pIdx < 2 ? 'eager' : 'lazy'}
+                      decoding="async"
                     />
                     <span className="merch-card-expand-hint">Click to expand</span>
                     {product.views.length > 1 && (
@@ -425,6 +435,8 @@ export function MerchandisePage() {
                   <img
                     src={qr}
                     alt="Payment QR Code" className="merch-qr-img"
+                    loading="lazy"
+                    decoding="async"
                   />
                   <div className="merch-qr-details">
                     <p className="merch-qr-label">Scan to Pay</p>

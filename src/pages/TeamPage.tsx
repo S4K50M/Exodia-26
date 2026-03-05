@@ -1,7 +1,5 @@
-import { useEffect, useRef, useState } from 'react' 
-import Lenis from 'lenis'
-import gsap from 'gsap'
-import { ScrollTrigger } from 'gsap/ScrollTrigger'
+import { useEffect, useRef, useState } from 'react'
+import type Lenis from 'lenis'
 
 import bgLeft from '../assets/team/bg_left.png'
 import bgRight from '../assets/team/bg_right.png'
@@ -9,13 +7,12 @@ import cloudLeft from '../assets/team/cloud_left.png'
 import cloudRight from '../assets/team/cloud_right.png'
 import cloudBLeft from '../assets/team/cloud_bleft.png'
 import cloudBRight from '../assets/team/cloud_bright.png'
-import {TEAM_SECTIONS} from '../data/team'
+import { TEAM_SECTIONS } from '../data/team'
 import '../styles/team.css'
 
 import { LoadingScreen } from '../components/LoadingScreen'
 import { TeamSVG } from '../assets/loading/TeamSVG'
-
-gsap.registerPlugin(ScrollTrigger)
+import { loadGsap, loadLenis } from '../utils/lazyAnimations'
 
 // ── Team data organised by position ──────────────────────────────────────────
 interface TeamMember {
@@ -40,17 +37,45 @@ export function TeamPage() {
   const cloudBLRef = useRef<HTMLDivElement | null>(null)
   const cloudBRRef = useRef<HTMLDivElement | null>(null)
   const sectionsRef = useRef<HTMLDivElement | null>(null)
+  const lenisRef = useRef<Lenis | null>(null)
+
+  const openMember = (member: TeamMember) => {
+    lenisRef.current?.stop()
+    setSelectedMember(member)
+  }
+
+  const closeMember = () => {
+    setSelectedMember(null)
+    lenisRef.current?.start()
+  }
 
   // ── Lenis smooth scroll ────────────────────────────────────────────────────
   useEffect(() => {
-    const lenis = new Lenis({ smoothWheel: true, lerp: 0.1 })
-    lenis.on('scroll', () => ScrollTrigger.update())
+    let isCancelled = false
+    let frameId: number | null = null
+    let lenis: Lenis | null = null
 
-    let frameId: number
-    const raf = (time: number) => { lenis.raf(time); frameId = requestAnimationFrame(raf) }
-    frameId = requestAnimationFrame(raf)
+    ;(async () => {
+      const [{ ScrollTrigger }, LenisCtor] = await Promise.all([loadGsap(), loadLenis()])
+      if (isCancelled) return
 
-    return () => { lenis.destroy(); cancelAnimationFrame(frameId) }
+      lenis = new LenisCtor({ smoothWheel: true, lerp: 0.1 })
+      lenisRef.current = lenis
+      lenis.on('scroll', () => ScrollTrigger.update())
+
+      const raf = (time: number) => {
+        lenis?.raf(time)
+        frameId = requestAnimationFrame(raf)
+      }
+      frameId = requestAnimationFrame(raf)
+    })()
+
+    return () => {
+      isCancelled = true
+      if (frameId) cancelAnimationFrame(frameId)
+      lenis?.destroy()
+      lenisRef.current = null
+    }
   }, [])
 
   // ── Animations ─────────────────────────────────────────────────────────────
@@ -58,42 +83,75 @@ export function TeamPage() {
     const trigger = scrollTriggerRef.current
     if (!trigger) return
 
-    const ctx = gsap.context(() => {
-      // Clouds recede on scroll
-      const cloudRefs = [cloudTLRef, cloudTRRef, cloudBLRef, cloudBRRef]
-      cloudRefs.forEach((ref) => {
-        if (ref.current) {
-          gsap.fromTo(ref.current, { scale: 1, opacity: 1 }, {
-            scale: 0.5, opacity: 0, ease: 'none',
-            scrollTrigger: { trigger, start: 'top top', end: '15% top', scrub: 1.5 },
-          })
-        }
-      })
+    let isCancelled = false
+    let ctx: { revert: () => void } | null = null
 
-      // Animate each section as it enters the viewport
-      const sectionEls = sectionsRef.current?.querySelectorAll('.team-section')
-      sectionEls?.forEach((section) => {
-        // Section title
-        const title = section.querySelector('.team-section-title')
-        if (title) {
-          gsap.fromTo(title, { y: 40, opacity: 0 }, {
-            y: 0, opacity: 1, duration: 0.8, ease: 'power3.out',
-            scrollTrigger: { trigger: section, start: 'top 85%', toggleActions: 'play none none reverse' },
-          })
-        }
+    ;(async () => {
+      const { gsap } = await loadGsap()
+      if (isCancelled) return
 
-        // Member cards stagger in
-        const cards = section.querySelectorAll('.team-member-card')
-        if (cards.length) {
-          gsap.fromTo(cards, { y: 60, opacity: 0, scale: 0.9 }, {
-            y: 0, opacity: 1, scale: 1, duration: 0.6, ease: 'back.out(1.4)', stagger: 0.12,
-            scrollTrigger: { trigger: section, start: 'top 80%', toggleActions: 'play none none reverse' },
-          })
-        }
-      })
-    }, containerRef)
+      ctx = gsap.context(() => {
+        // Clouds recede on scroll
+        const cloudRefs = [cloudTLRef, cloudTRRef, cloudBLRef, cloudBRRef]
+        cloudRefs.forEach((ref) => {
+          if (ref.current) {
+            gsap.fromTo(
+              ref.current,
+              { scale: 1, opacity: 1 },
+              {
+                scale: 0.5,
+                opacity: 0,
+                ease: 'none',
+                scrollTrigger: { trigger, start: 'top top', end: '15% top', scrub: 1.5 },
+              }
+            )
+          }
+        })
 
-    return () => ctx.revert()
+        // Animate each section as it enters the viewport
+        const sectionEls = sectionsRef.current?.querySelectorAll('.team-section')
+        sectionEls?.forEach((section) => {
+          // Section title
+          const title = section.querySelector('.team-section-title')
+          if (title) {
+            gsap.fromTo(
+              title,
+              { y: 40, opacity: 0 },
+              {
+                y: 0,
+                opacity: 1,
+                duration: 0.8,
+                ease: 'power3.out',
+                scrollTrigger: { trigger: section, start: 'top 85%', toggleActions: 'play none none reverse' },
+              }
+            )
+          }
+
+          // Member cards stagger in
+          const cards = section.querySelectorAll('.team-member-card')
+          if (cards.length) {
+            gsap.fromTo(
+              cards,
+              { y: 60, opacity: 0, scale: 0.9 },
+              {
+                y: 0,
+                opacity: 1,
+                scale: 1,
+                duration: 0.6,
+                ease: 'back.out(1.4)',
+                stagger: 0.12,
+                scrollTrigger: { trigger: section, start: 'top 80%', toggleActions: 'play none none reverse' },
+              }
+            )
+          }
+        })
+      }, containerRef)
+    })()
+
+    return () => {
+      isCancelled = true
+      ctx?.revert()
+    }
   }, [])
 
   return (
@@ -102,15 +160,15 @@ export function TeamPage() {
       <div className="team-scroll-trigger" ref={scrollTriggerRef}>
         {/* ── Sticky hero with background & clouds ── */}
         <div className="team-stage">
-          <div className="team-bg">
-            <div className="team-bg-left"><img src={bgLeft} alt="" /></div>
-            <div className="team-bg-right"><img src={bgRight} alt="" /></div>
+            <div className="team-bg">
+            <div className="team-bg-left"><img src={bgLeft} alt="" loading="eager" decoding="async" /></div>
+            <div className="team-bg-right"><img src={bgRight} alt="" loading="eager" decoding="async" /></div>
           </div>
 
-          <div className="team-cloud team-cloud-tl" ref={cloudTLRef}><img src={cloudLeft} alt="" /></div>
-          <div className="team-cloud team-cloud-tr" ref={cloudTRRef}><img src={cloudRight} alt="" /></div>
-          <div className="team-cloud team-cloud-bl" ref={cloudBLRef}><img src={cloudBLeft} alt="" /></div>
-          <div className="team-cloud team-cloud-br" ref={cloudBRRef}><img src={cloudBRight} alt="" /></div>
+          <div className="team-cloud team-cloud-tl" ref={cloudTLRef}><img src={cloudLeft} alt="" loading="eager" decoding="async" /></div>
+          <div className="team-cloud team-cloud-tr" ref={cloudTRRef}><img src={cloudRight} alt="" loading="eager" decoding="async" /></div>
+          <div className="team-cloud team-cloud-bl" ref={cloudBLRef}><img src={cloudBLeft} alt="" loading="eager" decoding="async" /></div>
+          <div className="team-cloud team-cloud-br" ref={cloudBRRef}><img src={cloudBRight} alt="" loading="eager" decoding="async" /></div>
 
           {/* Hero title */}
           <div className="team-hero-title">
@@ -126,10 +184,10 @@ export function TeamPage() {
               <h2 className="team-section-title">{section.title}</h2>
               <div className="team-section-grid">
                 {section.members.map((member) => (
-                  <div key={member.id} className="team-member-card" onClick={() => setSelectedMember(member)}>
+                  <div key={member.id} className="team-member-card" onClick={() => openMember(member)}>
                     <div className="team-member-avatar">
                       {member.image ? (
-                        <img src={member.image} alt={member.name} loading='lazy'/>
+                        <img src={member.image} alt={member.name} loading="lazy" decoding="async" />
                       ) : (
                         <div className="team-member-avatar-placeholder">
                           {member.name.split(' ').map((n) => n[0]).join('')}
@@ -166,18 +224,18 @@ export function TeamPage() {
       {selectedMember && (
           <div 
             className="team-modal-overlay" 
-            onClick={() => setSelectedMember(null)}
+            onClick={closeMember}
             onWheel={(e) => e.stopPropagation()} 
             onTouchMove={(e) => e.stopPropagation()}
           >
             <div className="team-modal-card" onClick={(e) => e.stopPropagation()}>
-              <button className="team-modal-close" onClick={() => setSelectedMember(null)}>
+              <button className="team-modal-close" onClick={closeMember}>
                 &times;
               </button>
               
               <div className="team-modal-avatar">
                 {selectedMember.image ? (
-                  <img src={selectedMember.image} alt={selectedMember.name} />
+                  <img src={selectedMember.image} alt={selectedMember.name} loading="eager" decoding="async" />
                 ) : (
                   <div className="team-member-avatar-placeholder">
                     {selectedMember.name.split(' ').map((n) => n[0]).join('')}

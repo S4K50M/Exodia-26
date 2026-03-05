@@ -392,7 +392,7 @@ export function AdminPage() {
         </div>
 
         {/* Tab System */}
-        <div className="flex gap-8 border-b border-white/10 mb-8 pb-1">
+        <div className="flex flex-wrap gap-4 md:gap-8 border-b border-white/10 mb-8 pb-1">
           {['approval', 'merch', 'notification'].map((tab) => (
             <button
               key={tab}
