@@ -318,7 +318,7 @@ export function HomePage() {
   return (
     <LoadingScreen
       svg={<HomeSVG />}
-      assets={[bg, exodia, hut, leftMountain, rightMountain]}
+      assets={[bg, exodia]}
     >
     <div className="app" ref={containerRef}>
       <main className="parallax-page">
@@ -349,14 +349,14 @@ export function HomePage() {
 
             <div className="layer layer-mountains">
               <div className="mountain-left" ref={leftMountRef}>
-                <img src={leftMountain} alt="" decoding="async" />
+                <img src={leftMountain} alt="" decoding="async" fetchPriority="low" />
               </div>
               <div className="mountain-right" ref={rightMountRef}>
-                <img src={rightMountain} alt="" decoding="async" />
+                <img src={rightMountain} alt="" decoding="async" fetchPriority="low" />
               </div>
             </div>
             <div className="layer layer-hut">
-              <img ref={hutRef} src={hut} alt="" decoding="async" />
+              <img ref={hutRef} src={hut} alt="" decoding="async" fetchPriority="low" />
             </div>
 
             {/* About Us - overlaid on top of parallax stage */}

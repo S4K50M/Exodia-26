@@ -217,9 +217,7 @@ export function EventsPage() {
     }
   }, [isFilterOpen])
 
-  const loadingAssets = shouldAnimate
-    ? [bg, leftDragon, rightDragon, leftSword, rightSword]
-    : [bg]
+  const loadingAssets = [bg]
 
   return (
     <LoadingScreen
@@ -331,6 +329,7 @@ export function EventsPage() {
                   className="event-asset sword-left"
                   alt=""
                   decoding="async"
+                  fetchPriority="low"
                 />
                 <img
                   ref={rightSwordRef}
@@ -338,13 +337,14 @@ export function EventsPage() {
                   className="event-asset sword-right"
                   alt=""
                   decoding="async"
+                  fetchPriority="low"
                 />
 
                 <div className="events-dragon events-dragon-left">
-                  <img ref={leftDragonRef} src={leftDragon} alt="" decoding="async" />
+                  <img ref={leftDragonRef} src={leftDragon} alt="" decoding="async" fetchPriority="low" />
                 </div>
                 <div className="events-dragon events-dragon-right">
-                  <img ref={rightDragonRef} src={rightDragon} alt="" decoding="async" />
+                  <img ref={rightDragonRef} src={rightDragon} alt="" decoding="async" fetchPriority="low" />
                 </div>
               </>
             )}

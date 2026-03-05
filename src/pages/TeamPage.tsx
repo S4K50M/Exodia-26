@@ -185,7 +185,7 @@ export function TeamPage() {
   return (
     <LoadingScreen
       svg={<TeamSVG />}
-      assets={[bgLeft, bgRight, cloudLeft, cloudRight, cloudBLeft, cloudBRight]}
+      assets={[bgLeft, bgRight]}
     >
     <div className="team-page" ref={containerRef}>
       <div className="team-scroll-trigger" ref={scrollTriggerRef}>
@@ -196,10 +196,10 @@ export function TeamPage() {
             <div className="team-bg-right"><img src={bgRight} alt="" decoding="async" fetchPriority="high" /></div>
           </div>
 
-          <div className="team-cloud team-cloud-tl" ref={cloudTLRef}><img src={cloudLeft} alt="" decoding="async" /></div>
-          <div className="team-cloud team-cloud-tr" ref={cloudTRRef}><img src={cloudRight} alt="" decoding="async" /></div>
-          <div className="team-cloud team-cloud-bl" ref={cloudBLRef}><img src={cloudBLeft} alt="" decoding="async" /></div>
-          <div className="team-cloud team-cloud-br" ref={cloudBRRef}><img src={cloudBRight} alt="" decoding="async" /></div>
+          <div className="team-cloud team-cloud-tl" ref={cloudTLRef}><img src={cloudLeft} alt="" decoding="async" fetchPriority="low" /></div>
+          <div className="team-cloud team-cloud-tr" ref={cloudTRRef}><img src={cloudRight} alt="" decoding="async" fetchPriority="low" /></div>
+          <div className="team-cloud team-cloud-bl" ref={cloudBLRef}><img src={cloudBLeft} alt="" decoding="async" fetchPriority="low" /></div>
+          <div className="team-cloud team-cloud-br" ref={cloudBRRef}><img src={cloudBRight} alt="" decoding="async" fetchPriority="low" /></div>
 
           {/* Hero title */}
           <div className="team-hero-title">

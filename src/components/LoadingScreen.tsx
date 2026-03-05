@@ -8,6 +8,7 @@ interface LoadingScreenProps {
   minDuration?: number
   assets?: string[]
   maxWaitMs?: number
+  delayMs?: number
   showOnce?: boolean
   children: ReactNode
 }
@@ -57,28 +58,33 @@ export function LoadingScreen({
   svg,
   minDuration = 0,
   assets = [],
-  maxWaitMs = 500,
+  maxWaitMs = 350,
+  delayMs = 120,
   showOnce = true,
   children,
 }: LoadingScreenProps) {
   const shouldShow = !showOnce || !hasShownGlobalLoader
-  const [showLoader, setShowLoader] = useState(shouldShow)
+  const [showLoader, setShowLoader] = useState(false)
   const [fadeOut, setFadeOut] = useState(false)
+  const showTimerRef = useRef<number | null>(null)
   const hideTimerRef = useRef<number | null>(null)
   const assetsRef = useRef<string[]>(assets)
   const assetsKey = assets.join('|')
-  const fadeMs = 450
+  const fadeMs = 300
+  const didShowRef = useRef(false)
+  const doneRef = useRef(false)
 
   useEffect(() => {
     assetsRef.current = assets
   }, [assetsKey])
 
   useEffect(() => {
-    if (!showLoader) return
+    if (!shouldShow) return
 
     const reduceMotion =
       window.matchMedia?.('(prefers-reduced-motion: reduce)').matches ?? false
     const duration = reduceMotion ? 0 : minDuration
+    const showDelay = reduceMotion ? 0 : delayMs
 
     const connection = (navigator as any).connection
     const saveData = connection?.saveData === true
@@ -87,6 +93,20 @@ export function LoadingScreen({
     const shouldPreload = !saveData && !slowNetwork
 
     let cancelled = false
+    doneRef.current = false
+    didShowRef.current = showDelay === 0
+
+    setFadeOut(false)
+    setShowLoader(showDelay === 0)
+
+    if (showDelay > 0) {
+      showTimerRef.current = window.setTimeout(() => {
+        if (cancelled) return
+        if (doneRef.current) return
+        didShowRef.current = true
+        setShowLoader(true)
+      }, showDelay)
+    }
 
     const start = Date.now()
     const waitForAssets = shouldPreload ? preloadImages(assetsRef.current) : Promise.resolve()
@@ -106,21 +126,39 @@ export function LoadingScreen({
     Promise.all([gate, waitForMin]).then(() => {
       if (cancelled) return
 
+      doneRef.current = true
+      if (showTimerRef.current !== null) {
+        window.clearTimeout(showTimerRef.current)
+        showTimerRef.current = null
+      }
+
+      if (showOnce) hasShownGlobalLoader = true
+
+      if (!didShowRef.current) {
+        setShowLoader(false)
+        setFadeOut(false)
+        return
+      }
+
       setFadeOut(true)
       hideTimerRef.current = window.setTimeout(() => {
         setShowLoader(false)
-        if (showOnce) hasShownGlobalLoader = true
+        setFadeOut(false)
       }, fadeMs)
     })
 
     return () => {
       cancelled = true
+      if (showTimerRef.current !== null) {
+        window.clearTimeout(showTimerRef.current)
+        showTimerRef.current = null
+      }
       if (hideTimerRef.current !== null) {
         window.clearTimeout(hideTimerRef.current)
         hideTimerRef.current = null
       }
     }
-  }, [assetsKey, maxWaitMs, minDuration, showLoader, showOnce])
+  }, [assetsKey, delayMs, maxWaitMs, minDuration, shouldShow, showOnce])
 
   return (
     <>

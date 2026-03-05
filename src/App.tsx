@@ -75,18 +75,35 @@ function App() {
     const warm = () => {
       prefetchRoute('/events')
       prefetchRoute('/team')
-      prefetchRoute('/merchandise')
-      prefetchRoute('/map')
     }
 
-    const win = window as any
-    if (typeof win.requestIdleCallback === 'function') {
-      const id = win.requestIdleCallback(warm, { timeout: 2500 })
-      return () => win.cancelIdleCallback?.(id)
+    const scheduleWarm = () => {
+      const win = window as any
+      if (typeof win.requestIdleCallback === 'function') {
+        const id = win.requestIdleCallback(warm, { timeout: 6000 })
+        return () => win.cancelIdleCallback?.(id)
+      }
+
+      const t = window.setTimeout(warm, 2500)
+      return () => window.clearTimeout(t)
     }
 
-    const t = window.setTimeout(warm, 1200)
-    return () => window.clearTimeout(t)
+    let cancelScheduled: (() => void) | null = null
+    const kick = () => {
+      cancelScheduled?.()
+      cancelScheduled = scheduleWarm()
+    }
+
+    if (document.readyState === 'complete') {
+      kick()
+      return () => cancelScheduled?.()
+    }
+
+    window.addEventListener('load', kick, { once: true })
+    return () => {
+      window.removeEventListener('load', kick)
+      cancelScheduled?.()
+    }
   }, [])
 
   return (

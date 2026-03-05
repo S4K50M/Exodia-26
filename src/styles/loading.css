@@ -7,7 +7,7 @@
   align-items: center;
   justify-content: center;
   background: var(--exodia-bg-deep);
-  transition: opacity 0.45s ease, visibility 0.45s ease;
+  transition: opacity 0.3s ease, visibility 0.3s ease;
 }
 
 .loading-overlay.loading-fade-out {
