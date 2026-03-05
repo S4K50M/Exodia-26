@@ -266,6 +266,16 @@
   transform: translateY(-7px) rotate(-45deg);
 }
 
+@media (max-width: 960px) {
+  /* Hide desktop links, show hamburger (tablet + mobile) */
+  .navbar-links {
+    display: none !important;
+  }
+  .navbar-hamburger {
+    display: flex;
+  }
+}
+
 /* Mobile slide-down menu */
 .navbar-mobile-menu {
   display: flex;

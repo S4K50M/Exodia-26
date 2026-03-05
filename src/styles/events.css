@@ -595,7 +595,7 @@
   color: #f5f5f7;
   font-family: inherit;
   font-size: 1rem;
-  width: 200px;
+  width: clamp(160px, 26vw, 280px);
 }
 
 .events-search-bar input::placeholder {
