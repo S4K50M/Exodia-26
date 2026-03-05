@@ -452,6 +452,8 @@
 }
 
 .merch-viewer-dot {
+  border: none;
+  padding: 0;
   width: 8px;
   height: 8px;
   border-radius: 50%;

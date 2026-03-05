@@ -1,6 +1,4 @@
 import { useEffect, useRef, useState, useMemo } from 'react'
-import gsap from 'gsap'
-import { ScrollTrigger } from 'gsap/ScrollTrigger'
 import { Search, Filter, X } from 'lucide-react'
 
 import bg from '../assets/events/bg.webp'
@@ -17,8 +15,6 @@ import { LoadingScreen } from '../components/LoadingScreen'
 import { EventsSVG } from '../assets/loading/EventsSVG'
 import { useLenisScroll } from '../utils/useLenisScroll'
 
-gsap.registerPlugin(ScrollTrigger)
-
 export function EventsPage() {
   const containerRef = useRef<HTMLDivElement | null>(null)
   const scrollTriggerRef = useRef<HTMLDivElement | null>(null)
@@ -30,8 +26,24 @@ export function EventsPage() {
   const headingRef = useRef<HTMLDivElement | null>(null)
 
   const controlsRef = useRef<HTMLDivElement | null>(null)
+  const filterWrapRef = useRef<HTMLDivElement | null>(null)
 
-  useLenisScroll({ smoothWheel: true, lerp: 0.1 })
+  const shouldAnimate = useMemo(() => {
+    if (typeof window === 'undefined') return false
+
+    const reduceMotion =
+      window.matchMedia?.('(prefers-reduced-motion: reduce)').matches ?? false
+    if (reduceMotion) return false
+
+    const connection = (navigator as any).connection
+    const saveData = connection?.saveData === true
+    const effectiveType = String(connection?.effectiveType ?? '')
+    const slowNetwork = /(^|-)2g$/.test(effectiveType) || effectiveType === 'slow-2g'
+
+    return !saveData && !slowNetwork
+  }, [])
+
+  useLenisScroll({ smoothWheel: true, lerp: 0.1 }, shouldAnimate)
 
   // 1. Filter & Search State
   const [searchTerm, setSearchTerm] = useState('')
@@ -76,50 +88,145 @@ export function EventsPage() {
 
 
   useEffect(() => {
+    if (!shouldAnimate) return
+
     const trigger = scrollTriggerRef.current
     if (!trigger) return
 
-    const ctx = gsap.context(() => {
-      if (headingRef.current) {
-        gsap.fromTo(headingRef.current,
-          { opacity: 1, y: 0 },
-          { opacity: 0, y: -100, ease: 'power1.inOut', scrollTrigger: { trigger, start: 'top top', end: '20% top', scrub: 1 } }
-        )
-      }
-      gsap.to(leftSwordRef.current, { x: '-100%', opacity: 0, scrollTrigger: { trigger, start: 'top top', end: '30% top', scrub: 2 } })
-      gsap.to(rightSwordRef.current, { x: '100%', opacity: 0, scrollTrigger: { trigger, start: 'top top', end: '30% top', scrub: 2 } })
+    let cancelled = false
+    let ctx: any = null
 
-      if (leftDragonRef.current) {
-        gsap.to(leftDragonRef.current, { x: '-20%', y: '50%', rotate: -10, scrollTrigger: { trigger, start: 'top top', end: '50% top', scrub: 1.5 } })
-      }
-      if (rightDragonRef.current) {
-        gsap.to(rightDragonRef.current, { x: '20%', y: '50%', rotate: 10, scrollTrigger: { trigger, start: 'top top', end: '50% top', scrub: 1.5 } })
-      }
+    ;(async () => {
+      try {
+        const [{ default: gsap }, { ScrollTrigger }] = await Promise.all([
+          import('gsap'),
+          import('gsap/ScrollTrigger'),
+        ])
 
-      if (controlsRef.current) {
-        gsap.fromTo(controlsRef.current,
-          { y: 50, opacity: 0 },
-          { y: 0, opacity: 1, ease: 'none', scrollTrigger: { trigger, start: '15% top', end: '40% top', scrub: 1 } }
-        )
-      }
+        if (cancelled) return
 
-      if (cardsWrapRef.current) {
-        gsap.fromTo(cardsWrapRef.current,
-          { yPercent: 100, opacity: 0, scale: 0.9 },
-          { yPercent: 0, opacity: 1, scale: 1, ease: 'none', scrollTrigger: { trigger, start: '15% top', end: '40% top', scrub: 1 } }
-        )
-      }
-    }, containerRef)
+        gsap.registerPlugin(ScrollTrigger)
 
-    return () => ctx.revert()
-  }, [])
+        ctx = gsap.context(() => {
+          if (headingRef.current) {
+            gsap.fromTo(
+              headingRef.current,
+              { opacity: 1, y: 0 },
+              {
+                opacity: 0,
+                y: -100,
+                ease: 'power1.inOut',
+                scrollTrigger: { trigger, start: 'top top', end: '20% top', scrub: 1 },
+              }
+            )
+          }
+
+          if (leftSwordRef.current) {
+            gsap.to(leftSwordRef.current, {
+              x: '-100%',
+              opacity: 0,
+              scrollTrigger: { trigger, start: 'top top', end: '30% top', scrub: 2 },
+            })
+          }
+
+          if (rightSwordRef.current) {
+            gsap.to(rightSwordRef.current, {
+              x: '100%',
+              opacity: 0,
+              scrollTrigger: { trigger, start: 'top top', end: '30% top', scrub: 2 },
+            })
+          }
+
+          if (leftDragonRef.current) {
+            gsap.to(leftDragonRef.current, {
+              x: '-20%',
+              y: '50%',
+              rotate: -10,
+              scrollTrigger: { trigger, start: 'top top', end: '50% top', scrub: 1.5 },
+            })
+          }
+          if (rightDragonRef.current) {
+            gsap.to(rightDragonRef.current, {
+              x: '20%',
+              y: '50%',
+              rotate: 10,
+              scrollTrigger: { trigger, start: 'top top', end: '50% top', scrub: 1.5 },
+            })
+          }
+
+          if (controlsRef.current) {
+            gsap.fromTo(
+              controlsRef.current,
+              { y: 50, opacity: 0 },
+              {
+                y: 0,
+                opacity: 1,
+                ease: 'none',
+                scrollTrigger: { trigger, start: '15% top', end: '40% top', scrub: 1 },
+              }
+            )
+          }
+
+          if (cardsWrapRef.current) {
+            gsap.fromTo(
+              cardsWrapRef.current,
+              { yPercent: 100, opacity: 0, scale: 0.9 },
+              {
+                yPercent: 0,
+                opacity: 1,
+                scale: 1,
+                ease: 'none',
+                scrollTrigger: { trigger, start: '15% top', end: '40% top', scrub: 1 },
+              }
+            )
+          }
+        }, containerRef)
+      } catch {
+        // Ignore dynamic import failures
+      }
+    })()
+
+    return () => {
+      cancelled = true
+      ctx?.revert()
+      ctx = null
+    }
+  }, [shouldAnimate])
+
+  useEffect(() => {
+    if (!isFilterOpen) return
+
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setIsFilterOpen(false)
+    }
+
+    const onPointerDown = (e: PointerEvent) => {
+      const target = e.target as Node | null
+      if (!target) return
+      if (!filterWrapRef.current) return
+      if (filterWrapRef.current.contains(target)) return
+      setIsFilterOpen(false)
+    }
+
+    window.addEventListener('keydown', onKeyDown)
+    window.addEventListener('pointerdown', onPointerDown)
+
+    return () => {
+      window.removeEventListener('keydown', onKeyDown)
+      window.removeEventListener('pointerdown', onPointerDown)
+    }
+  }, [isFilterOpen])
+
+  const loadingAssets = shouldAnimate
+    ? [bg, leftDragon, rightDragon, leftSword, rightSword]
+    : [bg]
 
   return (
     <LoadingScreen
       svg={<EventsSVG />}
-      assets={[bg, leftDragon, rightDragon, leftSword, rightSword]}
+      assets={loadingAssets}
     >
-      <div className="events-page" ref={containerRef}>
+      <div className={`events-page${shouldAnimate ? '' : ' events-static'}`} ref={containerRef}>
         <div className="events-scroll-trigger" ref={scrollTriggerRef}>
           <div className="events-stage">
             <div className="events-bg">
@@ -132,33 +239,49 @@ export function EventsPage() {
                 <Search size={18} color="#fbbf24" />
                 <input 
                   type="text" 
+                  aria-label="Search events"
                   placeholder="Search events..." 
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                 />
                 {searchTerm && (
-                  <X 
-                    size={18} 
-                    className="clear-icon" 
-                    onClick={() => setSearchTerm('')} 
-                  />
+                  <button
+                    type="button"
+                    className="events-search-clear"
+                    onClick={() => setSearchTerm('')}
+                    aria-label="Clear search"
+                  >
+                    <X size={18} aria-hidden="true" />
+                  </button>
                 )}
               </div>
 
-              <div className="events-filter-wrap">
+              <div className="events-filter-wrap" ref={filterWrapRef}>
                 <button 
                   className="events-filter-btn"
+                  type="button"
                   onClick={() => setIsFilterOpen(!isFilterOpen)}
+                  aria-haspopup="menu"
+                  aria-expanded={isFilterOpen}
+                  aria-controls="events-filter-menu"
                 >
                   <Filter size={18} />
                   <span>{activeFilter}</span>
                 </button>
 
                 {isFilterOpen && (
-                  <div className="events-filter-dropdown">
+                  <div
+                    id="events-filter-menu"
+                    className="events-filter-dropdown"
+                    role="menu"
+                    aria-label="Event type filter"
+                  >
                     {eventTypes.map(type => (
                       <button 
+                        type="button"
                         key={type} 
+                        role="menuitemradio"
+                        aria-checked={activeFilter === type}
                         className={`filter-option ${activeFilter === type ? 'active' : ''}`}
                         onClick={() => {
                           setActiveFilter(type)
@@ -174,49 +297,57 @@ export function EventsPage() {
             </div>
 
             {/* Heading Section */}
-            <div
-              ref={headingRef}
-              className="events-heading-container"
-              style={{
-                position: 'absolute',
-                top: '45%',
-                left: '50%',
-                transform: 'translate(-50%, -50%)',
-                textAlign: 'center',
-                zIndex: 20
-              }}
-            >
-              <h1 style={{ 
-                fontFamily: "'Brush Script MT', cursive", 
-                fontSize: 'clamp(3rem, 8vw, 6rem)',
-                color: '#e4d5b7',
-                textShadow: '0 0 20px rgba(0,0,0,0.8)'
-              }}>
-                Events
-              </h1>
-            </div>
+            {shouldAnimate && (
+              <div
+                ref={headingRef}
+                className="events-heading-container"
+                style={{
+                  position: 'absolute',
+                  top: '45%',
+                  left: '50%',
+                  transform: 'translate(-50%, -50%)',
+                  textAlign: 'center',
+                  zIndex: 20,
+                }}
+              >
+                <h1
+                  style={{
+                    fontFamily: "'Brush Script MT', cursive",
+                    fontSize: 'clamp(3rem, 8vw, 6rem)',
+                    color: '#e4d5b7',
+                    textShadow: '0 0 20px rgba(0,0,0,0.8)',
+                  }}
+                >
+                  Events
+                </h1>
+              </div>
+            )}
 
-            <img
-              ref={leftSwordRef}
-              src={leftSword}
-              className="event-asset sword-left"
-              alt=""
-              decoding="async"
-            />
-            <img
-              ref={rightSwordRef}
-              src={rightSword}
-              className="event-asset sword-right"
-              alt=""
-              decoding="async"
-            />
+            {shouldAnimate && (
+              <>
+                <img
+                  ref={leftSwordRef}
+                  src={leftSword}
+                  className="event-asset sword-left"
+                  alt=""
+                  decoding="async"
+                />
+                <img
+                  ref={rightSwordRef}
+                  src={rightSword}
+                  className="event-asset sword-right"
+                  alt=""
+                  decoding="async"
+                />
 
-            <div className="events-dragon events-dragon-left">
-              <img ref={leftDragonRef} src={leftDragon} alt="" decoding="async" />
-            </div>
-            <div className="events-dragon events-dragon-right">
-              <img ref={rightDragonRef} src={rightDragon} alt="" decoding="async" />
-            </div>
+                <div className="events-dragon events-dragon-left">
+                  <img ref={leftDragonRef} src={leftDragon} alt="" decoding="async" />
+                </div>
+                <div className="events-dragon events-dragon-right">
+                  <img ref={rightDragonRef} src={rightDragon} alt="" decoding="async" />
+                </div>
+              </>
+            )}
 
             {/* Cards Wrap */}
             <div className="events-cards-wrap" ref={cardsWrapRef}>

@@ -1,10 +1,5 @@
 import React, { useEffect, useRef, useState, useMemo } from 'react'
-import gsap from 'gsap'
-import { ScrollTrigger } from 'gsap/ScrollTrigger'
-import supabase from '../utils/supabase'
 import { lockBodyScroll } from '../utils/bodyScrollLock'
-
-gsap.registerPlugin(ScrollTrigger)
 
 import bg from '../assets/merchendise/bg.webp'
 import left from '../assets/merchendise/left.webp'
@@ -102,69 +97,108 @@ export function MerchandisePage() {
     }, 0)
   }, [selectedItems])
 
+  const shouldAnimate = useMemo(() => {
+    if (typeof window === 'undefined') return false
+
+    const reduceMotion =
+      window.matchMedia?.('(prefers-reduced-motion: reduce)').matches ?? false
+    if (reduceMotion) return false
+
+    const connection = (navigator as any).connection
+    const saveData = connection?.saveData === true
+    const effectiveType = String(connection?.effectiveType ?? '')
+    const slowNetwork = /(^|-)2g$/.test(effectiveType) || effectiveType === 'slow-2g'
+
+    return !saveData && !slowNetwork
+  }, [])
+
   /* ── GSAP entrance + scroll-triggered animation ─────────────────────── */
   useEffect(() => {
-    const ctx = gsap.context(() => {
-      /* Parallax BG entrance */
-      if (bgRef.current) {
-        gsap.fromTo(bgRef.current, { scale: 1.15 }, { scale: 1.05, duration: 2, ease: 'power2.out' })
-        gsap.to(bgRef.current, { scale: 1.08, duration: 8, ease: 'sine.inOut', yoyo: true, repeat: -1, delay: 2 })
-      }
-      if (leftBgRef.current) {
-        gsap.fromTo(leftBgRef.current, { x: '-100%' }, { x: '0%', duration: 1.8, ease: 'power3.out', delay: 0.2 })
-      }
-      if (rightBgRef.current) {
-        gsap.fromTo(rightBgRef.current, { x: '100%' }, { x: '0%', duration: 1.8, ease: 'power3.out', delay: 0.2 })
-      }
-      if (leftRef.current) {
-        gsap.fromTo(leftRef.current, { x: '-120%' }, { x: '0%', duration: 2, ease: 'power3.out', delay: 0.4 })
-      }
-      if (rightRef.current) {
-        gsap.fromTo(rightRef.current, { x: '120%' }, { x: '0%', duration: 2, ease: 'power3.out', delay: 0.4 })
-      }
+    if (!shouldAnimate) return
 
-      /* ScrollTrigger: pin hero and animate content from center → top */
-      if (heroRef.current && heroContentRef.current) {
-        const heroTl = gsap.timeline({
-          scrollTrigger: {
-            trigger: heroRef.current,
-            start: 'top top',
-            end: '+=60%',
-            pin: true,
-            scrub: 1,
-          },
-        })
+    let cancelled = false
+    let ctx: any = null
 
-        heroTl.to(heroContentRef.current, {
-          y: '-30vh',
-          scale: 0.85,
-          duration: 1,
-          ease: 'none',
-        })
-      }
+    ;(async () => {
+      try {
+        const [{ default: gsap }, { ScrollTrigger }] = await Promise.all([
+          import('gsap'),
+          import('gsap/ScrollTrigger'),
+        ])
 
-      /* Cards section entrance */
-      if (cardsSectionRef.current) {
-        gsap.fromTo(
-          cardsSectionRef.current,
-          { opacity: 0, y: 80 },
-          {
-            opacity: 1,
-            y: 0,
-            duration: 1,
-            scrollTrigger: {
-              trigger: cardsSectionRef.current,
-              start: 'top 90%',
-              end: 'top 50%',
-              scrub: 1,
-            },
+        if (cancelled) return
+
+        gsap.registerPlugin(ScrollTrigger)
+
+        ctx = gsap.context(() => {
+          /* Parallax BG entrance */
+          if (bgRef.current) {
+            gsap.fromTo(bgRef.current, { scale: 1.15 }, { scale: 1.05, duration: 2, ease: 'power2.out' })
+            gsap.to(bgRef.current, { scale: 1.08, duration: 8, ease: 'sine.inOut', yoyo: true, repeat: -1, delay: 2 })
           }
-        )
-      }
-    }, containerRef)
+          if (leftBgRef.current) {
+            gsap.fromTo(leftBgRef.current, { x: '-100%' }, { x: '0%', duration: 1.8, ease: 'power3.out', delay: 0.2 })
+          }
+          if (rightBgRef.current) {
+            gsap.fromTo(rightBgRef.current, { x: '100%' }, { x: '0%', duration: 1.8, ease: 'power3.out', delay: 0.2 })
+          }
+          if (leftRef.current) {
+            gsap.fromTo(leftRef.current, { x: '-120%' }, { x: '0%', duration: 2, ease: 'power3.out', delay: 0.4 })
+          }
+          if (rightRef.current) {
+            gsap.fromTo(rightRef.current, { x: '120%' }, { x: '0%', duration: 2, ease: 'power3.out', delay: 0.4 })
+          }
 
-    return () => ctx.revert()
-  }, [])
+          /* ScrollTrigger: pin hero and animate content from center → top */
+          if (heroRef.current && heroContentRef.current) {
+            const heroTl = gsap.timeline({
+              scrollTrigger: {
+                trigger: heroRef.current,
+                start: 'top top',
+                end: '+=60%',
+                pin: true,
+                scrub: 1,
+              },
+            })
+
+            heroTl.to(heroContentRef.current, {
+              y: '-30vh',
+              scale: 0.85,
+              duration: 1,
+              ease: 'none',
+            })
+          }
+
+          /* Cards section entrance */
+          if (cardsSectionRef.current) {
+            gsap.fromTo(
+              cardsSectionRef.current,
+              { opacity: 0, y: 80 },
+              {
+                opacity: 1,
+                y: 0,
+                duration: 1,
+                scrollTrigger: {
+                  trigger: cardsSectionRef.current,
+                  start: 'top 90%',
+                  end: 'top 50%',
+                  scrub: 1,
+                },
+              }
+            )
+          }
+        }, containerRef)
+      } catch {
+        // Ignore dynamic import failures
+      }
+    })()
+
+    return () => {
+      cancelled = true
+      ctx?.revert()
+      ctx = null
+    }
+  }, [shouldAnimate])
 
   /* ── Card view helpers ────────────────────────────────────────────── */
   const setCardView = (productIdx: number, viewIdx: number) => {
@@ -303,8 +337,11 @@ export function MerchandisePage() {
 
     setIsSubmitting(true)
     try {
-      const ext = file.name.split('.').pop()
+      const ext = file.name.split('.').pop() || 'png'
       const fileName = `${Date.now()}-${Math.random().toString(36).substring(7)}.${ext}`
+
+      const { default: supabase } = await import('../utils/supabase')
+
       const { error: upErr } = await supabase.storage.from('payment_proofs').upload(fileName, file)
       if (upErr) throw new Error('Image upload failed: ' + upErr.message)
       const { data: { publicUrl } } = supabase.storage.from('payment_proofs').getPublicUrl(fileName)
@@ -346,8 +383,8 @@ export function MerchandisePage() {
           <div className="merch-viewer-overlay" onClick={closeViewer}>
             <div className="merch-viewer-container" onClick={e => e.stopPropagation()}
               onTouchStart={handleTouchStart} onTouchMove={handleTouchMove} onTouchEnd={handleTouchEnd}>
-              <button className="merch-viewer-close" onClick={closeViewer}>&times;</button>
-              <button className="merch-viewer-arrow merch-viewer-arrow-left" onClick={viewerPrev}>&#8249;</button>
+              <button type="button" className="merch-viewer-close" onClick={closeViewer} aria-label="Close viewer">&times;</button>
+              <button type="button" className="merch-viewer-arrow merch-viewer-arrow-left" onClick={viewerPrev} aria-label="Previous image">&#8249;</button>
               <div className="merch-viewer-img-wrap">
                 <img
                   src={currentProduct.views[viewerIndex].src}
@@ -355,13 +392,20 @@ export function MerchandisePage() {
                   decoding="async"
                 />
               </div>
-              <button className="merch-viewer-arrow merch-viewer-arrow-right" onClick={viewerNext}>&#8250;</button>
+              <button type="button" className="merch-viewer-arrow merch-viewer-arrow-right" onClick={viewerNext} aria-label="Next image">&#8250;</button>
               <div className="merch-viewer-info">
                 <h3>{currentProduct.name} — ₹{currentProduct.price}</h3>
                 <span className="merch-viewer-view-label">{currentProduct.views[viewerIndex].label} View</span>
                 <div className="merch-viewer-dots">
-                  {currentProduct.views.map((_, i) => (
-                    <span key={i} className={`merch-viewer-dot ${i === viewerIndex ? 'active' : ''}`} onClick={() => setViewerIndex(i)} />
+                  {currentProduct.views.map((view, i) => (
+                    <button
+                      key={i}
+                      type="button"
+                      className={`merch-viewer-dot ${i === viewerIndex ? 'active' : ''}`}
+                      onClick={() => setViewerIndex(i)}
+                      aria-label={`View ${view.label}`}
+                      aria-pressed={i === viewerIndex}
+                    />
                   ))}
                 </div>
               </div>
@@ -391,7 +435,7 @@ export function MerchandisePage() {
           <div className="merch-hero-content" ref={heroContentRef}>
             <h2 className="merch-page-title">Merchandise</h2>
             <p className="merch-page-subtitle">Official Exodia'26 Gear — Limited Drops</p>
-            <button className="merch-buy-btn" onClick={openOrder}>
+            <button type="button" className="merch-buy-btn" onClick={openOrder}>
               Buy Merchandise
             </button>
           </div>
@@ -420,9 +464,9 @@ export function MerchandisePage() {
                     <span className="merch-card-expand-hint">Click to expand</span>
                     {product.views.length > 1 && (
                       <>
-                        <button className="merch-card-arrow merch-card-arrow-l"
+                        <button type="button" className="merch-card-arrow merch-card-arrow-l" aria-label="Previous view"
                           onClick={e => { e.stopPropagation(); cardPrev(pIdx) }}>&#8249;</button>
-                        <button className="merch-card-arrow merch-card-arrow-r"
+                        <button type="button" className="merch-card-arrow merch-card-arrow-r" aria-label="Next view"
                           onClick={e => { e.stopPropagation(); cardNext(pIdx) }}>&#8250;</button>
                       </>
                     )}
@@ -432,6 +476,7 @@ export function MerchandisePage() {
                     {product.views.map((v, i) => (
                       <button
                         key={i}
+                        type="button"
                         className={`merch-card-dot ${i === activeViews[pIdx] ? 'active' : ''}`}
                         onClick={() => setCardView(pIdx, i)}
                       >
@@ -458,7 +503,7 @@ export function MerchandisePage() {
             onTouchMove={(e) => e.stopPropagation()}
           >
             <div className="merch-content" onClick={e => e.stopPropagation()}>
-              <button className="merch-close-btn" onClick={closeOrder}>&times;</button>
+              <button type="button" className="merch-close-btn" onClick={closeOrder} aria-label="Close">&times;</button>
               <h2 className="merch-title">Place Your Order</h2>
               <p className="merch-subtitle">Select items, scan QR to pay, then submit the form.</p>
 
@@ -466,7 +511,9 @@ export function MerchandisePage() {
                 <div className="merch-qr-section">
                   <img
                     src={qr}
-                    alt="Payment QR Code" className="merch-qr-img"
+                    alt="Payment QR Code"
+                    className="merch-qr-img"
+                    decoding="async"
                   />
                   <div className="merch-qr-details">
                     <p className="merch-qr-label">Scan to Pay</p>

@@ -1,6 +1,4 @@
-import { useEffect, useRef, useState } from 'react' 
-import gsap from 'gsap'
-import { ScrollTrigger } from 'gsap/ScrollTrigger'
+import { useEffect, useRef, useState, useMemo } from 'react'
 
 import bgLeft from '../assets/team/bg_left.webp'
 import bgRight from '../assets/team/bg_right.webp'
@@ -14,8 +12,7 @@ import '../styles/team.css'
 import { LoadingScreen } from '../components/LoadingScreen'
 import { TeamSVG } from '../assets/loading/TeamSVG'
 import { useLenisScroll } from '../utils/useLenisScroll'
-
-gsap.registerPlugin(ScrollTrigger)
+import { lockBodyScroll } from '../utils/bodyScrollLock'
 
 // ── Team data organised by position ──────────────────────────────────────────
 interface TeamMember {
@@ -41,52 +38,149 @@ export function TeamPage() {
   const cloudBRRef = useRef<HTMLDivElement | null>(null)
   const sectionsRef = useRef<HTMLDivElement | null>(null)
 
-  useLenisScroll({ smoothWheel: true, lerp: 0.1 })
+  const shouldAnimate = useMemo(() => {
+    if (typeof window === 'undefined') return false
+
+    const reduceMotion =
+      window.matchMedia?.('(prefers-reduced-motion: reduce)').matches ?? false
+    if (reduceMotion) return false
+
+    const connection = (navigator as any).connection
+    const saveData = connection?.saveData === true
+    const effectiveType = String(connection?.effectiveType ?? '')
+    const slowNetwork = /(^|-)2g$/.test(effectiveType) || effectiveType === 'slow-2g'
+
+    return !saveData && !slowNetwork
+  }, [])
+
+  useLenisScroll({ smoothWheel: true, lerp: 0.1 }, shouldAnimate)
+
+  const unlockModalScrollRef = useRef<(() => void) | null>(null)
+  const closeBtnRef = useRef<HTMLButtonElement | null>(null)
 
   // ── Lenis smooth scroll ────────────────────────────────────────────────────
 
   // ── Animations ─────────────────────────────────────────────────────────────
   useEffect(() => {
+    if (!shouldAnimate) return
+
     const trigger = scrollTriggerRef.current
     if (!trigger) return
 
-    const ctx = gsap.context(() => {
-      // Clouds recede on scroll
-      const cloudRefs = [cloudTLRef, cloudTRRef, cloudBLRef, cloudBRRef]
-      cloudRefs.forEach((ref) => {
-        if (ref.current) {
-          gsap.fromTo(ref.current, { scale: 1, opacity: 1 }, {
-            scale: 0.5, opacity: 0, ease: 'none',
-            scrollTrigger: { trigger, start: 'top top', end: '15% top', scrub: 1.5 },
-          })
-        }
-      })
+    let cancelled = false
+    let ctx: any = null
 
-      // Animate each section as it enters the viewport
-      const sectionEls = sectionsRef.current?.querySelectorAll('.team-section')
-      sectionEls?.forEach((section) => {
-        // Section title
-        const title = section.querySelector('.team-section-title')
-        if (title) {
-          gsap.fromTo(title, { y: 40, opacity: 0 }, {
-            y: 0, opacity: 1, duration: 0.8, ease: 'power3.out',
-            scrollTrigger: { trigger: section, start: 'top 85%', toggleActions: 'play none none reverse' },
-          })
-        }
+    ;(async () => {
+      try {
+        const [{ default: gsap }, { ScrollTrigger }] = await Promise.all([
+          import('gsap'),
+          import('gsap/ScrollTrigger'),
+        ])
+        if (cancelled) return
 
-        // Member cards stagger in
-        const cards = section.querySelectorAll('.team-member-card')
-        if (cards.length) {
-          gsap.fromTo(cards, { y: 60, opacity: 0, scale: 0.9 }, {
-            y: 0, opacity: 1, scale: 1, duration: 0.6, ease: 'back.out(1.4)', stagger: 0.12,
-            scrollTrigger: { trigger: section, start: 'top 80%', toggleActions: 'play none none reverse' },
-          })
-        }
-      })
-    }, containerRef)
+        gsap.registerPlugin(ScrollTrigger)
 
-    return () => ctx.revert()
-  }, [])
+        ctx = gsap.context(() => {
+          // Clouds recede on scroll
+          const cloudRefs = [cloudTLRef, cloudTRRef, cloudBLRef, cloudBRRef]
+          cloudRefs.forEach((ref) => {
+            if (!ref.current) return
+            gsap.fromTo(
+              ref.current,
+              { scale: 1, opacity: 1 },
+              {
+                scale: 0.5,
+                opacity: 0,
+                ease: 'none',
+                scrollTrigger: { trigger, start: 'top top', end: '15% top', scrub: 1.5 },
+              }
+            )
+          })
+
+          // Animate each section as it enters the viewport
+          const sectionEls = sectionsRef.current?.querySelectorAll('.team-section')
+          sectionEls?.forEach((section) => {
+            // Section title
+            const title = section.querySelector('.team-section-title')
+            if (title) {
+              gsap.fromTo(
+                title,
+                { y: 40, opacity: 0 },
+                {
+                  y: 0,
+                  opacity: 1,
+                  duration: 0.8,
+                  ease: 'power3.out',
+                  scrollTrigger: {
+                    trigger: section,
+                    start: 'top 85%',
+                    toggleActions: 'play none none reverse',
+                  },
+                }
+              )
+            }
+
+            // Member cards stagger in
+            const cards = section.querySelectorAll('.team-member-card')
+            if (cards.length) {
+              gsap.fromTo(
+                cards,
+                { y: 60, opacity: 0, scale: 0.9 },
+                {
+                  y: 0,
+                  opacity: 1,
+                  scale: 1,
+                  duration: 0.6,
+                  ease: 'back.out(1.4)',
+                  stagger: 0.12,
+                  scrollTrigger: {
+                    trigger: section,
+                    start: 'top 80%',
+                    toggleActions: 'play none none reverse',
+                  },
+                }
+              )
+            }
+          })
+        }, containerRef)
+      } catch {
+        // Ignore dynamic import failures
+      }
+    })()
+
+    return () => {
+      cancelled = true
+      ctx?.revert()
+      ctx = null
+    }
+  }, [shouldAnimate])
+
+  useEffect(() => {
+    if (!selectedMember) return
+
+    const previousFocus = document.activeElement as HTMLElement | null
+
+    unlockModalScrollRef.current?.()
+    unlockModalScrollRef.current = lockBodyScroll()
+
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setSelectedMember(null)
+    }
+
+    window.addEventListener('keydown', onKeyDown)
+    const t = window.setTimeout(() => closeBtnRef.current?.focus(), 0)
+
+    return () => {
+      window.clearTimeout(t)
+      window.removeEventListener('keydown', onKeyDown)
+      unlockModalScrollRef.current?.()
+      unlockModalScrollRef.current = null
+      previousFocus?.focus?.()
+    }
+  }, [selectedMember])
+
+  const titleId = selectedMember ? `team-modal-title-${selectedMember.id}` : undefined
+  const bioId = selectedMember ? `team-modal-bio-${selectedMember.id}` : undefined
 
   return (
     <LoadingScreen
@@ -121,10 +215,24 @@ export function TeamPage() {
               <h2 className="team-section-title">{section.title}</h2>
               <div className="team-section-grid">
                 {section.members.map((member) => (
-                  <div key={member.id} className="team-member-card" onClick={() => setSelectedMember(member)}>
+                  <div
+                    key={member.id}
+                    className="team-member-card"
+                    role="button"
+                    tabIndex={0}
+                    aria-label={`View ${member.name}`}
+                    onClick={() => setSelectedMember(member)}
+                    onKeyDown={(e) => {
+                      if (e.currentTarget !== e.target) return
+                      if (e.key === 'Enter' || e.key === ' ') {
+                        e.preventDefault()
+                        setSelectedMember(member)
+                      }
+                    }}
+                  >
                     <div className="team-member-avatar">
                       {member.image ? (
-                        <img src={member.image} alt={member.name} loading='lazy'/>
+                        <img src={member.image} alt={member.name} loading="lazy" decoding="async" />
                       ) : (
                         <div className="team-member-avatar-placeholder">
                           {member.name.split(' ').map((n) => n[0]).join('')}
@@ -136,14 +244,30 @@ export function TeamPage() {
                     <p className="team-member-bio">{member.bio}</p>
                     <div className="team-member-socials">
                       {member.instagram && (
-                        <a href={member.instagram} target="_blank" rel="noopener noreferrer" aria-label="Instagram" className="team-social-link">
+                        <a
+                          href={member.instagram}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          aria-label="Instagram"
+                          className="team-social-link"
+                          onClick={(e) => e.stopPropagation()}
+                          onKeyDown={(e) => e.stopPropagation()}
+                        >
                           <svg viewBox="0 0 24 24" fill="currentColor" width="18" height="18">
                             <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zM12 16a4 4 0 110-8 4 4 0 010 8zm6.406-11.845a1.44 1.44 0 100 2.881 1.44 1.44 0 000-2.881z"/>
                           </svg>
                         </a>
                       )}
                       {member.linkedin && (
-                        <a href={member.linkedin} target="_blank" rel="noopener noreferrer" aria-label="LinkedIn" className="team-social-link">
+                        <a
+                          href={member.linkedin}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          aria-label="LinkedIn"
+                          className="team-social-link"
+                          onClick={(e) => e.stopPropagation()}
+                          onKeyDown={(e) => e.stopPropagation()}
+                        >
                           <svg viewBox="0 0 24 24" fill="currentColor" width="18" height="18">
                             <path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 01-2.063-2.065 2.064 2.064 0 112.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/>
                           </svg>
@@ -161,12 +285,26 @@ export function TeamPage() {
       {selectedMember && (
           <div 
             className="team-modal-overlay" 
+            data-lenis-prevent="true"
             onClick={() => setSelectedMember(null)}
             onWheel={(e) => e.stopPropagation()} 
             onTouchMove={(e) => e.stopPropagation()}
           >
-            <div className="team-modal-card" onClick={(e) => e.stopPropagation()}>
-              <button className="team-modal-close" onClick={() => setSelectedMember(null)}>
+            <div
+              className="team-modal-card"
+              role="dialog"
+              aria-modal="true"
+              aria-labelledby={titleId}
+              aria-describedby={selectedMember.bio ? bioId : undefined}
+              onClick={(e) => e.stopPropagation()}
+            >
+              <button
+                ref={closeBtnRef}
+                type="button"
+                className="team-modal-close"
+                onClick={() => setSelectedMember(null)}
+                aria-label="Close"
+              >
                 &times;
               </button>
               
@@ -184,9 +322,9 @@ export function TeamPage() {
                 )}
               </div>
               
-              <h2 className="team-modal-name">{selectedMember.name}</h2>
+              <h2 id={titleId} className="team-modal-name">{selectedMember.name}</h2>
               <span className="team-modal-role">{selectedMember.role}</span>
-              {selectedMember.bio && <p className="team-modal-bio">{selectedMember.bio}</p>}
+              {selectedMember.bio && <p id={bioId} className="team-modal-bio">{selectedMember.bio}</p>}
               
               <div className="team-modal-socials">
                 {selectedMember.instagram && (

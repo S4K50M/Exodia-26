@@ -1,6 +1,5 @@
 import React, { useEffect, useState, useRef, useCallback } from 'react'
 import gsap from 'gsap'
-import supabase from '../utils/supabase'
 import { lockBodyScroll } from '../utils/bodyScrollLock'
 
 import background from '../assets/register/background.webp'
@@ -236,8 +235,10 @@ export function RegisterModal({ isOpen, onClose }: RegisterModalProps) {
     try {
       if (!file) throw new Error('Please upload a screenshot of your payment.')
 
-      const fileExt = file.name.split('.').pop()
+      const fileExt = file.name.split('.').pop() || 'png'
       const fileName = `${Date.now()}-${Math.random().toString(36).substring(7)}.${fileExt}`
+
+      const { default: supabase } = await import('../utils/supabase')
 
       const { error: uploadError } = await supabase.storage.from('payment_proofs').upload(fileName, file)
       if (uploadError) throw new Error('Image upload failed: ' + uploadError.message)
