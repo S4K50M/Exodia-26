@@ -208,7 +208,7 @@ export function EventCards({ events }: EventCardsProps) {
 
       <div ref={viewportRef} className="events-carousel-viewport">
         {/* arc-stage: cards are absolutely centred here; GSAP moves them */}
-        <div className="events-carousel-arc-stage">
+        <div className="events-carousel-arc-stage ">
           {extEvents.map((event, index) => (
             <div
               key={`${event.id}-${index}`}
@@ -226,8 +226,8 @@ export function EventCards({ events }: EventCardsProps) {
               }}
               onClick={() => setOpenIdx(index)}
             >
-              <div className="event-card-inner" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%' }}>
-                <h3 style={{ textAlign: 'center', padding: '0 1rem' }}>{event.title}</h3>
+              <div className="event-card-inner " style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%' }}>
+                <h3 className='font-serif' style={{ textAlign: 'center', padding: '0 1rem' }}>{event.title}</h3>
               </div>
             </div>
           ))}
@@ -236,11 +236,11 @@ export function EventCards({ events }: EventCardsProps) {
       {/* Details overlay — rendered via portal so it escapes GSAP-transformed ancestors */}
       {openIdx !== null && extEvents[openIdx] && createPortal(
         <div className="event-details-overlay" onClick={() => setOpenIdx(null)}>
-          <div className="event-details-modal" onClick={(e) => e.stopPropagation()}>
+          <div className="event-details-modal " onClick={(e) => e.stopPropagation()}>
             
             <button onClick={() => setOpenIdx(null)} aria-label="Close" className="event-modal-close">✕</button>
             
-            <h2 style={{ margin: '0 0 1.5rem 0', color: '#f3af26', fontSize: 'clamp(2.5rem, 6vw, 4.5rem)', textTransform: 'uppercase', letterSpacing: '2px', textShadow: '0 0 20px rgba(251,191,36,0.4)' }}>
+            <h2 className= 'font-serif' style={{ margin: '0 0 1.5rem 0', color: '#f3af26', fontSize: 'clamp(2.5rem, 6vw, 4.5rem)', textTransform: 'uppercase', letterSpacing: '2px', textShadow: '0 0 20px rgba(251,191,36,0.4)' }}>
               {extEvents[openIdx].title}
             </h2>
             

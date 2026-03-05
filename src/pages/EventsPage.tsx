@@ -221,7 +221,7 @@ export function EventsPage() {
               <h1 style={{ 
                 fontFamily: "'Brush Script MT', cursive", 
                 fontSize: 'clamp(3rem, 8vw, 6rem)',
-                color: '#e4d5b7',
+                color: '#ffd581',
                 textShadow: '0 0 20px rgba(0,0,0,0.8)'
               }}>
                 Events
@@ -239,7 +239,7 @@ export function EventsPage() {
             </div>
 
             {/* Cards Wrap */}
-            <div className="events-cards-wrap" ref={cardsWrapRef}>
+            <div className="events-cards-wrap font-serif" ref={cardsWrapRef}>
               {filteredEvents.length > 0 ? (
                 // Important: Added a key so the carousel remounts and resets index when data length changes
                 <EventCards key={`${activeFilter}-${searchTerm}`} events={filteredEvents} />

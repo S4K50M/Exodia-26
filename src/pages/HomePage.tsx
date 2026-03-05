@@ -277,8 +277,8 @@ export function HomePage() {
             {/* About Us - overlaid on top of parallax stage */}
             <div className="about-us-overlay" ref={aboutRef}>
               <div className="about-us-content">
-                <h2 className="about-us-title">About Us</h2>
-                <p className="about-us-text">
+                <h2 className="about-us-title font-serif">About Us</h2>
+                <p className="about-us-text font-serif">
                   With a thunderbolt of lightning and mountains that have witnessed millennia, Exodia returns to you. Exodia'26 is IIT Mandi's celebration of creativity, innovation and culture right in the heart of Himalayas. This year, Exodia brings together the binding forces of the nature: Ethereal Earth, Fiery Fire, ever-wandering Air, Water and boundless Ether. Exodia'26 unites cultural performances, unique artistic installations and the nightly showcase of our diverse and vibrant community energy. Here nature awaits your creativity and memories that will find their way to your heart again and again.
                 </p>
               </div>

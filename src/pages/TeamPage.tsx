@@ -171,7 +171,7 @@ export function TeamPage() {
           <div className="team-cloud team-cloud-br" ref={cloudBRRef}><img src={cloudBRight} alt="" loading="eager" decoding="async" /></div>
 
           {/* Hero title */}
-          <div className="team-hero-title">
+          <div className="team-hero-title font-serif">
             <h1>Our Team</h1>
             <p>The people behind Exodia&apos;26</p>
           </div>

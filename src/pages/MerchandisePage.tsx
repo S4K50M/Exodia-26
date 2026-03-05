@@ -356,10 +356,10 @@ export function MerchandisePage() {
         <div className="merch-side-fixed merch-side-right-fg" ref={rightRef}><img src={right} alt="" loading="eager" decoding="async" /></div>
 
         {/* ═══ Hero Section — centered buy button ═══ */}
-        <section className="merch-hero" ref={heroRef}>
+        <section className="merch-hero " ref={heroRef}>
           <div className="merch-hero-content" ref={heroContentRef}>
-            <h2 className="merch-page-title">Merchandise</h2>
-            <p className="merch-page-subtitle">Official Exodia'26 Gear — Limited Drops</p>
+            <h2 className="merch-page-title font-serif">Merchandise</h2>
+            <p className="merch-page-subtitle font-serif">Official Exodia'26 Gear — Limited Drops</p>
             <button className="merch-buy-btn" onClick={openOrder}>
               Buy Merchandise
             </button>

@@ -1,4 +1,4 @@
-import adityaTayal from '../assets/team/dp/AdityaTayal.jpg'
+import adityaTayal from '../assets/team/dp/AdityaTayal.jpeg'
 
 interface TeamMember {
   id: number

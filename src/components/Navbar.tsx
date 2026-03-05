@@ -162,7 +162,7 @@ export function Navbar({ shouldAnimate = false, onRegisterClick, onNotifyClick }
       <nav ref={navRef} className="navbar flex items-center justify-between p-4">
         <Link
           to="/"
-          className={`navbar-brand ${location.pathname === '/' ? 'active' : ''}`}
+          className={`font-serif navbar-brand ${location.pathname === '/' ? 'active' : ' '}`}
         >
           Exodia
         </Link>
