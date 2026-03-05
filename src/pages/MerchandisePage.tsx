@@ -372,7 +372,7 @@ export function MerchandisePage() {
   return (
     <LoadingScreen
       svg={<MerchSVG />}
-      assets={[bg, leftBg, rightBg, left, right]}
+      assets={[bg]}
     >
       <div className="merchandise-page" ref={containerRef}>
         {/* Toast */}
@@ -418,16 +418,16 @@ export function MerchandisePage() {
           <img src={bg} alt="" decoding="async" fetchPriority="high" />
         </div>
         <div className="merch-side-fixed merch-side-left-bg" ref={leftBgRef}>
-          <img src={leftBg} alt="" decoding="async" />
+          <img src={leftBg} alt="" decoding="async" fetchPriority="low" />
         </div>
         <div className="merch-side-fixed merch-side-right-bg" ref={rightBgRef}>
-          <img src={rightBg} alt="" decoding="async" />
+          <img src={rightBg} alt="" decoding="async" fetchPriority="low" />
         </div>
         <div className="merch-side-fixed merch-side-left-fg" ref={leftRef}>
-          <img src={left} alt="" decoding="async" />
+          <img src={left} alt="" decoding="async" fetchPriority="low" />
         </div>
         <div className="merch-side-fixed merch-side-right-fg" ref={rightRef}>
-          <img src={right} alt="" decoding="async" />
+          <img src={right} alt="" decoding="async" fetchPriority="low" />
         </div>
 
         {/* ═══ Hero Section — centered buy button ═══ */}

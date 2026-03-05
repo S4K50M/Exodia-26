@@ -24,7 +24,21 @@ function canPrefetch() {
   const saveData = connection?.saveData === true
   const effectiveType = String(connection?.effectiveType ?? '')
   const slowNetwork = /(^|-)2g$/.test(effectiveType) || effectiveType === 'slow-2g'
-  return !saveData && !slowNetwork
+  if (saveData || slowNetwork) return false
+
+  const deviceMemory = (navigator as any).deviceMemory as number | undefined
+  if (typeof deviceMemory === 'number' && deviceMemory > 0 && deviceMemory <= 4) return false
+
+  const hardwareConcurrency = (navigator as any).hardwareConcurrency as number | undefined
+  if (
+    typeof hardwareConcurrency === 'number' &&
+    hardwareConcurrency > 0 &&
+    hardwareConcurrency <= 4
+  ) {
+    return false
+  }
+
+  return true
 }
 
 const prefetched = new Set<string>()

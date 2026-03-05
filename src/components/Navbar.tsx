@@ -71,10 +71,10 @@ export function Navbar({ shouldAnimate = false, onRegisterClick, onNotifyClick }
           className={`navbar-brand ${location.pathname === '/' ? 'active' : ''}`}
         >
           <img
-            src="/exodia.png"
+            src="/exodia-logo.webp"
             alt=""
             className="navbar-logo"
-            width={28}
+            width={56}
             height={28}
             decoding="async"
             aria-hidden="true"

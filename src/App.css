@@ -176,8 +176,10 @@
 }
 
 .navbar-logo {
-  width: 28px;
+  display: block;
   height: 28px;
+  width: auto;
+  max-width: 96px;
   border-radius: 8px;
   box-shadow:
     0 8px 18px rgba(0, 0, 0, 0.45),
@@ -550,8 +552,9 @@
   }
 
   .navbar-logo {
-    width: 24px;
     height: 24px;
+    width: auto;
+    max-width: 84px;
     border-radius: 7px;
   }
 

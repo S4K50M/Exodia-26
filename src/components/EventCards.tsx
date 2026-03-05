@@ -1,6 +1,5 @@
 import { useRef, useEffect, useState, useCallback, useLayoutEffect, useMemo } from 'react'
 import { createPortal } from 'react-dom'
-import gsap from 'gsap'
 import { lockBodyScroll } from '../utils/bodyScrollLock'
 
 export interface Event {
@@ -125,22 +124,29 @@ export function EventCards({ events }: EventCardsProps) {
     [arcDip]
   )
 
+  const applyCardVisual = useCallback(
+    (el: HTMLDivElement, offset: number) => {
+      const abs = Math.abs(offset)
+      const visible = abs <= VISIBLE + 1
+
+      el.style.display = visible ? 'block' : 'none'
+      el.style.zIndex = String(20 - abs)
+
+      if (!visible) return
+
+      el.style.transform = `translate3d(${arcX(offset)}px, ${arcY(offset)}px, 0) scale(${arcScale(offset)})`
+      el.style.opacity = String(arcOpacity(offset))
+      el.style.filter = `blur(${arcBlur(offset)}px)`
+    },
+    [arcX, arcY]
+  )
+
   // helper: snap all card transforms instantly (no tween) for a given centreIdx
   const snapAll = useCallback((centreIdx: number) => {
     for (const [i, el] of cardRefs.current) {
-      const offset = i - centreIdx
-      const abs = Math.abs(offset)
-      gsap.set(el, {
-        display: abs <= VISIBLE + 1 ? 'block' : 'none',
-        x: arcX(offset),
-        y: arcY(offset),
-        scale: arcScale(offset),
-        opacity: arcOpacity(offset),
-        filter: `blur(${arcBlur(offset)}px)`,
-        zIndex: 20 - abs,
-      })
+      applyCardVisual(el, i - centreIdx)
     }
-  }, [arcX, arcY])
+  }, [applyCardVisual])
 
   const setCardRef = useCallback(
     (index: number, el: HTMLDivElement | null) => {
@@ -150,18 +156,9 @@ export function EventCards({ events }: EventCardsProps) {
       }
       cardRefs.current.set(index, el)
       const offset = index - currentIndexRef.current
-      const abs = Math.abs(offset)
-      gsap.set(el, {
-        display: abs <= VISIBLE + 1 ? 'block' : 'none',
-        x: arcX(offset),
-        y: arcY(offset),
-        scale: arcScale(offset),
-        opacity: arcOpacity(offset),
-        filter: `blur(${arcBlur(offset)}px)`,
-        zIndex: 20 - abs,
-      })
+      applyCardVisual(el, offset)
     },
-    [arcX, arcY]
+    [applyCardVisual]
   )
 
   // set initial positions instantly on mount
@@ -172,35 +169,9 @@ export function EventCards({ events }: EventCardsProps) {
   // tween all cards to their new arc positions when index changes
   useEffect(() => {
     for (const [i, el] of cardRefs.current) {
-      const offset = i - currentIndex
-      const abs = Math.abs(offset)
-      const visible = abs <= VISIBLE + 1
-      gsap.set(el, { display: visible ? 'block' : 'none', zIndex: 20 - abs })
-      if (!visible) continue
-
-      if (reduceMotion) {
-        gsap.set(el, {
-          x: arcX(offset),
-          y: arcY(offset),
-          scale: arcScale(offset),
-          opacity: arcOpacity(offset),
-          filter: `blur(${arcBlur(offset)}px)`,
-        })
-        continue
-      }
-
-      gsap.to(el, {
-        x: arcX(offset),
-        y: arcY(offset),
-        scale: arcScale(offset),
-        opacity: arcOpacity(offset),
-        filter: `blur(${arcBlur(offset)}px)`,
-        duration: tweenDuration,
-        ease: 'power2.inOut',
-        overwrite: 'auto',
-      })
+      applyCardVisual(el, i - currentIndex)
     }
-  }, [arcX, arcY, currentIndex, reduceMotion, tweenDuration])
+  }, [applyCardVisual, currentIndex, reduceMotion, tweenDuration])
 
   // infinite-loop: silently jump back to middle copy after tween finishes
   useEffect(() => {

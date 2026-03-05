@@ -184,11 +184,22 @@
     0 8px 32px rgba(0, 0, 0, 0.6), /* Deeper initial shadow */
     inset 0 1px 0 rgba(180, 230, 255, 0.2),
     inset 0 -1px 0 rgba(0, 80, 160, 0.2);
-  transition: box-shadow 0.3s ease, border-color 0.3s ease; 
+  transition:
+    transform 0.62s cubic-bezier(0.45, 0, 0.55, 1),
+    opacity 0.62s cubic-bezier(0.45, 0, 0.55, 1),
+    filter 0.62s cubic-bezier(0.45, 0, 0.55, 1),
+    box-shadow 0.3s ease,
+    border-color 0.3s ease; 
   will-change: transform, opacity, filter;
 }
 
-/* GSAP handles scale inline, so we rely on box-shadow and border for hover */
+@media (prefers-reduced-motion: reduce) {
+  .events-carousel-card {
+    transition: box-shadow 0.3s ease, border-color 0.3s ease;
+  }
+}
+
+/* Transform/opacity/filter are driven via JS, hover stays purely visual. */
 .events-carousel-card:hover {
   filter: blur(0) !important;
   opacity: 1 !important;
