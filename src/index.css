@@ -13,6 +13,7 @@
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  cursor: none;
 }
 
 #root {
@@ -48,8 +49,20 @@ body {
   margin: 0;
   min-width: 320px;
   min-height: 100vh;
+  cursor: none;
 }
 
-a {
+a, label {
   color: inherit;
+  cursor: none !important;
+}
+
+button, [role="button"], input, select, textarea, 
+input[type="file"]::-webkit-file-upload-button,
+input[type="file"]::file-selector-button {
+  cursor: none !important;
+}
+
+* {
+  cursor: none !important;
 }

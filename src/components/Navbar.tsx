@@ -199,6 +199,7 @@ export function Navbar({ shouldAnimate = false, onRegisterClick, onNotifyClick }
             <button
               onClick={onNotifyClick}
               className="group relative flex items-center gap-2 px-3 py-2 text-gray-300 hover:text-yellow-400 transition-all duration-300 font-medium cursor-pointer bg-transparent border-none"
+              data-cursor="blur"
             >
               <Bell 
                 size={20} 
@@ -219,6 +220,7 @@ export function Navbar({ shouldAnimate = false, onRegisterClick, onNotifyClick }
                 transition-all duration-300 transform cursor-pointer border-none
                 hover:-translate-y-1 hover:shadow-[0_0_20px_rgba(234,179,8,0.8)] hover:from-yellow-400 hover:to-yellow-300
               `}
+              data-cursor="large"
             >
               Register
             </button>
