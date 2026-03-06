@@ -1,18 +1,18 @@
 import { useEffect, useRef, useState } from 'react'
 import type Lenis from 'lenis'
 
-import bgLeft from '../assets/team/bg_left.png'
-import bgRight from '../assets/team/bg_right.png'
-import cloudLeft from '../assets/team/cloud_left.png'
-import cloudRight from '../assets/team/cloud_right.png'
-import cloudBLeft from '../assets/team/cloud_bleft.png'
-import cloudBRight from '../assets/team/cloud_bright.png'
+import bgLeft from '../assets/team/bg_left.webp'
+import bgRight from '../assets/team/bg_right.webp'
+import cloudLeft from '../assets/team/cloud_left.webp'
+import cloudRight from '../assets/team/cloud_right.webp'
+import cloudBLeft from '../assets/team/cloud_bleft.webp'
+import cloudBRight from '../assets/team/cloud_bright.webp'
 import { TEAM_SECTIONS } from '../data/team'
 import '../styles/team.css'
 
 import { LoadingScreen } from '../components/LoadingScreen'
 import { TeamSVG } from '../assets/loading/TeamSVG'
-import { loadGsap, loadLenis } from '../utils/lazyAnimations'
+import { getLenisOptions, loadGsap, loadLenis } from '../utils/lazyAnimations'
 
 // ── Team data organised by position ──────────────────────────────────────────
 interface TeamMember {
@@ -59,7 +59,7 @@ export function TeamPage() {
       const [{ ScrollTrigger }, LenisCtor] = await Promise.all([loadGsap(), loadLenis()])
       if (isCancelled) return
 
-      lenis = new LenisCtor({ smoothWheel: true, lerp: 0.1 })
+      lenis = new LenisCtor(getLenisOptions())
       lenisRef.current = lenis
       lenis.on('scroll', () => ScrollTrigger.update())
 
@@ -161,14 +161,14 @@ export function TeamPage() {
         {/* ── Sticky hero with background & clouds ── */}
         <div className="team-stage">
             <div className="team-bg">
-            <div className="team-bg-left"><img src={bgLeft} alt="" loading="eager" decoding="async" /></div>
-            <div className="team-bg-right"><img src={bgRight} alt="" loading="eager" decoding="async" /></div>
+            <div className="team-bg-left"><img src={bgLeft} alt="" loading="eager" decoding="async" fetchPriority="high" /></div>
+            <div className="team-bg-right"><img src={bgRight} alt="" loading="eager" decoding="async" fetchPriority="high" /></div>
           </div>
 
-          <div className="team-cloud team-cloud-tl" ref={cloudTLRef}><img src={cloudLeft} alt="" loading="eager" decoding="async" /></div>
-          <div className="team-cloud team-cloud-tr" ref={cloudTRRef}><img src={cloudRight} alt="" loading="eager" decoding="async" /></div>
-          <div className="team-cloud team-cloud-bl" ref={cloudBLRef}><img src={cloudBLeft} alt="" loading="eager" decoding="async" /></div>
-          <div className="team-cloud team-cloud-br" ref={cloudBRRef}><img src={cloudBRight} alt="" loading="eager" decoding="async" /></div>
+          <div className="team-cloud team-cloud-tl" ref={cloudTLRef}><img src={cloudLeft} alt="" loading="eager" decoding="async" fetchPriority="low" /></div>
+          <div className="team-cloud team-cloud-tr" ref={cloudTRRef}><img src={cloudRight} alt="" loading="eager" decoding="async" fetchPriority="low" /></div>
+          <div className="team-cloud team-cloud-bl" ref={cloudBLRef}><img src={cloudBLeft} alt="" loading="eager" decoding="async" fetchPriority="low" /></div>
+          <div className="team-cloud team-cloud-br" ref={cloudBRRef}><img src={cloudBRight} alt="" loading="eager" decoding="async" fetchPriority="low" /></div>
 
           {/* Hero title */}
           <div className="team-hero-title font-serif">

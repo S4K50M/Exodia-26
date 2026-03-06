@@ -1,7 +1,10 @@
 /* Events page */
 .events-page {
   min-height: 100vh;
+  min-height: 100svh;
+  min-height: 100dvh;
   color: #f5f5f7;
+  overflow-x: clip;
 }
 
 .events-scroll-trigger {
@@ -13,6 +16,8 @@
   position: sticky;
   top: 0;
   height: 100vh;
+  height: 100svh;
+  height: 100dvh;
   width: 100%;
   overflow: hidden;
 }
@@ -582,6 +587,7 @@
   .events-controls {
     top: 8%;
     flex-direction: row;
+    flex-wrap: wrap;
     gap: 0.6rem;
     width: 92%;
     left: 50%;
@@ -602,7 +608,21 @@
   }
 
   .events-filter-wrap {
-    flex-shrink: 0;
+    flex: 1 1 100%;
+    display: flex;
+    justify-content: center;
+  }
+
+  .events-filter-btn {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .events-filter-dropdown {
+    left: 50%;
+    right: auto;
+    transform: translateX(-50%);
+    width: min(280px, calc(100vw - 2rem));
   }
 
   /* Event details modal — font sizes reduced by 2% on mobile */

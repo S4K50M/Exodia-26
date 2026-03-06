@@ -1,17 +1,17 @@
 import { useEffect, useRef, useState } from 'react'
 import type Lenis from 'lenis'
 
-import bg from '../assets/home/bg.png'
+import bg from '../assets/home/bg.webp'
 import exodia from '../assets/home/exodia.png'
 import hut from '../assets/home/hut.png'
-import leftMountain from '../assets/home/left_mountain.png'
-import rightMountain from '../assets/home/right_mountain.png'
+import leftMountain from '../assets/home/left_mountain.webp'
+import rightMountain from '../assets/home/right_mountain.webp'
 
 import '../styles/home.css'
 
 import { LoadingScreen } from '../components/LoadingScreen'
 import { HomeSVG } from '../assets/loading/HomeSVG'
-import { loadGsap, loadLenis } from '../utils/lazyAnimations'
+import { getLenisOptions, loadGsap, loadLenis } from '../utils/lazyAnimations'
 
 export function HomePage() {
   const [daysRemaining, setDaysRemaining] = useState(0)
@@ -49,7 +49,7 @@ export function HomePage() {
       const [{ ScrollTrigger }, LenisCtor] = await Promise.all([loadGsap(), loadLenis()])
       if (isCancelled) return
 
-      lenis = new LenisCtor({ smoothWheel: true, lerp: 0.1 })
+      lenis = new LenisCtor(getLenisOptions())
       lenisRef.current = lenis
       if (!hasIntroPlayed.current) lenis.stop()
       lenis.on('scroll', () => ScrollTrigger.update())
@@ -247,12 +247,12 @@ export function HomePage() {
         <div className="scroll-trigger" ref={scrollTriggerRef}>
           <div className="parallax-stage">
             <div className="layer layer-bg" ref={bgRef}>
-              <img src={bg} alt="" loading="eager" decoding="async" />
+              <img src={bg} alt="" loading="eager" decoding="async" fetchPriority="high" />
             </div>
             
             {/* Grouped Exodia and Countdown together */}
             <div className="layer layer-exodia" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
-              <img ref={exodiaRef} src={exodia} alt="Exodia" loading="eager" decoding="async" style={{ position: 'relative', zIndex: 10 }} />
+              <img ref={exodiaRef} src={exodia} alt="Exodia" loading="eager" decoding="async" fetchPriority="high" style={{ position: 'relative', zIndex: 10 }} />
               
               <div 
                 ref={countdownRef} 

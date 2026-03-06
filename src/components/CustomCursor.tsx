@@ -1,10 +1,12 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import './CustomCursor.css';
+import { shouldUseCustomCursor } from '../utils/lazyAnimations';
 
 export const CustomCursor: React.FC = () => {
   const cursorRef = useRef<HTMLDivElement>(null);
   const dotRef = useRef<HTMLDivElement>(null);
+  const [enabled, setEnabled] = useState(false);
   
   const mousePos = useRef({ x: 0, y: 0 });
   const renderedPos = useRef({ x: 0, y: 0 });
@@ -14,8 +16,46 @@ export const CustomCursor: React.FC = () => {
   const rafId = useRef<number>(0);
 
   useEffect(() => {
+    if (typeof window === 'undefined') return
+
+    const mediaQuery = window.matchMedia('(hover: hover) and (pointer: fine)')
+    const update = () => setEnabled(mediaQuery.matches)
+
+    update()
+    if (mediaQuery.addEventListener) {
+      mediaQuery.addEventListener('change', update)
+    } else {
+      mediaQuery.addListener(update)
+    }
+
+    return () => {
+      if (mediaQuery.removeEventListener) {
+        mediaQuery.removeEventListener('change', update)
+      } else {
+        mediaQuery.removeListener(update)
+      }
+    }
+  }, [])
+
+  useEffect(() => {
+    if (!enabled || !shouldUseCustomCursor()) {
+      document.documentElement.classList.remove('custom-cursor-enabled')
+      return
+    }
+
+    document.documentElement.classList.add('custom-cursor-enabled')
+
+    return () => {
+      document.documentElement.classList.remove('custom-cursor-enabled')
+    }
+  }, [enabled])
+
+  useEffect(() => {
+    if (!enabled || !shouldUseCustomCursor()) return
+
     const onMouseMove = (e: MouseEvent) => {
       mousePos.current = { x: e.clientX, y: e.clientY };
+      cursorRef.current?.classList.add('visible');
     };
 
     const animate = () => {
@@ -95,9 +135,9 @@ export const CustomCursor: React.FC = () => {
       observer.disconnect();
       cancelAnimationFrame(rafId.current);
     };
-  }, []);
+  }, [enabled]);
 
-  if (typeof document === 'undefined') return null;
+  if (!enabled || typeof document === 'undefined') return null;
 
   return createPortal(
     <div ref={cursorRef} className="custom-cursor-container">

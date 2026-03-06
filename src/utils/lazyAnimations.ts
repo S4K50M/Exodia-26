@@ -24,6 +24,7 @@ export async function loadGsap(): Promise<LoadedGsap> {
 }
 
 type Lenis = typeof import('lenis').default
+type LenisOptions = import('lenis').LenisOptions
 
 let lenisPromise: Promise<Lenis> | null = null
 
@@ -32,6 +33,30 @@ export async function loadLenis(): Promise<Lenis> {
 
   lenisPromise = import('lenis').then((m) => m.default)
   return lenisPromise
+}
+
+export function isTouchLikeDevice() {
+  if (typeof window === 'undefined') return false
+  return window.matchMedia('(hover: none), (pointer: coarse)').matches
+}
+
+export function shouldUseCustomCursor() {
+  if (typeof window === 'undefined') return false
+  return window.matchMedia('(hover: hover) and (pointer: fine)').matches
+}
+
+export function getLenisOptions(): LenisOptions {
+  const isTouchLike = isTouchLikeDevice()
+
+  return {
+    smoothWheel: true,
+    syncTouch: isTouchLike,
+    syncTouchLerp: isTouchLike ? 0.1 : 0.075,
+    touchMultiplier: 1,
+    gestureOrientation: 'vertical',
+    overscroll: false,
+    lerp: isTouchLike ? 0.12 : 0.1,
+  }
 }
 
 export function prefetchGsap() {
@@ -61,4 +86,3 @@ export function runWhenIdle(work: () => void, timeoutMs = 1200) {
 
   window.setTimeout(work, 1)
 }
-

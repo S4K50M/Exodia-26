@@ -12,9 +12,15 @@
   justify-content: center;
   mix-blend-mode: difference;
   will-change: transform, width, height, margin;
+  opacity: 0;
   transition: width 0.4s cubic-bezier(0.23, 1, 0.32, 1), 
               height 0.4s cubic-bezier(0.23, 1, 0.32, 1), 
-              margin 0.4s cubic-bezier(0.23, 1, 0.32, 1);
+              margin 0.4s cubic-bezier(0.23, 1, 0.32, 1),
+              opacity 0.2s ease;
+}
+
+.custom-cursor-container.visible {
+  opacity: 1;
 }
 
 .custom-cursor-ring {
@@ -59,11 +65,12 @@
   backdrop-filter: blur(10px) brightness(1.5);
 }
 
-/* Ensure default cursor is hidden */
-* {
+/* Hide default cursor only when the custom cursor is actually enabled */
+html.custom-cursor-enabled * {
   cursor: none !important;
 }
 
-html, body {
+html.custom-cursor-enabled,
+html.custom-cursor-enabled body {
   cursor: none !important;
 }

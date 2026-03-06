@@ -2,7 +2,7 @@ import React, { useEffect, useState, useRef, useCallback } from 'react'
 import supabase from '../utils/supabase'
 import { loadGsap } from '../utils/lazyAnimations'
 
-import background from '../assets/register/background.png'
+import background from '../assets/register/background.webp'
 
 import '../styles/register-modal.css'
 import qr from '../assets/register/qr.png'

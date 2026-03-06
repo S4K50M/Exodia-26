@@ -2,11 +2,11 @@ import { useEffect, useRef, useState, useMemo } from 'react'
 import type Lenis from 'lenis'
 import { Search, Filter, X } from 'lucide-react'
 
-import bg from '../assets/events/bg.png'
-import leftDragon from '../assets/events/left_dragon.png'
-import rightDragon from '../assets/events/right_dragon.png'
-import leftSword from '../assets/events/left_sword.png'
-import rightSword from '../assets/events/right_sword.png'
+import bg from '../assets/events/bg.webp'
+import leftDragon from '../assets/events/left_dragon.webp'
+import rightDragon from '../assets/events/right_dragon.webp'
+import leftSword from '../assets/events/left_sword.webp'
+import rightSword from '../assets/events/right_sword.webp'
 
 import { EventCards } from '../components/EventCards'
 import EventsRaw from '../data/events.json'
@@ -14,7 +14,7 @@ import '../styles/events.css'
 
 import { LoadingScreen } from '../components/LoadingScreen'
 import { EventsSVG } from '../assets/loading/EventsSVG'
-import { loadGsap, loadLenis } from '../utils/lazyAnimations'
+import { getLenisOptions, loadGsap, loadLenis } from '../utils/lazyAnimations'
 
 export function EventsPage() {
   const containerRef = useRef<HTMLDivElement | null>(null)
@@ -79,7 +79,7 @@ export function EventsPage() {
       const [{ ScrollTrigger }, LenisCtor] = await Promise.all([loadGsap(), loadLenis()])
       if (isCancelled) return
 
-      lenis = new LenisCtor({ smoothWheel: true, lerp: 0.1 })
+      lenis = new LenisCtor(getLenisOptions())
       lenis.on('scroll', () => ScrollTrigger.update())
 
       const raf = (time: number) => {
@@ -155,7 +155,7 @@ export function EventsPage() {
         <div className="events-scroll-trigger" ref={scrollTriggerRef}>
           <div className="events-stage">
             <div className="events-bg">
-              <img src={bg} alt="" loading="eager" decoding="async" />
+              <img src={bg} alt="" loading="eager" decoding="async" fetchPriority="high" />
             </div>
 
             {/* --- NEW: Search & Filter Controls --- */}
@@ -228,14 +228,14 @@ export function EventsPage() {
               </h1>
             </div>
 
-            <img ref={leftSwordRef} src={leftSword} className="event-asset sword-left" alt="" loading="eager" decoding="async" />
-            <img ref={rightSwordRef} src={rightSword} className="event-asset sword-right" alt="" loading="eager" decoding="async" />
+            <img ref={leftSwordRef} src={leftSword} className="event-asset sword-left" alt="" loading="eager" decoding="async" fetchPriority="low" />
+            <img ref={rightSwordRef} src={rightSword} className="event-asset sword-right" alt="" loading="eager" decoding="async" fetchPriority="low" />
 
             <div className="events-dragon events-dragon-left">
-              <img ref={leftDragonRef} src={leftDragon} alt="" loading="eager" decoding="async" />
+              <img ref={leftDragonRef} src={leftDragon} alt="" loading="eager" decoding="async" fetchPriority="low" />
             </div>
             <div className="events-dragon events-dragon-right">
-              <img ref={rightDragonRef} src={rightDragon} alt="" loading="eager" decoding="async" />
+              <img ref={rightDragonRef} src={rightDragon} alt="" loading="eager" decoding="async" fetchPriority="low" />
             </div>
 
             {/* Cards Wrap */}

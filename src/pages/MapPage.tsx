@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState, useCallback } from 'react'
 import { Maximize2, Minimize2 } from 'lucide-react'
 
-import mapImg from '../assets/map/map.png'
+import mapImg from '../assets/map/map.webp'
 import '../styles/map.css'
 
 import { LoadingScreen } from '../components/LoadingScreen'
@@ -241,6 +241,7 @@ export function MapPage() {
             draggable={false}
             loading="eager"
             decoding="async"
+            fetchPriority="high"
           />
 
           {imgSize.w > 0 && (

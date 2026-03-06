@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 
 import bottomLeft from '../assets/register/left-bottom.png';
 import bottomRight from '../assets/register/right-bottom.png';
-import background from '../assets/register/background.png';
+import background from '../assets/register/background.webp';
 import leftSide from '../assets/register/side-left.png';
 import rightSide from '../assets/register/side-right.png';
 

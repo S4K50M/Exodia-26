@@ -1,7 +1,10 @@
 /* -- Team page -- */
 .team-page {
   min-height: 100vh;
+  min-height: 100svh;
+  min-height: 100dvh;
   color: #f5f5f7;
+  overflow-x: clip;
 }
 
 .team-scroll-trigger {
@@ -13,6 +16,8 @@
   position: sticky;
   top: 0;
   height: 100vh;
+  height: 100svh;
+  height: 100dvh;
   width: 100%;
   overflow: hidden;
   z-index: 1;
@@ -49,32 +54,28 @@
 .team-cloud-tl {
   top: -10vh;
   left: 0;
-  width: 40vw;
-  min-width: 500px;
+  width: clamp(240px, 40vw, 500px);
   transform-origin: top left;
 }
 
 .team-cloud-tr {
   top: -10vh;
   right: 0;
-  width: 40vw;
-  min-width: 500px;
+  width: clamp(240px, 40vw, 500px);
   transform-origin: top right;
 }
 
 .team-cloud-bl {
   bottom: -12vh;
   left: 0;
-  width: 45vw;
-  min-width: 550px;
+  width: clamp(280px, 45vw, 550px);
   transform-origin: bottom left;
 }
 
 .team-cloud-br {
   bottom: -12vh;
   right: 0;
-  width: 45vw;
-  min-width: 550px;
+  width: clamp(280px, 45vw, 550px);
   transform-origin: bottom right;
 }
 
@@ -155,12 +156,14 @@
   display: flex;
   flex-wrap: wrap;
   justify-content: center;
-  gap: 1.5rem;
+  gap: clamp(0.9rem, 2.4vw, 1.5rem);
 }
 
 /* -- Member card -- */
 .team-member-card {
-  width: 220px;
+  flex: 1 1 220px;
+  width: min(100%, 220px);
+  max-width: 220px;
   padding: 1.75rem 1.25rem;
   border-radius: 1rem;
   background: transparent;
@@ -260,14 +263,14 @@
 @media (max-width: 720px) {
   .team-cloud-tl,
   .team-cloud-tr {
-    width: 45vw;
-    min-width: 280px;
+    top: -4vh;
+    width: clamp(180px, 42vw, 280px);
   }
 
   .team-cloud-bl,
   .team-cloud-br {
-    width: 50vw;
-    min-width: 320px;
+    bottom: -8vh;
+    width: clamp(200px, 48vw, 320px);
   }
 
   .team-sections {
@@ -279,7 +282,8 @@
   }
 
   .team-member-card {
-    width: 180px;
+    flex-basis: calc(50% - 0.75rem);
+    width: min(100%, 190px);
     padding: 1.25rem 1rem;
   }
 
@@ -289,19 +293,51 @@
   }
 }
 
-@media (max-width: 480px) {
-  .team-cloud-tl,
-  .team-cloud-tr {
-    min-width: 200px;
-  }
-
+@media (max-width: 560px) {
   .team-cloud-bl,
   .team-cloud-br {
-    min-width: 240px;
+    display: none;
+  }
+
+  .team-hero-title {
+    padding-inline: 1.25rem;
   }
 
   .team-member-card {
-    width: 160px;
+    flex-basis: 100%;
+    max-width: 320px;
+  }
+
+  .team-modal-card {
+    padding: 3rem 1rem 1.5rem;
+    border-radius: 1.25rem;
+  }
+
+  .team-modal-avatar {
+    width: 104px;
+    height: 104px;
+  }
+
+  .team-modal-name {
+    font-size: 1.4rem;
+  }
+
+  .team-modal-bio {
+    padding: 0;
+    font-size: 0.9rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .team-cloud-tl,
+  .team-cloud-tr {
+    top: -2vh;
+    width: clamp(150px, 40vw, 220px);
+  }
+
+  .team-member-card {
+    width: 100%;
+    max-width: none;
     padding: 1rem 0.75rem;
   }
 
@@ -345,6 +381,10 @@
   position: relative;
   width: 100%;
   max-width: 420px;
+  max-height: 88vh;
+  max-height: 88dvh;
+  overflow-y: auto;
+  overscroll-behavior: contain;
   background: rgba(15, 15, 35, 0.85);
   border: 1px solid rgba(228, 213, 183, 0.3);
   border-radius: 1.5rem;
