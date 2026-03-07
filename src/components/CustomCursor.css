@@ -67,3 +67,17 @@
 html, body {
   cursor: none !important;
 }
+/* Disable custom cursor on touch devices (phones & tablets) */
+@media (hover: none), (pointer: coarse) {
+  .custom-cursor-container {
+    display: none !important;
+  }
+
+  * {
+    cursor: auto !important;
+  }
+
+  html, body {
+    cursor: auto !important;
+  }
+}
