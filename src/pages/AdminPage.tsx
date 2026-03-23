@@ -196,8 +196,307 @@ function NotificationTab() {
 
 
 /**
- * MAIN ADMIN PAGE COMPONENT
+ * ADVERTISEMENT TAB COMPONENT
  */
+const gdrive = (url: string): string => {
+  // Convert Google Drive share link or ID to thumbnail URL
+  // Supports: https://drive.google.com/file/d/ID/view or plain ID
+  const match = url.match(/[-\w]{25,}/);
+  if (!match) return url;
+  return `https://drive.google.com/thumbnail?id=${match[0]}`;
+};
+
+function AdvertisementTab() {
+  const [current, setCurrent] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+  const [msg, setMsg] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
+
+  // Form state
+  const [isActive, setIsActive] = useState(false);
+  const [shape, setShape] = useState<'rectangle' | 'square' | 'portrait'>('rectangle');
+  const [hasButton, setHasButton] = useState(false);
+  const [buttonLink, setButtonLink] = useState('');
+  const [imageUrl, setImageUrl] = useState('');
+  const [heading, setHeading] = useState('');
+  const [description, setDescription] = useState('');
+
+  useEffect(() => { fetchCurrent(); }, []);
+
+  const fetchCurrent = async () => {
+    setLoading(true);
+    const { data } = await supabase
+      .from('advertisement')
+      .select('*')
+      .order('created_at', { ascending: false })
+      .limit(1);
+    if (data && data.length > 0) {
+      const d = data[0];
+      setCurrent(d);
+      setIsActive(d.is_active);
+      setShape(d.shape);
+      setHasButton(d.has_button);
+      setButtonLink(d.button_link || '');
+      setImageUrl(d.image_url || '');
+      setHeading(d.heading);
+      setDescription(d.description);
+    }
+    setLoading(false);
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setSaving(true);
+    setMsg(null);
+
+    // Convert Google Drive URL to thumbnail URL (or null if empty)
+    const finalImageUrl = imageUrl.trim() ? gdrive(imageUrl.trim()) : null;
+
+    // Delete ALL old rows
+    const { error: delError } = await supabase
+      .from('advertisement')
+      .delete()
+      .neq('id', '00000000-0000-0000-0000-000000000000'); // delete all
+
+    if (delError) {
+      setMsg({ type: 'error', text: 'Failed to clear old data: ' + delError.message });
+      setSaving(false);
+      return;
+    }
+
+    // Insert new row
+    const { error: insError } = await supabase
+      .from('advertisement')
+      .insert([{
+        is_active: isActive,
+        shape,
+        has_button: hasButton,
+        button_link: hasButton && buttonLink.trim() ? buttonLink.trim() : null,
+        image_url: finalImageUrl,
+        heading: heading.trim(),
+        description: description.trim(),
+      }]);
+
+    if (insError) {
+      setMsg({ type: 'error', text: 'Failed to save: ' + insError.message });
+    } else {
+      setMsg({ type: 'success', text: 'Advertisement updated successfully!' });
+      fetchCurrent();
+    }
+    setSaving(false);
+  };
+
+  const shapes: { value: 'rectangle' | 'square' | 'portrait'; label: string; desc: string }[] = [
+    { value: 'rectangle', label: 'Rectangle', desc: 'Wide landscape card (520px)' },
+    { value: 'square', label: 'Square', desc: 'Balanced square card (420px)' },
+    { value: 'portrait', label: 'Portrait', desc: 'Tall narrow card (360px)' },
+  ];
+
+  return (
+    <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 animate-in fade-in slide-in-from-bottom-4 duration-500">
+
+      {/* Form Section */}
+      <div className="space-y-6">
+        <h2 className="text-xl font-bold text-yellow-500 uppercase tracking-tight">Configure Advertisement</h2>
+
+        {loading ? (
+          <p className="text-gray-500 italic">Loading current config...</p>
+        ) : (
+          <form onSubmit={handleSubmit} className="bg-zinc-900 p-6 rounded-2xl border border-white/10 space-y-5">
+
+            {/* On/Off Toggle */}
+            <div className="flex items-center justify-between p-4 bg-white/5 rounded-xl border border-white/10">
+              <div>
+                <p className="text-sm font-bold text-white">Advertisement Active</p>
+                <p className="text-xs text-gray-500 mt-0.5">Show popup on homepage</p>
+              </div>
+              <button
+                type="button"
+                onClick={() => setIsActive(v => !v)}
+                className={`relative w-12 h-6 rounded-full transition-all duration-300 ${
+                  isActive ? 'bg-yellow-500' : 'bg-zinc-700'
+                }`}
+              >
+                <span className={`absolute top-1 left-1 w-4 h-4 bg-white rounded-full shadow transition-transform duration-300 ${
+                  isActive ? 'translate-x-6' : 'translate-x-0'
+                }`} />
+              </button>
+            </div>
+
+            {/* Shape */}
+            <div>
+              <label className="block text-xs font-bold text-gray-500 uppercase mb-3 ml-1">Poster Shape</label>
+              <div className="grid grid-cols-3 gap-3">
+                {shapes.map(s => (
+                  <button
+                    key={s.value}
+                    type="button"
+                    onClick={() => setShape(s.value)}
+                    className={`p-3 rounded-xl border text-center transition-all ${
+                      shape === s.value
+                        ? 'border-yellow-500 bg-yellow-500/10 text-yellow-400'
+                        : 'border-white/10 bg-white/5 text-gray-400 hover:border-white/20'
+                    }`}
+                  >
+                    <p className="text-xs font-bold">{s.label}</p>
+                    <p className="text-[10px] text-gray-500 mt-0.5 leading-tight">{s.desc}</p>
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Redirect Button Toggle */}
+            <div className="flex items-center justify-between p-4 bg-white/5 rounded-xl border border-white/10">
+              <div>
+                <p className="text-sm font-bold text-white">Redirect Button</p>
+                <p className="text-xs text-gray-500 mt-0.5">Show a CTA button on the popup</p>
+              </div>
+              <button
+                type="button"
+                onClick={() => setHasButton(v => !v)}
+                className={`relative w-12 h-6 rounded-full transition-all duration-300 ${
+                  hasButton ? 'bg-yellow-500' : 'bg-zinc-700'
+                }`}
+              >
+                <span className={`absolute top-1 left-1 w-4 h-4 bg-white rounded-full shadow transition-transform duration-300 ${
+                  hasButton ? 'translate-x-6' : 'translate-x-0'
+                }`} />
+              </button>
+            </div>
+
+            {/* Redirect Link (conditional) */}
+            {hasButton && (
+              <div>
+                <label className="block text-xs font-bold text-gray-500 uppercase mb-2 ml-1">Redirect Button Link</label>
+                <input
+                  type="url"
+                  value={buttonLink}
+                  onChange={e => setButtonLink(e.target.value)}
+                  placeholder="https://example.com"
+                  className="w-full bg-white/5 border border-white/10 p-3 rounded-xl outline-none focus:ring-2 focus:ring-yellow-500 transition-all text-white"
+                  required={hasButton}
+                />
+              </div>
+            )}
+
+            {/* Image URL */}
+            <div>
+              <label className="block text-xs font-bold text-gray-500 uppercase mb-2 ml-1">Image URL <span className="normal-case text-gray-600 font-normal">(Google Drive public link, optional)</span></label>
+              <input
+                type="url"
+                value={imageUrl}
+                onChange={e => setImageUrl(e.target.value)}
+                placeholder="https://drive.google.com/file/d/.../view"
+                className="w-full bg-white/5 border border-white/10 p-3 rounded-xl outline-none focus:ring-2 focus:ring-yellow-500 transition-all text-white"
+              />
+              <p className="text-[10px] text-gray-600 mt-1 ml-1">Will be auto-converted to a Google Drive thumbnail URL before saving</p>
+            </div>
+
+            {/* Heading */}
+            <div>
+              <label className="block text-xs font-bold text-gray-500 uppercase mb-2 ml-1">Heading <span className="text-red-400">*</span></label>
+              <input
+                type="text"
+                value={heading}
+                onChange={e => setHeading(e.target.value)}
+                placeholder="e.g. Registrations Now Open!"
+                className="w-full bg-white/5 border border-white/10 p-3 rounded-xl outline-none focus:ring-2 focus:ring-yellow-500 transition-all text-white"
+                required
+              />
+            </div>
+
+            {/* Description */}
+            <div>
+              <label className="block text-xs font-bold text-gray-500 uppercase mb-2 ml-1">Description <span className="text-red-400">*</span></label>
+              <textarea
+                value={description}
+                onChange={e => setDescription(e.target.value)}
+                placeholder="Write the advertisement body text here..."
+                rows={4}
+                className="w-full bg-white/5 border border-white/10 p-3 rounded-xl outline-none focus:ring-2 focus:ring-yellow-500 transition-all resize-none text-white"
+                required
+              />
+            </div>
+
+            {/* Message */}
+            {msg && (
+              <div className={`p-3 rounded-lg text-sm font-semibold ${
+                msg.type === 'success'
+                  ? 'bg-green-500/10 border border-green-500/30 text-green-400'
+                  : 'bg-red-500/10 border border-red-500/30 text-red-400'
+              }`}>
+                {msg.text}
+              </div>
+            )}
+
+            <button
+              type="submit"
+              disabled={saving}
+              className="w-full py-3 bg-yellow-500 hover:bg-yellow-400 disabled:bg-zinc-700 text-black font-black rounded-xl transition-all uppercase tracking-widest text-sm"
+            >
+              {saving ? 'Saving...' : 'Save Advertisement'}
+            </button>
+          </form>
+        )}
+      </div>
+
+      {/* Preview Section */}
+      <div className="space-y-6">
+        <h2 className="text-xl font-bold text-gray-400 uppercase tracking-tight">Current Config</h2>
+        {current ? (
+          <div className="bg-zinc-900 border border-white/5 p-5 rounded-2xl space-y-4">
+            <div className="flex items-center gap-3">
+              <span className={`inline-flex items-center gap-1.5 text-xs font-bold px-2.5 py-1 rounded-full ${
+                current.is_active
+                  ? 'bg-green-500/15 text-green-400 border border-green-500/20'
+                  : 'bg-zinc-700/50 text-gray-500 border border-white/5'
+              }`}>
+                <span className={`w-1.5 h-1.5 rounded-full ${
+                  current.is_active ? 'bg-green-400' : 'bg-gray-600'
+                }`} />
+                {current.is_active ? 'LIVE' : 'OFF'}
+              </span>
+              <span className="text-xs text-gray-500 uppercase tracking-wider font-semibold">{current.shape} shape</span>
+            </div>
+            <div>
+              <p className="text-[10px] uppercase tracking-widest text-gray-600 mb-1">Heading</p>
+              <p className="text-white font-bold">{current.heading}</p>
+            </div>
+            <div>
+              <p className="text-[10px] uppercase tracking-widest text-gray-600 mb-1">Description</p>
+              <p className="text-gray-400 text-sm leading-relaxed">{current.description}</p>
+            </div>
+            {current.image_url && (
+              <div>
+                <p className="text-[10px] uppercase tracking-widest text-gray-600 mb-2">Image</p>
+                <img src={current.image_url} alt="Ad preview" className="w-full max-h-40 object-cover rounded-lg border border-white/10" />
+              </div>
+            )}
+            <div className="flex items-center gap-4 text-xs">
+              <span className="text-gray-500">
+                Button: <span className={current.has_button ? 'text-yellow-400 font-bold' : 'text-gray-600'}>{current.has_button ? 'Yes' : 'No'}</span>
+              </span>
+              {current.has_button && current.button_link && (
+                <a href={current.button_link} target="_blank" rel="noreferrer" className="text-yellow-400/70 underline truncate max-w-[200px]">
+                  {current.button_link}
+                </a>
+              )}
+            </div>
+            <p className="text-[10px] text-zinc-600 font-mono">
+              Last updated: {new Date(current.created_at).toLocaleString()}
+            </p>
+          </div>
+        ) : (
+          <div className="bg-zinc-900/50 border border-dashed border-white/10 p-12 rounded-2xl text-center">
+            <p className="text-gray-500">No advertisement configured yet.</p>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+
 /**
  * MAIN ADMIN PAGE COMPONENT
  */
@@ -393,7 +692,7 @@ export function AdminPage() {
 
         {/* Tab System */}
         <div className="flex flex-wrap gap-4 md:gap-8 border-b border-white/10 mb-8 pb-1">
-          {['approval', 'merch', 'notification'].map((tab) => (
+          {['approval', 'merch', 'notification', 'advertisement'].map((tab) => (
             <button
               key={tab}
               onClick={() => setActiveTab(tab)}
@@ -607,6 +906,9 @@ export function AdminPage() {
 
         {/* --- NOTIFICATIONS TAB --- */}
         {activeTab === 'notification' && <NotificationTab />}
+
+        {/* --- ADVERTISEMENT TAB --- */}
+        {activeTab === 'advertisement' && <AdvertisementTab />}
       </div>
     </div>
   );

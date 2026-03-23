@@ -16,6 +16,10 @@ import teeFront from '../assets/merch/mockup-tee-front.png'
 import teeBack from '../assets/merch/mockup-tee-back.png'
 import acidFront from '../assets/merch/acid-wash-front.png'
 import acidBack from '../assets/merch/acid-wash-back.png'
+import newTeeFront from '../assets/merch/new-tee-front.png'
+import newTeeBack from '../assets/merch/new-tee-back.png'
+import newAcidTeeFront from '../assets/merch/new-acid-front.png'
+import newAcidTeeBack from '../assets/merch/new-acid-back.png'
 
 import '../styles/merchandise.css'
 import '../styles/merch-modal.css'
@@ -28,6 +32,8 @@ const MERCH_OPTIONS = [
   { id: 'hoodie', name: 'Oversized Hoodie', price: 669, type: 'single', sizeLabel: 'Size' },
   { id: 'tee', name: 'Oversized Tee', price: 349, type: 'single', sizeLabel: 'Size' },
   { id: 'acid_tee', name: 'Acid Wash Oversized Tee', price: 399, type: 'single', sizeLabel: 'Size' },
+  { id: 'tee2', name: 'Oversized Tee Two', price: 349, type: 'single', sizeLabel: 'Size' },
+  { id: 'acid_tee2', name: 'Acid Wash Oversized Tee Two', price: 399, type: 'single', sizeLabel: 'Size' },
   { id: 'combo1', name: 'COMBO 1 [Oversized (Hoodie + Tee) + Key Chain + Pen]', price: 999, type: 'combo', sizeLabels: ['Hoodie Size', 'Tee Size'] },
   { id: 'combo2', name: 'COMBO 2 [Oversized (Hoodie + Acid Wash Tee) + Key Chain + Pen]', price: 1049, type: 'combo', sizeLabels: ['Hoodie Size', 'Acid Tee Size'] },
 ]
@@ -48,6 +54,14 @@ const MERCH_GALLERY = [
   { id: 'acid_tee', name: 'Acid Wash Tee', price: 399, views: [
     { src: acidFront, label: 'Front' },
     { src: acidBack, label: 'Back' },
+  ]},
+  { id: 'tee2', name: 'Oversized Tee Two', price: 349, views: [
+    { src: newTeeFront, label: 'Front' },
+    { src: newTeeBack, label: 'Back' },
+  ]},
+  { id: 'acid_tee2', name: 'Acid Wash Oversized Tee Two', price: 399, views: [
+    { src: newAcidTeeFront, label: 'Front' },
+    { src: newAcidTeeBack, label: 'Back' },
   ]},
 ]
 
@@ -371,7 +385,11 @@ export function MerchandisePage() {
           <div className="merch-hscroll-wrap">
             <div className="merch-hscroll">
               {MERCH_GALLERY.map((product, pIdx) => (
-                <div key={product.id} className="merch-hscroll-card">
+                <div
+                  key={product.id}
+                  className="merch-hscroll-card"
+                  style={{ ['--card-delay' as string]: `${pIdx * 0.12}s` } as React.CSSProperties}
+                >
                   <div className="merch-card-img-area"
                     onTouchStart={e => handleCardTouchStart(e, pIdx)}
                     onTouchMove={handleCardTouchMove}
@@ -414,6 +432,14 @@ export function MerchandisePage() {
                   </div>
                 </div>
               ))}
+            </div>
+          </div>
+
+          {/* Animated scroll hint */}
+          <div className="merch-scroll-hint" aria-hidden="true">
+            <span className="merch-scroll-hint-text">swipe to explore</span>
+            <div className="merch-scroll-hint-track">
+              <div className="merch-scroll-hint-thumb" />
             </div>
           </div>
         </section>

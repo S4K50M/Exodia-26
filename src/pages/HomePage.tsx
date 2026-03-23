@@ -12,9 +12,11 @@ import '../styles/home.css'
 import { LoadingScreen } from '../components/LoadingScreen'
 import { HomeSVG } from '../assets/loading/HomeSVG'
 import { loadGsap, loadLenis } from '../utils/lazyAnimations'
+import { AdvertisementOverlay } from '../components/AdvertisementOverlay'
 
 export function HomePage() {
   const [daysRemaining, setDaysRemaining] = useState(0)
+  const [loaderDone, setLoaderDone] = useState(false)
 
   const containerRef = useRef<HTMLDivElement | null>(null)
   const scrollTriggerRef = useRef<HTMLDivElement | null>(null)
@@ -241,7 +243,8 @@ export function HomePage() {
   }, [])
 
   return (
-    <LoadingScreen svg={<HomeSVG />}>
+    <LoadingScreen svg={<HomeSVG />} onDone={() => setLoaderDone(true)}>
+    <AdvertisementOverlay loaderDone={loaderDone} />
     <div className="app" ref={containerRef}>
       <main className="parallax-page">
         <div className="scroll-trigger" ref={scrollTriggerRef}>

@@ -113,6 +113,29 @@
 /* ══════════════════════════════════════════════════════════════════════════
    HORIZONTAL SCROLLABLE CARD GALLERY
    ══════════════════════════════════════════════════════════════════════════ */
+
+/* Keyframes */
+@keyframes merch-card-float {
+  0%, 100% { transform: translateY(0px); }
+  50%       { transform: translateY(-8px); }
+}
+
+@keyframes merch-card-entrance {
+  from { opacity: 0; transform: translateY(40px) scale(0.95); }
+  to   { opacity: 1; transform: translateY(0)    scale(1); }
+}
+
+@keyframes merch-thumb-slide {
+  0%   { left: 0%; }
+  50%  { left: calc(100% - 36px); }
+  100% { left: 0%; }
+}
+
+@keyframes merch-hint-fade {
+  0%, 100% { opacity: 0.45; }
+  50%       { opacity: 0.9; }
+}
+
 .merch-hscroll-wrap {
   width: 100%;
   max-width: 1100px;
@@ -144,20 +167,67 @@
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
   border: 1.5px solid rgba(255, 255, 255, 0.1);
-  transition: transform 0.35s ease, box-shadow 0.35s ease, border-color 0.35s ease;
+
+  /* Entrance animation — uses animationDelay set inline via style prop */
+  animation:
+    merch-card-entrance 0.7s cubic-bezier(0.34, 1.56, 0.64, 1) both,
+    merch-card-float 5s ease-in-out infinite;
+  animation-delay: var(--card-delay, 0s), calc(var(--card-delay, 0s) + 0.7s);
+
+  transition: box-shadow 0.35s ease, border-color 0.35s ease;
 }
 
+/* Hover pauses float and lifts the card */
 .merch-hscroll-card:hover {
-  transform: translateY(-6px) scale(1.02);
-  border-color: rgba(192, 132, 252, 0.4);
+  animation-play-state: running, paused;
+  transform: translateY(-8px) scale(1.025);
+  border-color: rgba(192, 132, 252, 0.45);
   box-shadow:
-    0 0 40px rgba(192, 132, 252, 0.15),
-    0 20px 60px rgba(0, 0, 0, 0.5);
+    0 0 40px rgba(192, 132, 252, 0.18),
+    0 22px 60px rgba(0, 0, 0, 0.55);
 }
 
 /* Make arrows always visible on hscroll cards */
 .merch-hscroll-card .merch-card-arrow {
   opacity: 0.7;
+}
+
+/* ── Animated scroll hint ─────────────────────────────────────────────── */
+.merch-scroll-hint {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.4rem;
+  margin-top: 1.25rem;
+  animation: merch-hint-fade 3s ease-in-out infinite;
+  pointer-events: none;
+}
+
+.merch-scroll-hint-text {
+  font-size: 0.65rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: rgba(192, 132, 252, 0.7);
+}
+
+.merch-scroll-hint-track {
+  position: relative;
+  width: 88px;
+  height: 6px;
+  border-radius: 3px;
+  background: rgba(255, 255, 255, 0.1);
+  overflow: hidden;
+}
+
+.merch-scroll-hint-thumb {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 36px;
+  height: 100%;
+  border-radius: 3px;
+  background: linear-gradient(90deg, #8b5cf6, #c084fc);
+  animation: merch-thumb-slide 2s ease-in-out infinite;
 }
 
 /* ── Buy button ──────────────────────────────────────────────────────── */

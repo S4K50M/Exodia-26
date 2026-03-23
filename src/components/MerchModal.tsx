@@ -13,6 +13,10 @@ import teeFront from '../assets/merch/mockup-tee-front.png'
 import teeBack from '../assets/merch/mockup-tee-back.png'
 import acidFront from '../assets/merch/acid-wash-front.png'
 import acidBack from '../assets/merch/acid-wash-back.png'
+import newTeeFront from '../assets/merch/new-tee-front.png'
+import newTeeBack from '../assets/merch/new-tee-back.png'
+import newAcidTeeFront from '../assets/merch/new-acid-front.png'
+import newAcidTeeBack from '../assets/merch/new-acid-back.png'
 
 import '../styles/merch-modal.css'
 
@@ -25,6 +29,8 @@ const MERCH_OPTIONS = [
   { id: 'hoodie', name: 'Oversized Hoodie', price: 669, type: 'single', sizeLabel: 'Size' },
   { id: 'tee', name: 'Oversized Tee', price: 349, type: 'single', sizeLabel: 'Size' },
   { id: 'acid_tee', name: 'Acid Wash Oversized Tee', price: 399, type: 'single', sizeLabel: 'Size' },
+  { id: 'tee2', name: 'Oversized Tee Two', price: 349, type: 'single', sizeLabel: 'Size' },
+  {id: 'acid_tee2', name: 'Acid Wash Oversized Tee Two', price: 399, type: 'single', sizeLabel: 'Size'},
   { id: 'combo1', name: 'COMBO 1 [Oversized (Hoodie + Tee) + Key Chain + Pen]', price: 999, type: 'combo', sizeLabels: ['Hoodie Size', 'Tee Size'] },
   { id: 'combo2', name: 'COMBO 2 [Oversized (Hoodie + Acid Wash Tee) + Key Chain + Pen]', price: 1049, type: 'combo', sizeLabels: ['Hoodie Size', 'Acid Tee Size'] },
 ]
@@ -45,6 +51,14 @@ const MERCH_GALLERY = [
   { id: 'acid_tee', name: 'Acid Wash Tee', price: 399, views: [
     { src: acidFront, label: 'Front' },
     { src: acidBack, label: 'Back' },
+  ]},
+  { id: 'tee2', name: 'Oversized Tee Two', price: 349, views: [
+    { src: newTeeFront, label: 'Front' },
+    { src: newTeeBack, label: 'Back' },
+  ]},
+  {id: 'acid_tee2', name: 'Acid Wash Oversized Tee Two', price: 399, views: [
+    { src: newAcidTeeFront, label: 'Front' },
+    { src: newAcidTeeBack, label: 'Back' },
   ]},
 ]
 

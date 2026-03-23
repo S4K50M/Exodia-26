@@ -1,0 +1,257 @@
+/* ── Advertisement Overlay ─────────────────────────────────────────────────── */
+
+.ad-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 9000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+  background: rgba(0, 0, 0, 0.65);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  animation: ad-backdrop-in 0.45s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.ad-backdrop.ad-closing {
+  animation: ad-backdrop-out 0.4s cubic-bezier(0.55, 0, 1, 0.45) forwards;
+}
+
+/* ── Card ── */
+.ad-card {
+  position: relative;
+  background: linear-gradient(145deg, rgba(18, 17, 15, 0.98) 0%, rgba(30, 26, 15, 0.98) 100%);
+  border: 1px solid rgba(212, 175, 55, 0.25);
+  border-radius: 20px;
+  padding: 2rem;
+  overflow: hidden;
+  box-shadow:
+    0 0 0 1px rgba(212, 175, 55, 0.08),
+    0 30px 80px rgba(0, 0, 0, 0.7),
+    0 0 60px rgba(212, 175, 55, 0.06) inset;
+  max-height: 90vh;
+  overflow-y: auto;
+  scrollbar-width: none;
+  animation: ad-card-in 0.5s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.ad-card::-webkit-scrollbar { display: none; }
+
+.ad-card.ad-card-closing {
+  animation: ad-card-out 0.4s cubic-bezier(0.55, 0, 1, 0.45) forwards;
+}
+
+/* ── Shape variants ── */
+.ad-shape-rectangle {
+  width: min(520px, 92vw);
+}
+
+.ad-shape-square {
+  width: min(420px, 90vw);
+}
+
+.ad-shape-portrait {
+  width: min(360px, 88vw);
+}
+
+/* ── Glow line ── */
+.ad-glow-line {
+  position: absolute;
+  top: 0;
+  left: 10%;
+  right: 10%;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(212, 175, 55, 0.7), transparent);
+  filter: blur(1px);
+}
+
+/* ── Close button ── */
+.ad-close-btn {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: rgba(255, 255, 255, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: none;
+  transition: background 0.2s, color 0.2s, border-color 0.2s, transform 0.2s;
+  z-index: 10;
+}
+
+.ad-close-btn svg {
+  width: 16px;
+  height: 16px;
+}
+
+.ad-close-btn:hover {
+  background: rgba(212, 175, 55, 0.15);
+  border-color: rgba(212, 175, 55, 0.4);
+  color: #d4af37;
+  transform: rotate(90deg) scale(1.1);
+}
+
+/* ── Image ── */
+.ad-image-wrap {
+  width: 100%;
+  border-radius: 12px;
+  overflow: hidden;
+  margin-bottom: 1.5rem;
+  border: 1px solid rgba(255, 255, 255, 0.07);
+}
+
+.ad-image {
+  width: 100%;
+  height: auto;
+  display: block;
+  object-fit: cover;
+}
+
+/* ── Content ── */
+.ad-content {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.ad-eyebrow {
+  font-size: 0.65rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: rgba(212, 175, 55, 0.7);
+  font-weight: 600;
+  margin: 0;
+}
+
+.ad-heading {
+  font-size: clamp(1.4rem, 4vw, 2rem);
+  font-weight: 700;
+  color: #f5f0e0;
+  line-height: 1.15;
+  margin: 0;
+  background: linear-gradient(135deg, #f5f0e0 0%, #d4af37 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.ad-description {
+  font-size: 0.9rem;
+  color: rgba(200, 195, 180, 0.8);
+  line-height: 1.65;
+  margin: 0;
+}
+
+/* ── Redirect button ── */
+.ad-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-top: 0.5rem;
+  padding: 0.7rem 1.4rem;
+  background: linear-gradient(135deg, rgba(212, 175, 55, 0.15) 0%, rgba(212, 175, 55, 0.08) 100%);
+  border: 1px solid rgba(212, 175, 55, 0.35);
+  border-radius: 50px;
+  color: #d4af37;
+  font-size: 0.8rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  text-decoration: none;
+  cursor: none;
+  width: fit-content;
+  transition: background 0.25s, border-color 0.25s, color 0.25s, transform 0.2s, box-shadow 0.25s;
+}
+
+.ad-btn svg {
+  width: 15px;
+  height: 15px;
+  transition: transform 0.2s;
+}
+
+.ad-btn:hover {
+  background: linear-gradient(135deg, rgba(212, 175, 55, 0.3) 0%, rgba(212, 175, 55, 0.18) 100%);
+  border-color: rgba(212, 175, 55, 0.6);
+  color: #f0d060;
+  transform: translateY(-1px);
+  box-shadow: 0 8px 24px rgba(212, 175, 55, 0.18);
+}
+
+.ad-btn:hover svg {
+  transform: translateX(4px);
+}
+
+/* ── Bottom dots ── */
+.ad-bottom-decoration {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  margin-top: 1.5rem;
+}
+
+.ad-dot {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: rgba(212, 175, 55, 0.3);
+}
+
+.ad-dot:nth-child(2) {
+  background: rgba(212, 175, 55, 0.6);
+  width: 6px;
+  height: 6px;
+}
+
+/* ── Animations ── */
+@keyframes ad-backdrop-in {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+@keyframes ad-backdrop-out {
+  from { opacity: 1; }
+  to   { opacity: 0; }
+}
+
+@keyframes ad-card-in {
+  from {
+    opacity: 0;
+    transform: scale(0.88) translateY(24px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+@keyframes ad-card-out {
+  from {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+  to {
+    opacity: 0;
+    transform: scale(0.9) translateY(20px);
+  }
+}
+
+/* ── Responsive ── */
+@media (max-width: 480px) {
+  .ad-card {
+    padding: 1.5rem 1.25rem;
+    border-radius: 16px;
+  }
+
+  .ad-shape-rectangle,
+  .ad-shape-square,
+  .ad-shape-portrait {
+    width: 95vw;
+  }
+}

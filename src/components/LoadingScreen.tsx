@@ -6,12 +6,15 @@ interface LoadingScreenProps {
   svg: ReactNode
   /** Minimum time (ms) the loader stays visible – lets the animation play out */
   minDuration?: number
+  /** Optional callback fired when the loader finishes and is removed from DOM */
+  onDone?: () => void
   children: ReactNode
 }
 
 export function LoadingScreen({
   svg,
   minDuration = 2400,
+  onDone,
   children,
 }: LoadingScreenProps) {
   const [showLoader, setShowLoader] = useState(true)
@@ -21,7 +24,10 @@ export function LoadingScreen({
     const timer = setTimeout(() => {
       setFadeOut(true)
       // Remove loader from DOM after the fade-out transition ends
-      setTimeout(() => setShowLoader(false), 600)
+      setTimeout(() => {
+        setShowLoader(false)
+        onDone?.()
+      }, 600)
     }, minDuration)
     return () => clearTimeout(timer)
   }, [minDuration])
