@@ -1,0 +1,83 @@
+.custom-cursor-container {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 36px; /* 32px * 1.1 */
+  height: 36px;
+  margin: -18px 0 0 -18px;
+  pointer-events: none;
+  z-index: 999999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  mix-blend-mode: difference;
+  will-change: transform, width, height, margin;
+  transition: width 0.4s cubic-bezier(0.23, 1, 0.32, 1), 
+              height 0.4s cubic-bezier(0.23, 1, 0.32, 1), 
+              margin 0.4s cubic-bezier(0.23, 1, 0.32, 1);
+}
+
+.custom-cursor-ring {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  border: 1.5px solid rgba(255, 255, 255, 0.9);
+  border-radius: 50%;
+  transition: border-color 0.3s ease, background-color 0.3s ease, backdrop-filter 0.3s ease;
+  backdrop-filter: brightness(1.2) contrast(1.1);
+  will-change: border-color, backdrop-filter;
+}
+
+.custom-cursor-dot {
+  width: 4px;
+  height: 4px; /* Dot stays small but can transition if needed */
+  background-color: white;
+  border-radius: 50%;
+  will-change: transform;
+}
+
+.custom-cursor-container.hovering {
+  width: 64px; /* 56px * 1.15 */
+  height: 64px;
+  margin: -32px 0 0 -32px;
+}
+
+.custom-cursor-container.hovering .custom-cursor-ring {
+  border-color: rgba(255, 255, 255, 1);
+  background-color: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(4px) brightness(1.3);
+}
+
+/* Page/Element specific variants */
+.custom-cursor-container.cursor-type-large {
+  width: 92px; /* 80px * 1.15 */
+  height: 92px;
+  margin: -46px 0 0 -46px;
+}
+
+.custom-cursor-container.cursor-type-blur .custom-cursor-ring {
+  backdrop-filter: blur(10px) brightness(1.5);
+}
+
+/* Ensure default cursor is hidden */
+* {
+  cursor: none !important;
+}
+
+html, body {
+  cursor: none !important;
+}
+/* Disable custom cursor on touch devices (phones & tablets) */
+@media (hover: none), (pointer: coarse) {
+  .custom-cursor-container {
+    display: none !important;
+  }
+
+  * {
+    cursor: auto !important;
+  }
+
+  html, body {
+    cursor: auto !important;
+  }
+}

@@ -101,7 +101,7 @@
   font-size: clamp(2.5rem, 6vw, 5rem);
   font-weight: 800;
   margin: 0;
-  color: #e4d5b7;
+  color: #f4c464;
   text-shadow: 0 4px 20px rgba(0, 0, 0, 0.6);
   letter-spacing: 0.06em;
 }
@@ -109,8 +109,8 @@
 .team-hero-title p {
   font-size: clamp(1rem, 2vw, 1.35rem);
   margin: 0.5rem 0 0;
-  color: rgba(228, 213, 183, 0.7);
-  font-weight: 400;
+  color: rgba(255, 218, 144, 0.7);
+  font-weight:500;
 }
 
 /* -- Sections container -- */
@@ -135,7 +135,7 @@
   font-size: clamp(1.5rem, 3vw, 2.25rem);
   font-weight: 700;
   margin: 0 0 2rem;
-  color: #e4d5b7;
+  color: #fff06d;
   text-shadow: 0 2px 10px rgba(228, 213, 183, 0.25);
   letter-spacing: 0.04em;
   text-align: center;

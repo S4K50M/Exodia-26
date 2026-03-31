@@ -1,7 +1,7 @@
 import { Link, useLocation } from 'react-router-dom'
 import { useEffect, useRef, useState, useCallback } from 'react'
-import gsap from 'gsap'
 import { Bell } from 'lucide-react';
+import { loadGsap, prefetchAnimationLibs } from '../utils/lazyAnimations'
 
 interface NavbarProps {
   shouldAnimate?: boolean
@@ -15,7 +15,7 @@ export function Navbar({ shouldAnimate = false, onRegisterClick, onNotifyClick }
   const linksRef = useRef<HTMLUListElement>(null)
   const hasAnimatedRef = useRef(false)
   const mobileMenuRef = useRef<HTMLDivElement>(null)
-  const mobileTimelineRef = useRef<gsap.core.Timeline | null>(null)
+  const mobileTimelineRef = useRef<any>(null)
   const [menuOpen, setMenuOpen] = useState(false)
 
   // Close menu on route change
@@ -28,39 +28,61 @@ export function Navbar({ shouldAnimate = false, onRegisterClick, onNotifyClick }
     const menu = mobileMenuRef.current
     if (!menu) return
 
-    // Kill previous timeline
-    mobileTimelineRef.current?.kill()
-
-    const items = menu.querySelectorAll('.mobile-nav-item')
-    const tl = gsap.timeline({ paused: true })
-
+    // Make sure the menu is visible immediately on open (even before GSAP loads)
     if (menuOpen) {
-      gsap.set(menu, { display: 'flex' })
-      tl.fromTo(menu,
-        { opacity: 0, y: -20 },
-        { opacity: 1, y: 0, duration: 0.35, ease: 'power3.out' }
-      )
-      .fromTo(items,
-        { opacity: 0, x: -30 },
-        { opacity: 1, x: 0, duration: 0.3, stagger: 0.06, ease: 'power2.out' },
-        '-=0.15'
-      )
-      tl.play()
-    } else {
-      tl.to(items,
-        { opacity: 0, x: 20, duration: 0.2, stagger: 0.03, ease: 'power2.in' }
-      )
-      .to(menu,
-        { opacity: 0, y: -12, duration: 0.25, ease: 'power2.in',
-          onComplete: () =>{ gsap.set(menu, { display: 'none' })}
-        },
-        '-=0.1'
-      )
-      tl.play()
+      menu.style.display = 'flex'
     }
 
-    mobileTimelineRef.current = tl
-    return () => { tl.kill() }
+    let isCancelled = false
+    let tl: any = null
+
+    ;(async () => {
+      const { gsap } = await loadGsap()
+      if (isCancelled) return
+
+      // Kill previous timeline
+      mobileTimelineRef.current?.kill?.()
+
+      const items = menu.querySelectorAll('.mobile-nav-item')
+      tl = gsap.timeline({ paused: true })
+
+      if (menuOpen) {
+        gsap.set(menu, { display: 'flex' })
+        tl.fromTo(
+          menu,
+          { opacity: 0, y: -20 },
+          { opacity: 1, y: 0, duration: 0.35, ease: 'power3.out' }
+        ).fromTo(
+          items,
+          { opacity: 0, x: -30 },
+          { opacity: 1, x: 0, duration: 0.3, stagger: 0.06, ease: 'power2.out' },
+          '-=0.15'
+        )
+        tl.play()
+      } else {
+        tl.to(items, { opacity: 0, x: 20, duration: 0.2, stagger: 0.03, ease: 'power2.in' }).to(
+          menu,
+          {
+            opacity: 0,
+            y: -12,
+            duration: 0.25,
+            ease: 'power2.in',
+            onComplete: () => {
+              gsap.set(menu, { display: 'none' })
+            },
+          },
+          '-=0.1'
+        )
+        tl.play()
+      }
+
+      mobileTimelineRef.current = tl
+    })()
+
+    return () => {
+      isCancelled = true
+      tl?.kill?.()
+    }
   }, [menuOpen])
 
   // Desktop entrance animation
@@ -69,17 +91,30 @@ export function Navbar({ shouldAnimate = false, onRegisterClick, onNotifyClick }
       hasAnimatedRef.current = true
       const links = linksRef.current.querySelectorAll('li')
       
-      gsap.set(navRef.current, { y: -100, scale: 0.5, opacity: 1 })
-      gsap.set(links, { opacity: 0 })
+      let isCancelled = false
+      let tl: any = null
 
-      const tl = gsap.timeline({ delay: 0.1 })
-      
-      tl.to(navRef.current, {
-        y: 0, scale: 1, duration: 0.8, ease: 'back.out(1.2)'
-      })
-      .to(links, {
-        opacity: 1, duration: 0.5, stagger: 0.1, ease: 'power2.out'
-      }, '-=0.2')
+      ;(async () => {
+        const { gsap } = await loadGsap()
+        if (isCancelled) return
+
+        gsap.set(navRef.current, { y: -100, scale: 0.5, opacity: 1 })
+        gsap.set(links, { opacity: 0 })
+
+        tl = gsap.timeline({ delay: 0.1 })
+        
+        tl.to(navRef.current, {
+          y: 0, scale: 1, duration: 0.8, ease: 'back.out(1.2)'
+        })
+        .to(links, {
+          opacity: 1, duration: 0.5, stagger: 0.1, ease: 'power2.out'
+        }, '-=0.2')
+      })()
+
+      return () => {
+        isCancelled = true
+        tl?.kill?.()
+      }
     }
   }, [shouldAnimate])
 
@@ -89,6 +124,30 @@ export function Navbar({ shouldAnimate = false, onRegisterClick, onNotifyClick }
 
   const handleMobileLinkClick = useCallback(() => {
     setMenuOpen(false)
+  }, [])
+
+  const prefetchRoute = useCallback((to: string) => {
+    prefetchAnimationLibs()
+
+    switch (to) {
+      case '/events':
+        void import('../pages/EventsPage')
+        break
+      case '/team':
+        void import('../pages/TeamPage')
+        break
+      case '/merchandise':
+        void import('../pages/MerchandisePage')
+        break
+      case '/map':
+        void import('../pages/MapPage')
+        break
+      case '/admin':
+        void import('../pages/AdminPage')
+        break
+      default:
+        break
+    }
   }, [])
 
   const navLinks = [
@@ -103,7 +162,7 @@ export function Navbar({ shouldAnimate = false, onRegisterClick, onNotifyClick }
       <nav ref={navRef} className="navbar flex items-center justify-between p-4">
         <Link
           to="/"
-          className={`navbar-brand ${location.pathname === '/' ? 'active' : ''}`}
+          className={`font-serif navbar-brand ${location.pathname === '/' ? 'active' : ' '}`}
         >
           Exodia
         </Link>
@@ -123,7 +182,13 @@ export function Navbar({ shouldAnimate = false, onRegisterClick, onNotifyClick }
         <ul ref={linksRef} className="navbar-links flex items-center gap-6">
           {navLinks.map(({ to, label }) => (
             <li key={to}>
-              <Link to={to} className={location.pathname === to ? 'active' : ''}>
+              <Link
+                to={to}
+                className={location.pathname === to ? 'active' : ''}
+                onMouseEnter={() => prefetchRoute(to)}
+                onFocus={() => prefetchRoute(to)}
+                onTouchStart={() => prefetchRoute(to)}
+              >
                 {label}
               </Link>
             </li>
@@ -134,6 +199,7 @@ export function Navbar({ shouldAnimate = false, onRegisterClick, onNotifyClick }
             <button
               onClick={onNotifyClick}
               className="group relative flex items-center gap-2 px-3 py-2 text-gray-300 hover:text-yellow-400 transition-all duration-300 font-medium cursor-pointer bg-transparent border-none"
+              data-cursor="blur"
             >
               <Bell 
                 size={20} 
@@ -154,6 +220,7 @@ export function Navbar({ shouldAnimate = false, onRegisterClick, onNotifyClick }
                 transition-all duration-300 transform cursor-pointer border-none
                 hover:-translate-y-1 hover:shadow-[0_0_20px_rgba(234,179,8,0.8)] hover:from-yellow-400 hover:to-yellow-300
               `}
+              data-cursor="large"
             >
               Register
             </button>
@@ -162,13 +229,16 @@ export function Navbar({ shouldAnimate = false, onRegisterClick, onNotifyClick }
       </nav>
 
       {/* Mobile slide-down menu */}
-      <div ref={mobileMenuRef} className="navbar-mobile-menu" style={{ display: 'none' }}>
+      <div ref={mobileMenuRef} className="navbar-mobile-menu">
         {navLinks.map(({ to, label }) => (
           <Link
             key={to}
             to={to}
             className={`mobile-nav-item ${location.pathname === to ? 'active' : ''}`}
             onClick={handleMobileLinkClick}
+            onMouseEnter={() => prefetchRoute(to)}
+            onFocus={() => prefetchRoute(to)}
+            onTouchStart={() => prefetchRoute(to)}
           >
             {label}
           </Link>

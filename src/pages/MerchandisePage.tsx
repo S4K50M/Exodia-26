@@ -1,9 +1,6 @@
 import React, { useEffect, useRef, useState, useMemo } from 'react'
-import gsap from 'gsap'
-import { ScrollTrigger } from 'gsap/ScrollTrigger'
 import supabase from '../utils/supabase'
-
-gsap.registerPlugin(ScrollTrigger)
+import { loadGsap } from '../utils/lazyAnimations'
 
 import bg from '../assets/merchendise/bg.png'
 import left from '../assets/merchendise/left.png'
@@ -19,6 +16,10 @@ import teeFront from '../assets/merch/mockup-tee-front.png'
 import teeBack from '../assets/merch/mockup-tee-back.png'
 import acidFront from '../assets/merch/acid-wash-front.png'
 import acidBack from '../assets/merch/acid-wash-back.png'
+import newTeeFront from '../assets/merch/new-tee-front.png'
+import newTeeBack from '../assets/merch/new-tee-back.png'
+import newAcidTeeFront from '../assets/merch/new-acid-front.png'
+import newAcidTeeBack from '../assets/merch/new-acid-back.png'
 
 import '../styles/merchandise.css'
 import '../styles/merch-modal.css'
@@ -31,6 +32,8 @@ const MERCH_OPTIONS = [
   { id: 'hoodie', name: 'Oversized Hoodie', price: 669, type: 'single', sizeLabel: 'Size' },
   { id: 'tee', name: 'Oversized Tee', price: 349, type: 'single', sizeLabel: 'Size' },
   { id: 'acid_tee', name: 'Acid Wash Oversized Tee', price: 399, type: 'single', sizeLabel: 'Size' },
+  { id: 'tee2', name: 'Oversized Tee Two', price: 349, type: 'single', sizeLabel: 'Size' },
+  { id: 'acid_tee2', name: 'Acid Wash Oversized Tee Two', price: 399, type: 'single', sizeLabel: 'Size' },
   { id: 'combo1', name: 'COMBO 1 [Oversized (Hoodie + Tee) + Key Chain + Pen]', price: 999, type: 'combo', sizeLabels: ['Hoodie Size', 'Tee Size'] },
   { id: 'combo2', name: 'COMBO 2 [Oversized (Hoodie + Acid Wash Tee) + Key Chain + Pen]', price: 1049, type: 'combo', sizeLabels: ['Hoodie Size', 'Acid Tee Size'] },
 ]
@@ -51,6 +54,14 @@ const MERCH_GALLERY = [
   { id: 'acid_tee', name: 'Acid Wash Tee', price: 399, views: [
     { src: acidFront, label: 'Front' },
     { src: acidBack, label: 'Back' },
+  ]},
+  { id: 'tee2', name: 'Oversized Tee Two', price: 349, views: [
+    { src: newTeeFront, label: 'Front' },
+    { src: newTeeBack, label: 'Back' },
+  ]},
+  { id: 'acid_tee2', name: 'Acid Wash Oversized Tee Two', price: 399, views: [
+    { src: newAcidTeeFront, label: 'Front' },
+    { src: newAcidTeeBack, label: 'Back' },
   ]},
 ]
 
@@ -101,7 +112,14 @@ export function MerchandisePage() {
 
   /* ── GSAP entrance + scroll-triggered animation ─────────────────────── */
   useEffect(() => {
-    const ctx = gsap.context(() => {
+    let isCancelled = false
+    let ctx: { revert: () => void } | null = null
+
+    ;(async () => {
+      const { gsap } = await loadGsap()
+      if (isCancelled) return
+
+      ctx = gsap.context(() => {
       /* Parallax BG entrance */
       if (bgRef.current) {
         gsap.fromTo(bgRef.current, { scale: 1.15 }, { scale: 1.05, duration: 2, ease: 'power2.out' })
@@ -159,8 +177,12 @@ export function MerchandisePage() {
         )
       }
     }, containerRef)
+    })()
 
-    return () => ctx.revert()
+    return () => {
+      isCancelled = true
+      ctx?.revert()
+    }
   }, [])
 
   /* ── Card view helpers ────────────────────────────────────────────── */
@@ -324,7 +346,7 @@ export function MerchandisePage() {
               <button className="merch-viewer-close" onClick={closeViewer}>&times;</button>
               <button className="merch-viewer-arrow merch-viewer-arrow-left" onClick={viewerPrev}>&#8249;</button>
               <div className="merch-viewer-img-wrap">
-                <img src={currentProduct.views[viewerIndex].src} alt={currentProduct.views[viewerIndex].label} />
+                <img src={currentProduct.views[viewerIndex].src} alt={currentProduct.views[viewerIndex].label} loading="eager" decoding="async" />
               </div>
               <button className="merch-viewer-arrow merch-viewer-arrow-right" onClick={viewerNext}>&#8250;</button>
               <div className="merch-viewer-info">
@@ -341,17 +363,17 @@ export function MerchandisePage() {
         )}
 
         {/* ═══ Fixed Parallax Background — covers entire page ═══ */}
-        <div className="merch-bg-fixed" ref={bgRef}><img src={bg} alt="" /></div>
-        <div className="merch-side-fixed merch-side-left-bg" ref={leftBgRef}><img src={leftBg} alt="" /></div>
-        <div className="merch-side-fixed merch-side-right-bg" ref={rightBgRef}><img src={rightBg} alt="" /></div>
-        <div className="merch-side-fixed merch-side-left-fg" ref={leftRef}><img src={left} alt="" /></div>
-        <div className="merch-side-fixed merch-side-right-fg" ref={rightRef}><img src={right} alt="" /></div>
+        <div className="merch-bg-fixed" ref={bgRef}><img src={bg} alt="" loading="eager" decoding="async" /></div>
+        <div className="merch-side-fixed merch-side-left-bg" ref={leftBgRef}><img src={leftBg} alt="" loading="eager" decoding="async" /></div>
+        <div className="merch-side-fixed merch-side-right-bg" ref={rightBgRef}><img src={rightBg} alt="" loading="eager" decoding="async" /></div>
+        <div className="merch-side-fixed merch-side-left-fg" ref={leftRef}><img src={left} alt="" loading="eager" decoding="async" /></div>
+        <div className="merch-side-fixed merch-side-right-fg" ref={rightRef}><img src={right} alt="" loading="eager" decoding="async" /></div>
 
         {/* ═══ Hero Section — centered buy button ═══ */}
-        <section className="merch-hero" ref={heroRef}>
+        <section className="merch-hero " ref={heroRef}>
           <div className="merch-hero-content" ref={heroContentRef}>
-            <h2 className="merch-page-title">Merchandise</h2>
-            <p className="merch-page-subtitle">Official Exodia'26 Gear — Limited Drops</p>
+            <h2 className="merch-page-title font-serif">Merchandise</h2>
+            <p className="merch-page-subtitle font-serif">Official Exodia'26 Gear — Limited Drops</p>
             <button className="merch-buy-btn" onClick={openOrder}>
               Buy Merchandise
             </button>
@@ -363,7 +385,11 @@ export function MerchandisePage() {
           <div className="merch-hscroll-wrap">
             <div className="merch-hscroll">
               {MERCH_GALLERY.map((product, pIdx) => (
-                <div key={product.id} className="merch-hscroll-card">
+                <div
+                  key={product.id}
+                  className="merch-hscroll-card"
+                  style={{ ['--card-delay' as string]: `${pIdx * 0.12}s` } as React.CSSProperties}
+                >
                   <div className="merch-card-img-area"
                     onTouchStart={e => handleCardTouchStart(e, pIdx)}
                     onTouchMove={handleCardTouchMove}
@@ -374,6 +400,8 @@ export function MerchandisePage() {
                       src={product.views[activeViews[pIdx]].src}
                       alt={`${product.name} ${product.views[activeViews[pIdx]].label}`}
                       className="merch-card-img"
+                      loading={pIdx < 2 ? 'eager' : 'lazy'}
+                      decoding="async"
                     />
                     <span className="merch-card-expand-hint">Click to expand</span>
                     {product.views.length > 1 && (
@@ -406,6 +434,14 @@ export function MerchandisePage() {
               ))}
             </div>
           </div>
+
+          {/* Animated scroll hint */}
+          <div className="merch-scroll-hint" aria-hidden="true">
+            <span className="merch-scroll-hint-text">swipe to explore</span>
+            <div className="merch-scroll-hint-track">
+              <div className="merch-scroll-hint-thumb" />
+            </div>
+          </div>
         </section>
 
         {/* ═══ Order Modal Overlay ═══ */}
@@ -425,6 +461,8 @@ export function MerchandisePage() {
                   <img
                     src={qr}
                     alt="Payment QR Code" className="merch-qr-img"
+                    loading="lazy"
+                    decoding="async"
                   />
                   <div className="merch-qr-details">
                     <p className="merch-qr-label">Scan to Pay</p>

@@ -1,7 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
-import Lenis from 'lenis'
-import gsap from 'gsap'
-import { ScrollTrigger } from 'gsap/ScrollTrigger'
+import type Lenis from 'lenis'
 
 import bg from '../assets/home/bg.png'
 import exodia from '../assets/home/exodia.png'
@@ -13,11 +11,12 @@ import '../styles/home.css'
 
 import { LoadingScreen } from '../components/LoadingScreen'
 import { HomeSVG } from '../assets/loading/HomeSVG'
-
-gsap.registerPlugin(ScrollTrigger)
+import { loadGsap, loadLenis } from '../utils/lazyAnimations'
+import { AdvertisementOverlay } from '../components/AdvertisementOverlay'
 
 export function HomePage() {
   const [daysRemaining, setDaysRemaining] = useState(0)
+  const [loaderDone, setLoaderDone] = useState(false)
 
   const containerRef = useRef<HTMLDivElement | null>(null)
   const scrollTriggerRef = useRef<HTMLDivElement | null>(null)
@@ -44,15 +43,32 @@ export function HomePage() {
 
   // ── Lenis smooth scroll ──────────────────────────────────────────────────────
   useEffect(() => {
-    const lenis = new Lenis({ smoothWheel: true, lerp: 0.1 })
-    lenisRef.current = lenis
-    lenis.on('scroll', () => ScrollTrigger.update())
+    let isCancelled = false
+    let frameId: number | null = null
+    let lenis: Lenis | null = null
 
-    let frameId: number
-    const raf = (time: number) => { lenis.raf(time); frameId = requestAnimationFrame(raf) }
-    frameId = requestAnimationFrame(raf)
+    ;(async () => {
+      const [{ ScrollTrigger }, LenisCtor] = await Promise.all([loadGsap(), loadLenis()])
+      if (isCancelled) return
 
-    return () => { lenis.destroy(); cancelAnimationFrame(frameId) }
+      lenis = new LenisCtor({ smoothWheel: true, lerp: 0.1 })
+      lenisRef.current = lenis
+      if (!hasIntroPlayed.current) lenis.stop()
+      lenis.on('scroll', () => ScrollTrigger.update())
+
+      const raf = (time: number) => {
+        lenis?.raf(time)
+        frameId = requestAnimationFrame(raf)
+      }
+      frameId = requestAnimationFrame(raf)
+    })()
+
+    return () => {
+      isCancelled = true
+      if (frameId) cancelAnimationFrame(frameId)
+      lenis?.destroy()
+      lenisRef.current = null
+    }
   }, [])
 
   // ── Intro + scroll parallax ──────────────────────────────────────────────────
@@ -60,15 +76,21 @@ export function HomePage() {
     const trigger = scrollTriggerRef.current
     if (!trigger || !leftMountRef.current || !rightMountRef.current || !exodiaRef.current || !countdownRef.current) return
 
-    const lenis = lenisRef.current
-    const mm = gsap.matchMedia()
+    let isCancelled = false
+    let mm: ReturnType<(typeof import('gsap').default)['matchMedia']> | null = null
 
-    mm.add({
-      isMobile: "(max-width: 768px)",
-      isTablet: "(min-width: 769px) and (max-width: 1199px)",
-      isDesktop: "(min-width: 1200px)"
-    }, (context) => {
-      const { isMobile, isTablet } = context.conditions as { isMobile: boolean, isTablet: boolean, isDesktop: boolean }
+    ;(async () => {
+      const { gsap } = await loadGsap()
+      if (isCancelled) return
+
+      mm = gsap.matchMedia()
+
+      mm.add({
+        isMobile: "(max-width: 768px)",
+        isTablet: "(min-width: 769px) and (max-width: 1199px)",
+        isDesktop: "(min-width: 1200px)"
+      }, (context: { conditions?: unknown }) => {
+        const { isMobile, isTablet } = context.conditions as { isMobile: boolean, isTablet: boolean, isDesktop: boolean }
 
       // ── DYNAMIC VARIABLES BASED ON SCREEN SIZE ──
       const initMountScale = isMobile ? 5.5 : isTablet ? 4.0 : 3.2
@@ -80,7 +102,7 @@ export function HomePage() {
       const originR = isMobile || isTablet ? 'bottom right' : 'bottom center'
 
       if (!hasIntroPlayed.current) {
-        lenis?.stop()
+        lenisRef.current?.stop()
         
         // ── INTRO START STATES ────────────────────────────────────────────────────
         gsap.set(leftMountRef.current, { scale: initMountScale, xPercent: 0, yPercent: 0, transformOrigin: originL })
@@ -94,7 +116,7 @@ export function HomePage() {
         delay: hasIntroPlayed.current ? 0 : 0.2,
         onComplete: () => {
           hasIntroPlayed.current = true
-          lenis?.start()
+          lenisRef.current?.start()
 
           if (bgRef.current) {
             gsap.fromTo(bgRef.current,
@@ -116,8 +138,8 @@ export function HomePage() {
           }
           if (exodiaRef.current) {
             gsap.fromTo(exodiaRef.current,
-              { yPercent: 0, scale: exodiaFinalScale },
-              { yPercent: isMobile ? -350 : isTablet ? -220 : -180, scale: exodiaFinalScale * 0.75, ease: 'none',
+              { yPercent: 0, scale: exodiaFinalScale, opacity: 1 },
+              { yPercent: isMobile ? -350 : isTablet ? -220 : -180, scale: exodiaFinalScale * 0.75, opacity: 0, ease: 'none',
                 scrollTrigger: { trigger, start: 'top top', end: 'bottom bottom', scrub: 1 } })
           }
           // Fade countdown out rapidly as soon as user scrolls
@@ -164,10 +186,12 @@ export function HomePage() {
         tl.kill()
       }
     }, containerRef)
+    })()
 
     return () => {
-      mm.revert()
-      lenis?.start()
+      isCancelled = true
+      mm?.revert()
+      lenisRef.current?.start()
     }
   }, [])
 
@@ -175,49 +199,63 @@ export function HomePage() {
   useEffect(() => {
     if (!aboutRef.current || !scrollTriggerRef.current) return
 
-    const aboutEl = aboutRef.current
+    let isCancelled = false
+    let ctx: { revert: () => void } | null = null
 
-    const ctx = gsap.context(() => {
-      gsap.fromTo(
-        aboutEl,
-        { opacity: 0, yPercent: 30 },
-        {
-          opacity: 1,
-          yPercent: 0,
-          ease: 'power2.out',
-          scrollTrigger: {
-            trigger: scrollTriggerRef.current,
-            start: '50% top',
-            end: '60% top',
-            scrub: 1,
-            onUpdate: (self) => {
-              if (self.progress > 0.05) {
-                aboutEl.style.pointerEvents = 'auto'
-              } else {
-                aboutEl.style.pointerEvents = 'none'
-              }
+    ;(async () => {
+      const { gsap } = await loadGsap()
+      if (isCancelled) return
+
+      const aboutEl = aboutRef.current
+      const trigger = scrollTriggerRef.current
+      if (!aboutEl || !trigger) return
+
+      ctx = gsap.context(() => {
+        const isMobile = window.matchMedia('(max-width: 720px)').matches
+        const start = isMobile ? '35% top' : '50% top'
+        const end = isMobile ? '75% top' : '65% top'
+
+        gsap.fromTo(
+          aboutEl,
+          { opacity: 0, yPercent: isMobile ? 20 : 30 },
+          {
+            opacity: 1,
+            yPercent: 0,
+            ease: 'power2.out',
+            scrollTrigger: {
+              trigger,
+              start,
+              end,
+              scrub: 1,
+              onEnter: () => { aboutEl.style.pointerEvents = 'auto' },
+              onEnterBack: () => { aboutEl.style.pointerEvents = 'auto' },
+              onLeaveBack: () => { aboutEl.style.pointerEvents = 'none' },
             },
-          },
-        }
-      )
-    })
+          }
+        )
+      }, containerRef)
+    })()
 
-    return () => ctx.revert()
+    return () => {
+      isCancelled = true
+      ctx?.revert()
+    }
   }, [])
 
   return (
-    <LoadingScreen svg={<HomeSVG />}>
+    <LoadingScreen svg={<HomeSVG />} onDone={() => setLoaderDone(true)}>
+    <AdvertisementOverlay loaderDone={loaderDone} />
     <div className="app" ref={containerRef}>
       <main className="parallax-page">
         <div className="scroll-trigger" ref={scrollTriggerRef}>
           <div className="parallax-stage">
             <div className="layer layer-bg" ref={bgRef}>
-              <img src={bg} alt="" />
+              <img src={bg} alt="" loading="eager" decoding="async" />
             </div>
             
             {/* Grouped Exodia and Countdown together */}
             <div className="layer layer-exodia" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
-              <img ref={exodiaRef} src={exodia} alt="Exodia" style={{ position: 'relative', zIndex: 10 }} />
+              <img ref={exodiaRef} src={exodia} alt="Exodia" loading="eager" decoding="async" style={{ position: 'relative', zIndex: 10 }} />
               
               <div 
                 ref={countdownRef} 
@@ -229,21 +267,21 @@ export function HomePage() {
 
             <div className="layer layer-mountains">
               <div className="mountain-left" ref={leftMountRef}>
-                <img src={leftMountain} alt="" />
+                <img src={leftMountain} alt="" loading="eager" decoding="async" />
               </div>
               <div className="mountain-right" ref={rightMountRef}>
-                <img src={rightMountain} alt="" />
+                <img src={rightMountain} alt="" loading="eager" decoding="async" />
               </div>
             </div>
             <div className="layer layer-hut">
-              <img ref={hutRef} src={hut} alt="" />
+              <img ref={hutRef} src={hut} alt="" loading="eager" decoding="async" />
             </div>
 
             {/* About Us - overlaid on top of parallax stage */}
             <div className="about-us-overlay" ref={aboutRef}>
               <div className="about-us-content">
-                <h2 className="about-us-title">About Us</h2>
-                <p className="about-us-text">
+                <h2 className="about-us-title font-serif">About Us</h2>
+                <p className="about-us-text font-serif">
                   With a thunderbolt of lightning and mountains that have witnessed millennia, Exodia returns to you. Exodia'26 is IIT Mandi's celebration of creativity, innovation and culture right in the heart of Himalayas. This year, Exodia brings together the binding forces of the nature: Ethereal Earth, Fiery Fire, ever-wandering Air, Water and boundless Ether. Exodia'26 unites cultural performances, unique artistic installations and the nightly showcase of our diverse and vibrant community energy. Here nature awaits your creativity and memories that will find their way to your heart again and again.
                 </p>
               </div>
