@@ -19,6 +19,7 @@
   padding-bottom: 12px;
   background: linear-gradient(180deg, rgba(10,10,26,0.95) 60%, transparent);
   pointer-events: none;
+  overflow: visible;
 }
 
 .map-controls-inner {
@@ -29,12 +30,15 @@
   gap: 16px;
   padding: 0 1rem;
   flex-wrap: wrap;
+  overflow: visible;
 }
 
 .map-select-group {
   display: flex;
   flex-direction: column;
   gap: 4px;
+  position: relative;
+  overflow: visible;
 }
 
 .map-select-group label {
@@ -94,6 +98,150 @@
   background: rgba(239,68,68,0.25);
   border-color: rgba(239,68,68,0.8);
   color: #fee2e2;
+}
+
+/* ── Categorized Dropdown ──────────────────────────────────────────────── */
+.map-dropdown {
+  position: relative;
+  min-width: 200px;
+  overflow: visible;
+}
+
+.map-dropdown-trigger {
+  appearance: none;
+  -webkit-appearance: none;
+  background: #1e1e3a;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 12px;
+  padding: 10px 14px;
+  font-size: 0.95rem;
+  color: #f5f5f7;
+  width: 100%;
+  outline: none;
+  cursor: pointer;
+  transition: border-color 0.2s, box-shadow 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.map-dropdown-trigger:hover {
+  border-color: rgba(140, 220, 255, 0.4);
+}
+
+.map-dropdown-trigger:focus,
+.map-dropdown-trigger:active {
+  border-color: rgba(140, 220, 255, 0.6);
+  box-shadow: 0 0 0 3px rgba(140, 220, 255, 0.15);
+}
+
+.map-dropdown-chevron {
+  flex-shrink: 0;
+  transition: transform 0.2s ease;
+  color: rgba(140, 220, 255, 0.6);
+}
+
+.map-dropdown-panel {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0;
+  right: 0;
+  background: #1e1e3a;
+  border: 1px solid rgba(140, 220, 255, 0.25);
+  border-radius: 12px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+  z-index: 1000;
+  max-height: 320px;
+  overflow: auto;
+  -webkit-overflow-scrolling: touch;
+  backdrop-filter: blur(8px);
+  pointer-events: auto;
+  min-width: 200px;
+}
+
+.map-dropdown-category {
+  border-bottom: 1px solid rgba(140, 220, 255, 0.08);
+}
+
+.map-dropdown-category:last-child {
+  border-bottom: none;
+}
+
+.map-category-header {
+  width: 100%;
+  padding: 10px 14px;
+  background: transparent;
+  border: none;
+  text-align: left;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: rgba(140, 220, 255, 0.85);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  cursor: pointer;
+  transition: background 0.15s ease;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.map-category-header:hover {
+  background: rgba(140, 220, 255, 0.08);
+}
+
+.map-category-chevron {
+  flex-shrink: 0;
+  color: rgba(140, 220, 255, 0.5);
+  transition: transform 0.2s ease;
+}
+
+.map-category-items {
+  padding: 4px 0;
+  background: rgba(0, 0, 0, 0.2);
+}
+
+.map-item {
+  width: 100%;
+  padding: 8px 28px;
+  background: transparent;
+  border: none;
+  text-align: left;
+  font-size: 0.9rem;
+  color: rgba(200, 230, 250, 0.8);
+  cursor: pointer;
+  transition: background 0.15s ease, color 0.15s ease;
+  display: block;
+}
+
+.map-item:hover {
+  background: rgba(140, 220, 255, 0.12);
+  color: rgba(220, 240, 255, 0.95);
+}
+
+.map-item.active {
+  background: rgba(140, 220, 255, 0.2);
+  color: #8cdcff;
+  font-weight: 600;
+}
+
+/* Scrollbar styling for dropdown panel */
+.map-dropdown-panel::-webkit-scrollbar {
+  width: 6px;
+}
+
+.map-dropdown-panel::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.map-dropdown-panel::-webkit-scrollbar-thumb {
+  background: rgba(140, 220, 255, 0.2);
+  border-radius: 3px;
+}
+
+.map-dropdown-panel::-webkit-scrollbar-thumb:hover {
+  background: rgba(140, 220, 255, 0.35);
 }
 
 /* ── Map viewport ──────────────────────────────────────────────────────── */
@@ -189,8 +337,8 @@
   }
 
   .map-controls-inner {
-    gap: 6px;
-    flex-wrap: nowrap;        /* keep From / To / Clear in one row */
+    gap: 4px;
+    flex-wrap: wrap;
     padding: 0 0.5rem;
   }
 
@@ -211,12 +359,29 @@
     border-radius: 8px;
   }
 
+  .map-dropdown {
+    width: 100%;
+    flex: 1;
+    min-width: 0;
+  }
+
+  .map-dropdown-trigger {
+    font-size: 0.75rem;
+    padding: 6px 8px;
+    width: 100%;
+  }
+
+  .map-dropdown-panel {
+    max-height: 240px;
+    min-width: auto;
+  }
+
   .map-clear-btn {
-    padding: 7px 12px;
+    padding: 6px 10px;
     font-size: 0.75rem;
     white-space: nowrap;
-    align-self: flex-end;
     border-radius: 8px;
+    flex: 0 0 auto;
   }
 
   .map-viewport {
