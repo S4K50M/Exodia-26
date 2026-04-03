@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState, useCallback } from 'react'
-import { ImageOff, X } from 'lucide-react'
+import {  X } from 'lucide-react'
 
 // Import your supabase client (adjust path if needed)
 import supabase from '../utils/supabase'
