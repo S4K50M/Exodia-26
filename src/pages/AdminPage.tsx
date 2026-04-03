@@ -498,6 +498,224 @@ function AdvertisementTab() {
 
 
 /**
+ * PHOTO GALLERY TAB COMPONENT
+ */
+function PhotoGalleryTab() {
+  const [photos, setPhotos] = useState<any[]>([]);
+  const [loading, setLoading] = useState(false);
+
+  // Form State
+  const [heading, setHeading] = useState('');
+  const [caption, setCaption] = useState('');
+  const [driveUrl, setDriveUrl] = useState('');
+  const [tags, setTags] = useState<string[]>([]);
+  const [tagInput, setTagInput] = useState('');
+
+  useEffect(() => {
+    fetchPhotos();
+  }, []);
+
+  const fetchPhotos = async () => {
+    const { data, error } = await supabase
+      .from('photo_gallery')
+      .select('*')
+      .order('created_at', { ascending: false });
+    if (!error) setPhotos(data || []);
+  };
+
+  const handleAddTag = (e: React.KeyboardEvent | React.MouseEvent) => {
+    e.preventDefault();
+    const cleanTag = tagInput.trim().toLowerCase();
+    if (cleanTag && !tags.includes(cleanTag)) {
+      setTags([...tags, cleanTag]);
+      setTagInput('');
+    }
+  };
+
+  const removeTag = (tagToRemove: string) => {
+    setTags(tags.filter(t => t !== tagToRemove));
+  };
+
+  // Google Drive to Thumbnail converter (reused logic)
+  const gdriveToThumb = (url: string): string => {
+    const match = url.match(/[-\w]{25,}/);
+    if (!match) return url;
+    return `https://drive.google.com/thumbnail?id=${match[0]}`;
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+
+    const finalImageUrl = driveUrl.trim() ? gdriveToThumb(driveUrl.trim()) : '';
+
+    if (!finalImageUrl) {
+      alert("Please provide a valid image URL.");
+      setLoading(false);
+      return;
+    }
+
+    const { error } = await supabase
+      .from('photo_gallery')
+      .insert([{
+        heading: heading.trim(),
+        caption: caption.trim(),
+        tags: tags,
+        image_url: finalImageUrl,
+      }]);
+
+    if (error) {
+      alert("Failed to save photo: " + error.message);
+    } else {
+      // Reset form
+      setHeading('');
+      setCaption('');
+      setDriveUrl('');
+      setTags([]);
+      fetchPhotos();
+    }
+    setLoading(false);
+  };
+
+  const handleDelete = async (id: string) => {
+    if (!confirm("Are you sure you want to delete this photo from the gallery?")) return;
+    const { error } = await supabase.from('photo_gallery').delete().eq('id', id);
+    if (!error) setPhotos(prev => prev.filter(p => p.id !== id));
+  };
+
+  return (
+    <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 animate-in fade-in slide-in-from-bottom-4 duration-500">
+      
+      {/* Compose Section */}
+      <div className="space-y-6">
+        <h2 className="text-xl font-bold text-yellow-500 uppercase tracking-tight">Upload Photo</h2>
+        <form onSubmit={handleSubmit} className="bg-zinc-900 p-6 rounded-2xl border border-white/10 space-y-4">
+          
+          <div>
+            <label className="block text-xs font-bold text-gray-500 uppercase mb-2 ml-1">Heading</label>
+            <input 
+              value={heading}
+              onChange={(e) => setHeading(e.target.value)}
+              placeholder="e.g. Day 1: EDM Night"
+              className="w-full bg-white/5 border border-white/10 p-3 rounded-xl outline-none focus:ring-2 focus:ring-yellow-500 transition-all text-white"
+              required
+            />
+          </div>
+
+          <div>
+            <label className="block text-xs font-bold text-gray-500 uppercase mb-2 ml-1">Drive Image URL</label>
+            <input 
+              type="url"
+              value={driveUrl}
+              onChange={(e) => setDriveUrl(e.target.value)}
+              placeholder="https://drive.google.com/file/d/..."
+              className="w-full bg-white/5 border border-white/10 p-3 rounded-xl outline-none focus:ring-2 focus:ring-yellow-500 transition-all text-white"
+              required
+            />
+            <p className="text-[10px] text-gray-600 mt-1 ml-1">Auto-converts to thumbnail format.</p>
+          </div>
+
+          <div>
+            <label className="block text-xs font-bold text-gray-500 uppercase mb-2 ml-1">Caption</label>
+            <textarea 
+              value={caption}
+              onChange={(e) => setCaption(e.target.value)}
+              placeholder="Describe the moment..."
+              rows={3}
+              className="w-full bg-white/5 border border-white/10 p-3 rounded-xl outline-none focus:ring-2 focus:ring-yellow-500 transition-all resize-none text-white"
+              required
+            />
+          </div>
+
+          <div>
+            <label className="block text-xs font-bold text-gray-500 uppercase mb-2 ml-1">Tags</label>
+            <div className="flex gap-2">
+              <input 
+                value={tagInput}
+                onChange={(e) => setTagInput(e.target.value)}
+                onKeyDown={(e) => e.key === 'Enter' && handleAddTag(e)}
+                placeholder="e.g. concert, crowd..."
+                className="flex-grow bg-white/5 border border-white/10 p-3 rounded-xl outline-none focus:ring-2 focus:ring-yellow-500 transition-all text-white"
+              />
+              <button 
+                type="button"
+                onClick={handleAddTag}
+                className="px-4 bg-zinc-800 hover:bg-zinc-700 text-white rounded-xl border border-white/10 transition-colors font-bold text-sm"
+              >
+                Add
+              </button>
+            </div>
+            {/* Tag Badges */}
+            {tags.length > 0 && (
+              <div className="flex flex-wrap gap-2 mt-3">
+                {tags.map(tag => (
+                  <span key={tag} className="flex items-center gap-1.5 bg-yellow-500/10 text-yellow-500 text-xs px-2.5 py-1 rounded-md border border-yellow-500/20">
+                    #{tag}
+                    <button type="button" onClick={() => removeTag(tag)} className="hover:text-red-400 font-black ml-1">
+                      &times;
+                    </button>
+                  </span>
+                ))}
+              </div>
+            )}
+          </div>
+
+          <button 
+            type="submit" 
+            disabled={loading}
+            className="w-full py-3 mt-2 bg-yellow-500 hover:bg-yellow-400 text-black font-black rounded-xl transition-all uppercase tracking-widest text-sm"
+          >
+            {loading ? 'Uploading...' : 'Publish to Gallery'}
+          </button>
+        </form>
+      </div>
+
+      {/* Gallery List Section */}
+      <div className="space-y-6">
+        <h2 className="text-xl font-bold text-gray-400 uppercase tracking-tight">Current Gallery</h2>
+        <div className="space-y-4 max-h-[70vh] overflow-y-auto pr-2 custom-scrollbar">
+          {photos.length === 0 && <p className="text-gray-600 italic">Gallery is empty.</p>}
+          {photos.map((photo) => (
+            <div key={photo.id} className="group bg-zinc-900/50 border border-white/5 p-4 rounded-2xl relative flex gap-4 hover:border-white/20 transition-all items-start">
+              
+              <img 
+                src={photo.image_url} 
+                alt={photo.heading} 
+                className="w-24 h-24 object-cover rounded-lg border border-white/10 shrink-0"
+              />
+              
+              <div className="flex-grow min-w-0 pr-8">
+                <h3 className="font-bold text-white text-base truncate">{photo.heading}</h3>
+                <p className="text-gray-400 text-xs mt-1 line-clamp-2 leading-relaxed">{photo.caption}</p>
+                
+                <div className="flex flex-wrap gap-1.5 mt-2">
+                  {photo.tags?.map((t: string) => (
+                    <span key={t} className="text-[10px] bg-white/5 text-gray-400 px-1.5 py-0.5 rounded border border-white/10">
+                      #{t}
+                    </span>
+                  ))}
+                </div>
+              </div>
+
+              <button 
+                onClick={() => handleDelete(photo.id)}
+                className="absolute top-4 right-4 text-gray-600 hover:text-red-500 transition-colors bg-zinc-950 p-1.5 rounded-lg border border-transparent hover:border-red-500/20 hover:bg-red-500/10"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+                  <path fillRule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z" clipRule="evenodd" />
+                </svg>
+              </button>
+
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+
+/**
  * MAIN ADMIN PAGE COMPONENT
  */
 export function AdminPage() {
@@ -513,16 +731,16 @@ export function AdminPage() {
   const [loadingMerch, setLoadingMerch] = useState(true);
 
   // --- REPLACE THIS WITH YOUR ADMIN EMAIL ---
-  const ADMIN_EMAIL = "setiasaksham15@gmail.com";
+  // const ADMIN_EMAIL = "setiasaksham15@gmail.com";
 
   useEffect(() => {
     // Check initial session
     supabase.auth.getSession().then(({ data: { session } }) => {
       setSession(session);
-      if (session?.user.email === ADMIN_EMAIL) {
+      // if (session?.user.email === ADMIN_EMAIL) {
         fetchRegistrations();
         fetchMerchOrders();
-      }
+      // }
     });
 
     // Listen for auth changes
@@ -665,7 +883,7 @@ export function AdminPage() {
   };
 
   // Auth Guard
-  if (!session || session.user.email !== ADMIN_EMAIL) {
+  if (!session ) {  // || session.user.email !== ADMIN_EMAIL
     return <AdminLogin onLoginSuccess={() => window.location.reload()} />;
   }
 
@@ -692,7 +910,7 @@ export function AdminPage() {
 
         {/* Tab System */}
         <div className="flex flex-wrap gap-4 md:gap-8 border-b border-white/10 mb-8 pb-1">
-          {['approval', 'merch', 'notification', 'advertisement'].map((tab) => (
+          {['approval', 'merch', 'notification', 'advertisement','gallery'].map((tab) => (
             <button
               key={tab}
               onClick={() => setActiveTab(tab)}
@@ -909,7 +1127,11 @@ export function AdminPage() {
 
         {/* --- ADVERTISEMENT TAB --- */}
         {activeTab === 'advertisement' && <AdvertisementTab />}
+
+        {activeTab === 'gallery' && <PhotoGalleryTab />}
+
       </div>
     </div>
   );
 }
+
