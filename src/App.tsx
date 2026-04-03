@@ -9,6 +9,7 @@ import { prefetchAnimationLibs, runWhenIdle } from './utils/lazyAnimations'
 
 const EventsPage = lazy(() => import('./pages/EventsPage').then((m) => ({ default: m.EventsPage })))
 const TeamPage = lazy(() => import('./pages/TeamPage').then((m) => ({ default: m.TeamPage })))
+const GalleryPage = lazy(() => import('./pages/GalleryPage').then((m) => ({ default: m.GalleryPage })))
 const MerchandisePage = lazy(() => import('./pages/MerchandisePage').then((m) => ({ default: m.MerchandisePage })))
 const MapPage = lazy(() => import('./pages/MapPage').then((m) => ({ default: m.MapPage })))
 const AdminPage = lazy(() => import('./pages/AdminPage').then((m) => ({ default: m.AdminPage })))
@@ -34,6 +35,7 @@ function App() {
       prefetchAnimationLibs()
       void import('./pages/EventsPage')
       void import('./pages/TeamPage')
+      void import('./pages/GalleryPage')
       void import('./pages/MerchandisePage')
       void import('./pages/MapPage')
     })
@@ -51,6 +53,7 @@ function App() {
           <Route path="/" element={<HomePage />} />
           <Route path="/events" element={<EventsPage />} />
           <Route path="/team" element={<TeamPage />} />
+          <Route path="/gallery" element={<GalleryPage />} />
           <Route path="/merchandise" element={<MerchandisePage />} />
           <Route path="/map" element={<MapPage />} />
           <Route path="/admin" element={<AdminPage />}/>

@@ -136,6 +136,9 @@ export function Navbar({ shouldAnimate = false, onRegisterClick, onNotifyClick }
       case '/team':
         void import('../pages/TeamPage')
         break
+      case '/gallery':
+        void import('../pages/GalleryPage')
+        break
       case '/merchandise':
         void import('../pages/MerchandisePage')
         break
@@ -153,6 +156,7 @@ export function Navbar({ shouldAnimate = false, onRegisterClick, onNotifyClick }
   const navLinks = [
     { to: '/events', label: 'Events' },
     { to: '/team', label: 'Team' },
+    { to: '/gallery', label: 'Gallery' },
     { to: '/merchandise', label: 'Merchandise' },
     { to: '/map', label: 'Map' },
   ]

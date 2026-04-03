@@ -65,6 +65,27 @@ const MERCH_GALLERY = [
   ]},
 ]
 
+const MERCH_PRELOAD_IMAGES = [
+  bg,
+  left,
+  right,
+  leftBg,
+  rightBg,
+  hoodieFront,
+  hoodieBack,
+  hoodieSide,
+  hoodieCollage,
+  teeFront,
+  teeBack,
+  acidFront,
+  acidBack,
+  newTeeFront,
+  newTeeBack,
+  newAcidTeeFront,
+  newAcidTeeBack,
+  qr,
+]
+
 export function MerchandisePage() {
   /* ── Refs ───────────────────────────────────────────────────────────── */
   const containerRef = useRef<HTMLDivElement | null>(null)
@@ -333,7 +354,7 @@ export function MerchandisePage() {
 
   /* ── JSX ────────────────────────────────────────────────────────────── */
   return (
-    <LoadingScreen svg={<MerchSVG />}>
+    <LoadingScreen svg={<MerchSVG />} preloadImages={MERCH_PRELOAD_IMAGES}>
       <div className="merchandise-page" ref={containerRef}>
         {/* Toast */}
         {toast && <div className={`merch-toast merch-toast-${toast.type}`}>{toast.msg}</div>}

@@ -14,6 +14,8 @@ import { HomeSVG } from '../assets/loading/HomeSVG'
 import { loadGsap, loadLenis } from '../utils/lazyAnimations'
 import { AdvertisementOverlay } from '../components/AdvertisementOverlay'
 
+const HOME_PRELOAD_IMAGES = [bg, exodia, hut, leftMountain, rightMountain]
+
 export function HomePage() {
   const [daysRemaining, setDaysRemaining] = useState(0)
   const [loaderDone, setLoaderDone] = useState(false)
@@ -243,7 +245,11 @@ export function HomePage() {
   }, [])
 
   return (
-    <LoadingScreen svg={<HomeSVG />} onDone={() => setLoaderDone(true)}>
+    <LoadingScreen
+      svg={<HomeSVG />}
+      preloadImages={HOME_PRELOAD_IMAGES}
+      onDone={() => setLoaderDone(true)}
+    >
     <AdvertisementOverlay loaderDone={loaderDone} />
     <div className="app" ref={containerRef}>
       <main className="parallax-page">

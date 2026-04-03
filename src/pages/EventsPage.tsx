@@ -16,6 +16,8 @@ import { LoadingScreen } from '../components/LoadingScreen'
 import { EventsSVG } from '../assets/loading/EventsSVG'
 import { loadGsap, loadLenis } from '../utils/lazyAnimations'
 
+const EVENTS_PRELOAD_IMAGES = [bg, leftDragon, rightDragon, leftSword, rightSword]
+
 export function EventsPage() {
   const containerRef = useRef<HTMLDivElement | null>(null)
   const scrollTriggerRef = useRef<HTMLDivElement | null>(null)
@@ -150,7 +152,7 @@ export function EventsPage() {
   }, [])
 
   return (
-    <LoadingScreen svg={<EventsSVG />}>
+    <LoadingScreen svg={<EventsSVG />} preloadImages={EVENTS_PRELOAD_IMAGES}>
       <div className="events-page" ref={containerRef}>
         <div className="events-scroll-trigger" ref={scrollTriggerRef}>
           <div className="events-stage">
