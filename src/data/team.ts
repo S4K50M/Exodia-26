@@ -114,6 +114,7 @@ export const TEAM_SECTIONS: TeamSection[] = [
   {
     title: 'Hospitality',
     members: [
+      { id: 46, name: 'Tvisha ', role: 'Head', bio: '', image: gdrive('1eiPywsGfUgvbryOlBi9ieK1fDt2N2uok'), linkedin: 'https://www.linkedin.com/in/tvisha-jaiswal' },
       { id: 31, name: 'Chirag', role: 'Head', bio: '', image: gdrive('129gaYHGrFR9PWg9dEFFu2OTYYnjhKjBG'), instagram: 'https://www.instagram.com/chirag_._n' },
       { id: 32, name: 'Vaishnavi Garg', role: 'Head', bio: '', image: gdrive('1ihdXEkFAcNKO4qz_0kdVmBto-PCXjiK8'), instagram: 'https://www.instagram.com/vaishnavi.garg07', linkedin: 'https://www.linkedin.com/in/vaishnavi-garg-592a6b31b' },
       { id: 33, name: 'Chetan', role: 'Head', bio: '', image: gdrive('15JA9dYp05cLyl-Wvh8hNDHnWr2zHHtgU'), linkedin: 'https://www.linkedin.com/in/chetan-meena-65b336324' },
