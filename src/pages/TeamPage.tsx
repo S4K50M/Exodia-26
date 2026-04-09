@@ -14,6 +14,20 @@ import { LoadingScreen } from '../components/LoadingScreen'
 import { TeamSVG } from '../assets/loading/TeamSVG'
 import { loadGsap, loadLenis } from '../utils/lazyAnimations'
 
+const TEAM_MEMBER_IMAGES = TEAM_SECTIONS.flatMap((section) =>
+  section.members.flatMap((member) => (member.image ? [member.image] : []))
+)
+
+const TEAM_PRELOAD_IMAGES = [
+  bgLeft,
+  bgRight,
+  cloudLeft,
+  cloudRight,
+  cloudBLeft,
+  cloudBRight,
+  ...TEAM_MEMBER_IMAGES,
+]
+
 // ── Team data organised by position ──────────────────────────────────────────
 interface TeamMember {
   id: number
@@ -155,7 +169,7 @@ export function TeamPage() {
   }, [])
 
   return (
-    <LoadingScreen svg={<TeamSVG />}>
+    <LoadingScreen svg={<TeamSVG />} preloadImages={TEAM_PRELOAD_IMAGES}>
     <div className="team-page" ref={containerRef}>
       <div className="team-scroll-trigger" ref={scrollTriggerRef}>
         {/* ── Sticky hero with background & clouds ── */}

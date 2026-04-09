@@ -8,6 +8,8 @@ import '../styles/map.css'
 import { LoadingScreen } from '../components/LoadingScreen'
 import { MapSVG } from '../assets/loading/MapSVG'
 
+const MAP_PRELOAD_IMAGES = [mapImg]
+
 /* ─── Types ──────────────────────────────────────────────────────────────── */
 interface Node { id: string; x: number; y: number }
 interface Edge { source: string; target: string; weight: number }
@@ -211,7 +213,7 @@ export function MapPage() {
       : ''
 
   return (
-    <LoadingScreen svg={<MapSVG />}>
+    <LoadingScreen svg={<MapSVG />} preloadImages={MAP_PRELOAD_IMAGES}>
     <div className="map-page">
       {/* ── Controls ─────────────────────────────────────────────────────── */}
       <div className="map-controls">
