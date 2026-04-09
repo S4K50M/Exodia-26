@@ -1,7 +1,8 @@
 import { useEffect, useRef, useState, useCallback } from 'react'
-import { Maximize2, Minimize2, ChevronDown } from 'lucide-react'
+import { Maximize2, Minimize2 } from 'lucide-react'
 
-import mapImg from '../assets/map/map.png'
+import mapImg from '../assets/map/north_map.jpg'
+import southMapImg from '../assets/map/south_map.jpg'
 import '../styles/map.css'
 
 import { LoadingScreen } from '../components/LoadingScreen'
@@ -11,120 +12,17 @@ import { MapSVG } from '../assets/loading/MapSVG'
 interface Node { id: string; x: number; y: number }
 interface Edge { source: string; target: string; weight: number }
 interface MapData { nodes: Node[]; edges: Edge[] }
+type Campus = 'north' | 'south'
 
-interface LocationCategory {
-  name: string
-  items: string[]
-}
-
-/* ─── Categorized Dropdown Component ────────────────────────────────────── */
-interface CategorizedDropdownProps {
-  value: string
-  onChange: (value: string) => void
-  categories: LocationCategory[]
-  placeholder: string
-}
-
-function CategorizedDropdown({
-  value,
-  onChange,
-  categories,
-  placeholder,
-}: CategorizedDropdownProps) {
-  const [isOpen, setIsOpen] = useState(false)
-  const [expandedCategory, setExpandedCategory] = useState<string | null>(null)
-  const dropdownRef = useRef<HTMLDivElement>(null)
-  const panelRef = useRef<HTMLDivElement>(null)
-
-  // Close dropdown when clicking outside
-  useEffect(() => {
-    const handleClickOutside = (e: MouseEvent) => {
-      if (dropdownRef.current && !dropdownRef.current.contains(e.target as unknown as Element)) {
-        setIsOpen(false)
-      }
-    }
-    document.addEventListener('mousedown', handleClickOutside)
-    return () => document.removeEventListener('mousedown', handleClickOutside)
-  }, [])
-
-  // Enable mouse wheel scrolling on the dropdown panel
-  useEffect(() => {
-    const panel = panelRef.current
-    if (!panel) return
-
-    const handleWheel = (e: WheelEvent) => {
-      e.stopPropagation()
-    }
-
-    panel.addEventListener('wheel', handleWheel)
-    return () => {
-      panel.removeEventListener('wheel', handleWheel)
-    }
-  }, [isOpen])
-
-  const selectedLabel = categories
-    .flatMap((cat) => cat.items)
-    .find((item) => item === value) || placeholder
-
-  return (
-    <div className="map-dropdown" ref={dropdownRef}>
-      <button
-        className="map-dropdown-trigger"
-        onClick={() => setIsOpen(!isOpen)}
-      >
-        {selectedLabel}
-        <ChevronDown
-          size={16}
-          className="map-dropdown-chevron"
-          style={{ transform: isOpen ? 'rotate(180deg)' : 'none' }}
-        />
-      </button>
-
-      {isOpen && (
-        <div className="map-dropdown-panel" ref={panelRef}>
-          {categories.map((category) => (
-            <div key={category.name} className="map-dropdown-category">
-              <button
-                className="map-category-header"
-                onClick={() =>
-                  setExpandedCategory(
-                    expandedCategory === category.name ? null : category.name
-                  )
-                }
-              >
-                <span>{category.name}</span>
-                <ChevronDown
-                  size={14}
-                  className="map-category-chevron"
-                  style={{
-                    transform:
-                      expandedCategory === category.name ? 'rotate(180deg)' : 'none',
-                  }}
-                />
-              </button>
-
-              {expandedCategory === category.name && (
-                <div className="map-category-items">
-                  {category.items.map((item) => (
-                    <button
-                      key={item}
-                      className={`map-item ${value === item ? 'active' : ''}`}
-                      onClick={() => {
-                        onChange(item)
-                        setIsOpen(false)
-                      }}
-                    >
-                      {item}
-                    </button>
-                  ))}
-                </div>
-              )}
-            </div>
-          ))}
-        </div>
-      )}
-    </div>
-  )
+const CAMPUS_CONFIG: Record<Campus, { mapSrc: string; jsonPath: string }> = {
+  north: {
+    mapSrc: mapImg,
+    jsonPath: '/northCampusMap.json',
+  },
+  south: {
+    mapSrc: southMapImg,
+    jsonPath: '/southCampusMap.json',
+  },
 }
 
 /* ─── Dijkstra ───────────────────────────────────────────────────────────── */
@@ -189,7 +87,8 @@ function dijkstra(
 /* ─── Component ──────────────────────────────────────────────────────────── */
 export function MapPage() {
   const [mapData, setMapData] = useState<MapData | null>(null)
-  const [categories, setCategories] = useState<LocationCategory[]>([])
+  const [locations, setLocations] = useState<string[]>([])
+  const [campus, setCampus] = useState<Campus>('north')
   const [fromId, setFromId] = useState('')
   const [toId, setToId] = useState('')
   const [imgSize, setImgSize] = useState({ w: 0, h: 0 })
@@ -251,80 +150,39 @@ export function MapPage() {
     }
   }
 
-  /* ── Load mapData.json and organize into categories ──────────────────── */
+  /* ── Load mapData.json (based on selected campus) ────────────────────── */
   useEffect(() => {
-    fetch('/mapData.json')
-      .then((r) => r.json())
-      .then((data: MapData) => {
-        setMapData(data)
+    // Reset immediately on campus switch so old campus nodes never linger.
+    setFromId('')
+    setToId('')
+    setLocations([])
+    setMapData(null)
+    setImgSize({ w: 0, h: 0 })
 
-        // ═══════════════════════════════════════════════════════════════════════════
-        // EDIT YOUR LOCATION CATEGORIES HERE
-        // Add location node IDs to each category array
-        // ═══════════════════════════════════════════════════════════════════════════
-        const locationCategories: LocationCategory[] = [
-        {
-          name: 'Hostels',
-          items: [
-            'B8',
-            'B9',
-            'B10',
-            'B11',
-            'B12',
-            'B13',
-            'B14',
-            'B15',
-            'B16',
-            'B17',
-            'B18',
-            'B19',
-            'B20',
-            'B21',
-            'B22',
-            'B23',
-            'B24',
-            'B25',
-            'B26',
-          ],
-        },
-        {
-          name: 'Academic Buildings',
-          items: [
-            'A9',
-            'A10',
-            'A11',
-            'A13',
-            'A14',
-            'A17',
-            'A18',
-          ],
-        },
-        {
-          name: 'Mess & Canteens',
-          items: [
-            'Pine Mess',
-            'Tulsi Mess',
-            'Oak Mess',
-            'Alder Mess',
-            'Peepal Mess',
-            'Monal Canteen',
-            'Amul Canteen',
-            'Faculty Canteen',
-            'Higher Taste',
-            'Bake -o -mocha',
-          ],
-        },
-        {
-          name: 'Shops',
-          items: [
-            'Supermarket',
-          ],
-        },
-      ]
-
-        setCategories(locationCategories)
+    fetch(CAMPUS_CONFIG[campus].jsonPath)
+      .then((r) => {
+        if (!r.ok) throw new Error('Map data request failed')
+        return r.json()
       })
-  }, [])
+      .then((data: MapData) => {
+        if (!data || !Array.isArray(data.nodes) || !Array.isArray(data.edges)) {
+          throw new Error('Invalid map data shape')
+        }
+
+        setMapData(data)
+        // Named locations = nodes whose id does NOT start with "N" followed by digits
+        const named = data.nodes
+          .filter((n) => !/^N\d+$/.test(n.id))
+          .map((n) => n.id)
+          .sort((a, b) => a.localeCompare(b))
+        setLocations(named)
+      })
+      .catch(() => {
+        // Keep controls empty when campus JSON is missing/empty/invalid.
+        setMapData(null)
+        setLocations([])
+      })
+  }, [campus])
 
   /* ── Track natural image dimensions for SVG viewBox ───────────────────── */
   const onImgLoad = useCallback(() => {
@@ -358,24 +216,56 @@ export function MapPage() {
       {/* ── Controls ─────────────────────────────────────────────────────── */}
       <div className="map-controls">
         <div className="map-controls-inner">
-          <div className="map-select-group">
-            <label>From</label>
-            <CategorizedDropdown
-              value={fromId}
-              onChange={setFromId}
-              categories={categories}
-              placeholder="Select location…"
-            />
+          <div className="map-select-group map-campus-group">
+            <label>Campus</label>
+            <div className="map-campus-toggle" role="tablist" aria-label="Campus map toggle">
+              <button
+                type="button"
+                className={`map-campus-btn ${campus === 'north' ? 'active' : ''}`}
+                onClick={() => setCampus('north')}
+              >
+                North
+              </button>
+              <button
+                type="button"
+                className={`map-campus-btn ${campus === 'south' ? 'active' : ''}`}
+                onClick={() => setCampus('south')}
+              >
+                South
+              </button>
+            </div>
           </div>
 
           <div className="map-select-group">
-            <label>To</label>
-            <CategorizedDropdown
+            <label htmlFor="map-from">From</label>
+            <select
+              id="map-from"
+              value={fromId}
+              onChange={(e) => setFromId(e.target.value)}
+            >
+              <option value="">Select location…</option>
+              {locations.map((loc) => (
+                <option key={loc} value={loc}>
+                  {loc}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          <div className="map-select-group">
+            <label htmlFor="map-to">To</label>
+            <select
+              id="map-to"
               value={toId}
-              onChange={setToId}
-              categories={categories}
-              placeholder="Select location…"
-            />
+              onChange={(e) => setToId(e.target.value)}
+            >
+              <option value="">Select location…</option>
+              {locations.map((loc) => (
+                <option key={loc} value={loc}>
+                  {loc}
+                </option>
+              ))}
+            </select>
           </div>
 
           <button className="map-clear-btn" onClick={handleClear}>
@@ -397,13 +287,11 @@ export function MapPage() {
           </button>
           <img
             ref={imgRef}
-            src={mapImg}
+            src={CAMPUS_CONFIG[campus].mapSrc}
             alt="Campus Map"
             className="map-image"
             onLoad={onImgLoad}
             draggable={false}
-            loading="eager"
-            decoding="async"
           />
 
           {imgSize.w > 0 && (
