@@ -1,73 +1,64 @@
-# React + TypeScript + Vite
+# # Exodia-Web 2026 🏔️
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Welcome to the official repository for **Exodia 2026**, the premier cultural fest of IIT Mandi! This project is designed to deliver a highly interactive, dynamic, and informative web experience for all fest attendees and participants.
 
-Currently, two official plugins are available:
+## 🚀 Tech Stack
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+Here is the core architecture powering the Exodia platform:
 
-## React Compiler
+* **Frontend:** React
+* **Database & Authentication:** Supabase
+* **Styling:** Tailwind CSS
+* **Animations:** GSAP (GreenSock Animation Platform)
+* **Deployment:** Vercel
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+## ✨ Key Features
 
-## Expanding the ESLint configuration
+* **Advanced GSAP Animations:** Extensive use of GSAP to create a fluid and engaging UI, featuring smooth scroll-based parallax effects and a custom-built, highly interactive event carousel.
+* **Smart Campus Navigation:** A fully functional interactive map page of the IIT Mandi campus, utilizing the **A* (A-Star) search algorithm** to calculate optimal, real-time routing between fest venues.
+* **Comprehensive Event Hub:** Detailed descriptions, schedules, and rules for all cultural and technical events.
+* **Real-time Announcements:** A dedicated notification and advertisement system to keep attendees updated on schedule changes, flash events, and sponsor announcements.
+* **Secure Auth & Data:** Robust user authentication and database management handled seamlessly by Supabase.
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+## 🛠️ Getting Started
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+Follow these instructions to set up the project locally for development and testing.
 
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
+### Prerequisites
 
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
+Ensure you have Node.js and npm (or yarn/pnpm) installed on your machine.
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+### Installation Steps
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+1.  **Clone the repository**
+    ```bash
+    git clone [https://github.com/your-org/Exodia-Web.git](https://github.com/your-org/Exodia-Web.git)
+    cd Exodia-Web
+    ```
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
+2.  **Install dependencies**
+    ```bash
+    npm install
+    # or yarn install
+    ```
+
+3.  **Configure environment variables**
+    Create a `.env` file in the root directory and add your required keys (e.g., Supabase):
+    ```env
+    REACT_APP_SUPABASE_URL=your_supabase_url
+    REACT_APP_SUPABASE_ANON_KEY=your_supabase_anon_key
+    ```
+
+4.  **Start the development server**
+    ```bash
+    npm start
+    ```
+    Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+
+## 🗺️ The Map & Routing System
+
+The campus map feature uses a graph-based representation of IIT Mandi's paths and nodes. The A* algorithm ensures efficient pathfinding by evaluating both the actual distance from the start node and the estimated distance to the destination, providing users with the fastest route between event locations.
+
+---
+
+*For any issues, bug reports, or feature requests, please open an issue in this repository.*
