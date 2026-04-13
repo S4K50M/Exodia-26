@@ -16,8 +16,9 @@ Here is the core architecture powering the Exodia platform:
 
 * **Advanced GSAP Animations:** Extensive use of GSAP to create a fluid and engaging UI, featuring smooth scroll-based parallax effects and a custom-built, highly interactive event carousel.
 * **Smart Campus Navigation:** A fully functional interactive map page of the IIT Mandi campus, utilizing the **A* (A-Star) search algorithm** to calculate optimal, real-time routing between fest venues.
-* **Comprehensive Event Hub:** Detailed descriptions, schedules, and rules for all cultural and technical events.
+* **Comprehensive Event Hub:** Detailed descriptions, schedules, and rules for all cultural events with tag based seperation events.
 * **Real-time Announcements:** A dedicated notification and advertisement system to keep attendees updated on schedule changes, flash events, and sponsor announcements.
+* **Crazy Photo Gallary:** A Photo gallery with tag based event seperation and a admin management to auto add data.
 * **Secure Auth & Data:** Robust user authentication and database management handled seamlessly by Supabase.
 
 ## 🛠️ Getting Started
