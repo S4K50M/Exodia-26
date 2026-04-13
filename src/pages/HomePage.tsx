@@ -7,7 +7,18 @@ import hut from '../assets/home/hut.png'
 import leftMountain from '../assets/home/left_mountain.png'
 import rightMountain from '../assets/home/right_mountain.png'
 
+import sbiLogo from '../assets/logo/SBI Logo The Banker to Every Indian.png'
+import easeMyTripLogo from '../assets/logo/EaseMyTrip Logo.png'
+import abhibusLogo from '../assets/logo/abhibus-logo.png'
+import datamaticsLogo from '../assets/logo/datamatics logo.png'
+import neudLogo from '../assets/logo/NEUD.png'
+import everteenLogo from '../assets/logo/everteen.png'
+import uniproLogo from '../assets/logo/unipro.png'
+import sharmajeeLogo from '../assets/logo/SharmaJEE+ Logo Dark.png'
+import robokwikLogo from '../assets/logo/logo.png'
+
 import '../styles/home.css'
+import '../styles/sponsor-marquee.css'
 
 import { LoadingScreen } from '../components/LoadingScreen'
 import { HomeSVG } from '../assets/loading/HomeSVG'
@@ -15,6 +26,18 @@ import { loadGsap, loadLenis } from '../utils/lazyAnimations'
 import { AdvertisementOverlay } from '../components/AdvertisementOverlay'
 
 const HOME_PRELOAD_IMAGES = [bg, exodia, hut, leftMountain, rightMountain]
+
+const SPONSORS = [
+  { link: 'https://onlinesbi.sbi.bank.in/', logo: sbiLogo, name: 'SBI' },
+  { link: 'https://www.easemytrip.com/flights.html', logo: easeMyTripLogo, name: 'EaseMyTrip' },
+  { link: 'https://www.abhibus.com/', logo: abhibusLogo, name: 'Abhibus' },
+  { link: 'https://www.datamatics.com/', logo: datamaticsLogo, name: 'Datamatics' },
+  { link: 'https://neud.co.in/', logo: neudLogo, name: 'NEUD' },
+  { link: 'https://everteen.in/', logo: everteenLogo, name: 'Everteen' },
+  { link: 'http://uniproinfra.com/', logo: uniproLogo, name: 'Unipro' },
+  { link: 'https://www.sharmajee.com/', logo: sharmajeeLogo, name: 'SharmaJEE+' },
+  { link: 'https://www.robokwik.com/', logo: robokwikLogo, name: 'Robokwik' },
+]
 
 export function HomePage() {
   const [daysRemaining, setDaysRemaining] = useState(0)
@@ -30,6 +53,7 @@ export function HomePage() {
   const rightMountRef = useRef<HTMLImageElement | null>(null)
   const lenisRef = useRef<Lenis | null>(null)
   const aboutRef = useRef<HTMLDivElement | null>(null)
+  const sponsorRef = useRef<HTMLDivElement | null>(null)
   
   const hasIntroPlayed = useRef(false)
 
@@ -244,6 +268,48 @@ export function HomePage() {
     }
   }, [])
 
+  // ── Sponsor marquee scroll-in animation ─────────────────────────────────────
+  useEffect(() => {
+    if (!sponsorRef.current || !scrollTriggerRef.current) return
+
+    let isCancelled = false
+    let ctx: { revert: () => void } | null = null
+
+    ;(async () => {
+      const { gsap } = await loadGsap()
+      if (isCancelled) return
+
+      const sponsorEl = sponsorRef.current
+      const trigger = scrollTriggerRef.current
+      if (!sponsorEl || !trigger) return
+
+      ctx = gsap.context(() => {
+        const isMobile = window.matchMedia('(max-width: 720px)').matches
+
+        gsap.fromTo(
+          sponsorEl,
+          { opacity: 0, yPercent: 40 },
+          {
+            opacity: 1,
+            yPercent: 0,
+            ease: 'power2.out',
+            scrollTrigger: {
+              trigger,
+              start: isMobile ? '52% top' : '56% top',
+              end: 'bottom bottom',
+              scrub: 1,
+            },
+          }
+        )
+      }, containerRef)
+    })()
+
+    return () => {
+      isCancelled = true
+      ctx?.revert()
+    }
+  }, [])
+
   return (
     <LoadingScreen
       svg={<HomeSVG />}
@@ -290,6 +356,26 @@ export function HomePage() {
                 <p className="about-us-text font-serif">
                   With a thunderbolt of lightning and mountains that have witnessed millennia, Exodia returns to you. Exodia'26 is IIT Mandi's celebration of creativity, innovation and culture right in the heart of Himalayas. This year, Exodia brings together the binding forces of the nature: Ethereal Earth, Fiery Fire, ever-wandering Air, Water and boundless Ether. Exodia'26 unites cultural performances, unique artistic installations and the nightly showcase of our diverse and vibrant community energy. Here nature awaits your creativity and memories that will find their way to your heart again and again.
                 </p>
+              </div>
+
+              {/* ── Sponsor Marquee (below About Us) ───────────────────────── */}
+              <div className="sponsor-marquee-section" ref={sponsorRef}>
+                <h3 className="sponsor-marquee-heading font-serif">Our Sponsors</h3>
+                <div className="sponsor-marquee-tilt">
+                  <div className="sponsor-marquee-track">
+                    {[...SPONSORS, ...SPONSORS, ...SPONSORS].map((s, i) => (
+                      <a
+                        key={i}
+                        href={s.link}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="sponsor-marquee-item"
+                      >
+                        <img src={s.logo} alt={s.name} loading="lazy" />
+                      </a>
+                    ))}
+                  </div>
+                </div>
               </div>
             </div>
           </div>
