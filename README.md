@@ -1,25 +1,29 @@
-# # Exodia-Web 2026 🏔️
+# 🏔️ Exodia-Web 2026
 
-Welcome to the official repository for **Exodia 2026**, the premier cultural fest of IIT Mandi! This project is designed to deliver a highly interactive, dynamic, and informative web experience for all fest attendees and participants.
+Welcome to the official repository for **Exodia 2026**, the premier cultural fest of IIT Mandi! 
 
-## 🚀 Tech Stack
+This platform isn't just a static informational site—it's a highly interactive web experience built to help attendees navigate the campus, discover events, and stay updated in real-time. Whether you're here to check out the code, report a bug, or contribute, we're glad you made it!
 
-Here is the core architecture powering the Exodia platform:
+## 💡 What's This Project About?
+Organizing a massive cultural fest requires a digital hub that can handle chaotic schedules, lost attendees, and real-time updates. We built this platform to solve those exact problems. It serves as the digital backbone of Exodia, allowing users to seamlessly browse events, find their way around the IIT Mandi campus, and catch the latest announcements without refreshing the page.
 
-* **Frontend:** React
-* **Database & Authentication:** Supabase
-* **Styling:** Tailwind CSS
-* **Animations:** GSAP (GreenSock Animation Platform)
-* **Deployment:** Vercel
+## ✨ Core Features
 
-## ✨ Key Features
+* **Smart Campus Navigation:** IIT Mandi is huge. We built an interactive map that uses a pathfinding algorithm (A*) to calculate the fastest, most efficient walking routes between different fest venues in real-time.
+* **Fluid UI & Animations:** We use GSAP (GreenSock) to bring the site to life. From smooth scroll-based parallax effects to a custom interactive event carousel, the site is designed to feel dynamic and modern.
+* **The Event Hub:** A deeply categorized database of every cultural event. Users can easily filter through events using tags to find schedules, rules, and descriptions that match their interests.
+* **Real-Time Live Updates:** Schedules change and flash events happen. Our dedicated announcement system pushes out notifications and sponsor updates instantly.
+* **Dynamic Photo Gallery:** A visual recap of the fest. It includes tag-based filtering for specific events and an admin dashboard so our team can easily upload new shots on the fly.
 
-* **Advanced GSAP Animations:** Extensive use of GSAP to create a fluid and engaging UI, featuring smooth scroll-based parallax effects and a custom-built, highly interactive event carousel.
-* **Smart Campus Navigation:** A fully functional interactive map page of the IIT Mandi campus, utilizing the **A* (A-Star) search algorithm** to calculate optimal, real-time routing between fest venues.
-* **Comprehensive Event Hub:** Detailed descriptions, schedules, and rules for all cultural events with tag based seperation events.
-* **Real-time Announcements:** A dedicated notification and advertisement system to keep attendees updated on schedule changes, flash events, and sponsor announcements.
-* **Crazy Photo Gallary:** A Photo gallery with tag based event seperation and a admin management to auto add data.
-* **Secure Auth & Data:** Robust user authentication and database management handled seamlessly by Supabase.
+## 🚀 The Tech Stack
+
+We chose tools that prioritize speed, ease of development, and real-time capabilities:
+
+* **Frontend:** React (Building the user interface)
+* **Styling:** Tailwind CSS (Rapid, responsive design)
+* **Animations:** GSAP (High-performance animations)
+* **Backend & Auth:** Supabase (Handling our database, user logins, and real-time data syncing)
+* **Deployment:** Vercel (Fast, reliable hosting)
 
 ## 🛠️ Getting Started
 
